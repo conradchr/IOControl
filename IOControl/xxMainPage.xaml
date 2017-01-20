@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<TabbedPage xmlns="http://xamarin.com/schemas/2014/forms"
+						xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+						x:Class="MasterDetailPageNavigation.TestPage">
+	<TabbedPage.Children>
+		<CarouselPage x:Name="Page1"
+									Title="Tab 1">
+			<CarouselPage.Children>
+				<ContentPage>
+					<StackLayout>
+						<Button Text="Tab 1.1"></Button>
+					</StackLayout>
+				</ContentPage>
+				<ContentPage/>
+				<ContentPage/>
+			</CarouselPage.Children>
+		</CarouselPage>
+		<CarouselPage x:Name="Page2"
+									Title="Tab 2">
+			<CarouselPage.Children>
+				<ContentPage/>
+				<ContentPage>
+					<StackLayout>
+						<Button Text="Tab 2.2"></Button>
+					</StackLayout>
+				</ContentPage>
+				<ContentPage/>
+			</CarouselPage.Children>
+		</CarouselPage>
+		<CarouselPage x:Name="Page3"
+									Title="Tab 3">
+			<CarouselPage.Children>
+				<ContentPage/>
+				<ContentPage/>
+				<ContentPage>
+					<StackLayout>
+						<Button Text="Tab 3.3"></Button>
+					</StackLayout>
+				</ContentPage>
+			</CarouselPage.Children>
+		</CarouselPage>
+	</TabbedPage.Children>
+</TabbedPage>
