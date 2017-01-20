@@ -405,7 +405,8 @@ namespace IOControl
             // Delete Button
             Image imgDelete = new Image() { Source = ImageSource.FromFile("btn_delete.png") };
             var imgDeleteTapped = new TapGestureRecognizer();
-            imgDeleteTapped.Tapped += async (s, e) => await DeleteItem();
+            //imgDeleteTapped.Tapped += async (s, e) => await DeleteItem();
+            imgDeleteTapped.Tapped += async (s, e) => await AddIO();
             imgDelete.GestureRecognizers.Add(imgDeleteTapped);
             gridFooter.Children.Add(imgDelete, 0, 0);
             
@@ -498,8 +499,43 @@ namespace IOControl
 
         public async Task<bool> AddIO()
         {
+            Dictionary<string, IOType> ioTypes = new Dictionary<string, IOType>();
+            ioTypes.Add(Resx.AppResources.Module_DI, IOType.DI);
+            ioTypes.Add(Resx.AppResources.Module_DO, IOType.DO);
+            ioTypes.Add(Resx.AppResources.Module_PWM, IOType.PWM);
+            ioTypes.Add(Resx.AppResources.Module_AI, IOType.AD);
+            ioTypes.Add(Resx.AppResources.Module_AO, IOType.DA);
+            ioTypes.Add(Resx.AppResources.Module_TEMP, IOType.TEMP);
 
+            string[] options = new string[ioTypes.Keys.Count];
+            ioTypes.Keys.CopyTo(options, 0);
 
+                /*
+            List<string> options = new List<string>();
+            foreach (var key in ioTypes.Keys)
+            {
+                options.Add(key);
+            }
+            */
+
+            var io = await DisplayActionSheet(
+                Resx.AppResources.CFG_AddIOHeader,
+                Resx.AppResources.MSG_Cancel,
+                null,
+                options
+            );
+
+            if (ioTypes.ContainsKey(io))
+            {
+                DT.Log(ioTypes[io].ToString());
+            }
+            else
+            {
+                DT.Log(io);
+            }
+            
+
+            
 
             return true;
         }

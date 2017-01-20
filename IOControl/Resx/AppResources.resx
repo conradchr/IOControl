@@ -216,6 +216,9 @@
   <data name="Groups" xml:space="preserve">
     <value>Groups</value>
   </data>
+  <data name="CFG_AddIOHeader" xml:space="preserve">
+    <value />
+  </data>
   <data name="Module_AI" xml:space="preserve">
     <value>Analog Input</value>
   </data>

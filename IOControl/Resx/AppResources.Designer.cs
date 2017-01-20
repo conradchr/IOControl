@@ -152,6 +152,15 @@ namespace IOControl.Resx {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
+        internal static string CFG_AddIOHeader {
+            get {
+                return ResourceManager.GetString("CFG_AddIOHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Add new location ähnelt.
         /// </summary>
         internal static string CFG_AddNewLocationHeader {
