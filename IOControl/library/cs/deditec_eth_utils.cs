@@ -29,9 +29,10 @@ public class DT_ETH
 
     public const uint DIP_SWITCH_DELIVERY_STANDARD = 0xf; // 1111 [bin] -> alles an!
 
-    static uint dummy_uint = 0;
+    
 
     #if (!__MOBILE__)
+    static uint dummy_uint = 0;
 
     // GetMacOfIP()
     /*

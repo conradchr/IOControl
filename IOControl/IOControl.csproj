@@ -58,9 +58,6 @@
     <Compile Include="library\cs\deditec_string_utils.cs" />
     <Compile Include="library\delib\deditec_tcp_bc_io.cs" />
     <Compile Include="library\delib\delib_error_codes.cs" />
-    <Compile Include="Page1.xaml.cs">
-      <DependentUpon>Page1.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Pages\AppearancePage.cs" />
     <Compile Include="Pages\ConfigurationPage.cs" />
     <Compile Include="Pages\DialogAddIO.cs" />
@@ -69,7 +66,6 @@
     <Compile Include="Pages\IOContentPage.cs" />
     <Compile Include="Pages\IOTabbedPage.cs" />
     <Compile Include="Pages\MainPage.cs" />
-    <Compile Include="Pages\Rumspiel.cs" />
     <Compile Include="PlatformInterfaces\IWifiUtils.cs" />
     <Compile Include="PlatformInterfaces\ILocalizeUtils.cs" />
     <Compile Include="PlatformInterfaces\IDelibUtils.cs" />
@@ -128,10 +124,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Page1.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="Resx\AppResources.de.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>AppResources.de.Designer.cs</LastGenOutput>

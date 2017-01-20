@@ -141,7 +141,7 @@ namespace IOControl
             listView.GroupDisplayBinding = new Binding("LongName");
             listView.GroupShortNameBinding = new Binding("ShortName");
             //listView.SeparatorVisibility = SeparatorVisibility.None;
-            listView.GroupHeaderTemplate = new DataTemplate(() => { return new HeaderViewCell(this); });
+            //listView.GroupHeaderTemplate = new DataTemplate(() => { return new HeaderViewCell(this); });
             listView.ItemTemplate = new DataTemplate(typeof(ItemViewCell));
             listView.HasUnevenRows = true;
 
