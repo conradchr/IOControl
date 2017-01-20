@@ -8,13 +8,6 @@ using Xamarin.Forms;
 
 namespace IOControl
 {
-    /*
-    public class Test : AppearancePage
-    {
-        public Test(Test.Constructor ctor) : base(ctor) { }
-    }
-    */
-
     public partial class AppearancePage : ContentPage
     {
         // ----------------------------------------------------------------------------
@@ -43,16 +36,16 @@ namespace IOControl
         // ----------------------------------------------------------------------------
 
         public Constructor Ctor { get; set; }
-        //public static ContentPage Context { get; set; }
-        ObservableCollection<HeaderModel> items;
-        public Task<bool> PageCloseTask { get { return tcs.Task; } }
 
+        /*
+        public Task<bool> PageCloseTask { get { return tcs.Task; } }
         TaskCompletionSource<bool> tcs;
         bool taskComplete = false;
+        */
 
-        ListView listView;
+        ObservableCollection<HeaderModel> items;
         ItemModel selectedItem = null;
-
+        
         Image imgContinue;
         Grid gridFooter;
         Label labelFooter;
@@ -314,22 +307,25 @@ namespace IOControl
 
         public AppearancePage(Constructor ctor)
         {
-            tcs = new TaskCompletionSource<bool>();
+            items = new ObservableCollection<HeaderModel>();
 
+            /*
+            tcs = new TaskCompletionSource<bool>();
             this.Disappearing += (s, e) =>
             {
-                //if (taskComplete)
+                if (taskComplete)
                 {
                     tcs.SetResult(true);
                     DT.Log(string.Format("AppearancePage {0} weg", Ctor.ViewType));
                 }
             };
+            */
 
             Icon = "hamburger.png";
 
             Ctor = ctor;
-            //Context = this;
-            items = new ObservableCollection<HeaderModel>();
+            
+            
 
             switch (Ctor.ViewType)
             {
@@ -349,13 +345,12 @@ namespace IOControl
             // --------------------
             // ListView
 
-            listView = new ListView();
+            ListView listView = new ListView();
             listView.ItemsSource = items;
             listView.IsGroupingEnabled = true;
             listView.GroupDisplayBinding = new Binding("LongName");
             listView.GroupShortNameBinding = new Binding("ShortName");
             //listView.SeparatorVisibility = SeparatorVisibility.None;
-            //listView.GroupHeaderTemplate = new DataTemplate(typeof(HeaderViewCell), );
             listView.GroupHeaderTemplate = new DataTemplate(() => { return new HeaderViewCell(this); });
             listView.ItemTemplate = new DataTemplate(typeof(ItemViewCell));
             listView.HasUnevenRows = true;
@@ -446,6 +441,31 @@ namespace IOControl
             var imgContinueTapped = new TapGestureRecognizer();
             imgContinueTapped.Tapped += async (s, e) =>
             {
+                switch (Ctor.ViewType)
+                {
+                    case ViewType.MAIN:
+                        await Navigation.PushAsync(new AppearancePage(new Constructor()
+                        {
+                            ViewType = ViewType.GROUP,
+                            Object = selectedItem.Object
+                        }));
+                        break;
+
+                    case ViewType.GROUP:
+                        await Navigation.PushAsync(new AppearancePage(new Constructor()
+                        {
+                            ViewType = ViewType.IO,
+                            Object = selectedItem.Object
+                        }));
+                        break;
+
+                    case ViewType.IO:
+                        break;
+                }
+
+
+
+                /*
                 DT.Log("zeige GROUP");
                 AppearancePage ap = new AppearancePage(new Constructor()
                 {
@@ -456,6 +476,9 @@ namespace IOControl
                 DT.Log("warte auf GROUP ende");
                 await ap.PageCloseTask;
                 DT.Log("ende GROUP");
+                */
+
+
             };
 
             imgContinue.GestureRecognizers.Add(imgContinueTapped);
@@ -465,6 +488,20 @@ namespace IOControl
             slMain.Children.Add(slFooter);
 
             Content = slMain;
+        }
+
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+
+        public async Task<bool> AddIO()
+        {
+
+
+
+            return true;
         }
 
         // ----------------------------------------------------------------------------
@@ -742,6 +779,7 @@ namespace IOControl
 
                     DT.Session.xmlContent.Save();
                     MessagingCenter.Send<ContentPage>(this, DT.Const.MSG_REFRESH);
+                    selectedItem = null;
                 }
             }
 

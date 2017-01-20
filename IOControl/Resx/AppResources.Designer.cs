@@ -278,6 +278,60 @@ namespace IOControl.Resx {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Analog Input ähnelt.
+        /// </summary>
+        internal static string Module_AI {
+            get {
+                return ResourceManager.GetString("Module_AI", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Analog Output ähnelt.
+        /// </summary>
+        internal static string Module_AO {
+            get {
+                return ResourceManager.GetString("Module_AO", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Digital Input ähnelt.
+        /// </summary>
+        internal static string Module_DI {
+            get {
+                return ResourceManager.GetString("Module_DI", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Digital Output ähnelt.
+        /// </summary>
+        internal static string Module_DO {
+            get {
+                return ResourceManager.GetString("Module_DO", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die PWM Output ähnelt.
+        /// </summary>
+        internal static string Module_PWM {
+            get {
+                return ResourceManager.GetString("Module_PWM", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Temperature Input ähnelt.
+        /// </summary>
+        internal static string Module_TEMP {
+            get {
+                return ResourceManager.GetString("Module_TEMP", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Modules ähnelt.
         /// </summary>
         internal static string Modules {

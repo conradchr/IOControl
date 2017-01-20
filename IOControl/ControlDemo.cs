@@ -242,6 +242,14 @@ namespace IOControl
 
             Task<bool> wait;
 
+            var action = await DisplayActionSheet("ActionSheet: Send to?", "Cancel", null, "Email", "Twitter", "Facebook");
+            DT.Log("Action: " + action);
+
+            var test = await DisplayActionSheet("ActionSheet: SavePhoto?", "Cancel", "Delete", "Photo Roll", "Email");
+            DT.Log("Action: " + action);
+
+            var test2 = await UserDialogs.Instance.ActionSheetAsync("test", "cancel", "destructive", null, new string[] { "a", "b", "c" });
+
             /*
             UserDialogs.Instance.Toast("bla bla bla ... ich bin ein testtoast!!!");
             wait = MachTask();
@@ -253,7 +261,7 @@ namespace IOControl
             wait.Start();
             await wait;
             UserDialogs.Instance.HideLoading();
-            */
+            
 
             UserDialogs.Instance.ShowError("mööp!");
             wait = MachTask();
@@ -278,8 +286,14 @@ namespace IOControl
             if (pm.Ok)
             {
                 DT.Log(String.Format("text = {0}", pm.Text));
-            } 
-       } 
+            }
+
+            await wait;
+            var action = await UserDialogs.Instance.ActionSheetAsync("test", "cancel", "destructive", null, new string[] { "a", "b", "c" });
+            */
+        }
+
+
 
 
     }

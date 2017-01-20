@@ -63,6 +63,7 @@
     </Compile>
     <Compile Include="Pages\AppearancePage.cs" />
     <Compile Include="Pages\ConfigurationPage.cs" />
+    <Compile Include="Pages\DialogAddIO.cs" />
     <Compile Include="Pages\DialogBroadcast.cs" />
     <Compile Include="Pages\DialogNetworkConfig.cs" />
     <Compile Include="Pages\IOContentPage.cs" />

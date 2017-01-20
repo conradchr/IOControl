@@ -216,4 +216,22 @@
   <data name="Groups" xml:space="preserve">
     <value>Groups</value>
   </data>
+  <data name="Module_AI" xml:space="preserve">
+    <value>Analog Input</value>
+  </data>
+  <data name="Module_AO" xml:space="preserve">
+    <value>Analog Output</value>
+  </data>
+  <data name="Module_DI" xml:space="preserve">
+    <value>Digital Input</value>
+  </data>
+  <data name="Module_DO" xml:space="preserve">
+    <value>Digital Output</value>
+  </data>
+  <data name="Module_PWM" xml:space="preserve">
+    <value>PWM Output</value>
+  </data>
+  <data name="Module_TEMP" xml:space="preserve">
+    <value>Temperature Input</value>
+  </data>
 </root>
