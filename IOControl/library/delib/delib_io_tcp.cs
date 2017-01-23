@@ -276,12 +276,7 @@ public class DT_TCPUtils
 			}
 		}
 		
-		if(rx_buffer_length != null)
-		{
-            rx_buffer_length = (int) amount_bytes_received - (int) rx_data_pos;
-		}
-
-
+        rx_buffer_length = (int) amount_bytes_received - (int) rx_data_pos;
 
 		return DT.Error.DAPI_ERR_NONE;
 	}
@@ -632,8 +627,6 @@ public class DT_TCPUtils
 
     public static uint DapiTCPReadMultipleBytes(uint handle, uint address, uint address_depth, uint repeat, Byte[] buff, uint buff_len)
     {
-        uint amount_bytes_received;
-
         byte[] buffer;
         uint buffer_length;
 

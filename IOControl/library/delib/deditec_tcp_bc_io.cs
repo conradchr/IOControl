@@ -151,7 +151,7 @@ public class DT_Mobile_BCFunctions
 		    {
 			    buff_tx [pos++] = 0;
 		    }
-		} catch (Exception e) {
+		} catch (Exception/* e*/) {
 			//DT.Log(e.ToString());
 		}
 
@@ -454,7 +454,7 @@ public class DT_Mobile_BCFunctions
 	{
 		uint ret;
 		uint no_of_mac_adresses;
-		uint i,j;
+        uint i;
 		Byte[] buff_rx = new Byte[1000];
 
 		ret = BroadcastTxRx(DEDITEC_BC_PACKET_CMD_GLOBAL_CALL, 0x0, null, null, ref buff_rx);

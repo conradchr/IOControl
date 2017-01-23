@@ -51,13 +51,13 @@ public class DT_BCFunctions
     {
         Byte[] mac_and_dev_cfg_buffer = new Byte[MAX_BYTES_DEV_ANSWER_GC_DEV_CFG * 30]; // maximal 30 module
         uint no_of_modules;
-        uint dummy_uint = 0;
         uint i;
         ETHDeviceConfig eth_dev;
-		#if (!__MOBILE__)
+        #if (!__MOBILE__)
+            uint dummy_uint = 0;
         	no_of_modules = DT.Ext.DapiInternCommand(DT.Ext.DAPI_INTERN_CMD_BC_GET_MAC_LIST_WITH_DEV_CFG, "", "", mac_and_dev_cfg_buffer, (uint)mac_and_dev_cfg_buffer.Length, ref dummy_uint);
-		#else
-			no_of_modules = DT.Mobile.BC.GetMacListDevCfg(ref mac_and_dev_cfg_buffer);
+        #else
+            no_of_modules = DT.Mobile.BC.GetMacListDevCfg(ref mac_and_dev_cfg_buffer);
 		#endif
         if (no_of_modules > 0)
         {
@@ -80,7 +80,6 @@ public class DT_BCFunctions
     {
         Byte[] mac_buffer = new Byte[MAX_BYTES_DEV_ANSWER_GC * 30]; // maximal 30 module
         uint no_of_modules;
-        uint dummy_uint = 0;
         uint i;
         int j;
         ETHDeviceConfig eth_dev;
@@ -91,6 +90,7 @@ public class DT_BCFunctions
 
         uint debug_modules_filtered = 0;
 		#if (!__MOBILE__)
+            uint dummy_uint = 0;
         	no_of_modules = DT.Ext.DapiInternCommand(DT.Ext.DAPI_INTERN_CMD_BC_GET_MAC_LIST, "", "", mac_buffer, (uint)mac_buffer.Length, ref dummy_uint);
 		#else
 			no_of_modules = DT.Mobile.BC.GetMacList(ref mac_buffer);
@@ -377,13 +377,12 @@ public class DT_BCFunctions
 
 	public static uint deditec_bc_eth0_config(String mac_addr)
 	{
+        #if (!__MOBILE__)
         uint dummy_uint = 0;
-
-#if (!__MOBILE__)
-        return DT.Ext.DapiInternCommand(DT.Ext.DAPI_INTERN_CMD_BC_ETH0_CONFIG, mac_addr, "", new Byte[0], 0, ref dummy_uint);
-#else
-        return DT.Mobile.BC.Eth0Config(DT.Conv.ConvertStringToByteArray(mac_addr));
-#endif
+            return DT.Ext.DapiInternCommand(DT.Ext.DAPI_INTERN_CMD_BC_ETH0_CONFIG, mac_addr, "", new Byte[0], 0, ref dummy_uint);
+        #else
+            return DT.Mobile.BC.Eth0Config(DT.Conv.ConvertStringToByteArray(mac_addr));
+        #endif
     }
 
     // ----------------------------------------------------------------------------
