@@ -26,6 +26,9 @@ namespace IOControl
         {
             public IOType IOType { get; set; }
             public ContentGroup Group { get; set; }
+
+
+
         }
 
         // ------------------------------------
