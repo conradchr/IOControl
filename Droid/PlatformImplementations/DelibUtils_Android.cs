@@ -15,13 +15,15 @@ namespace IOControl.Droid
     {
         public uint DapiOpenModuleEx(String ipAdresseDeditec, uint portNoDeditec, uint timeout_ms, String enc_pw)
         {
+            DT.Log(string.Format("{0}:{1} {2}", ipAdresseDeditec, portNoDeditec, timeout_ms));
+
             DapiHandle dapiHandle = new DapiHandle();
             dapiHandle.ip_addr = ipAdresseDeditec;
             dapiHandle.port = (int)portNoDeditec;
             dapiHandle.timeout = (int)timeout_ms;
 
             dapiHandle.encryption_type = DT.DAPI_OPEN_MODULE_ENCRYPTION_TYPE_NONE;
-            dapiHandle.encryption_password = enc_pw;
+            //dapiHandle.encryption_password = enc_pw;
 
             try
             {

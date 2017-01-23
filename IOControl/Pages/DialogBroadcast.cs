@@ -338,7 +338,6 @@ namespace IOControl
         void AddModules()
         {
             List<BCTemplateItem> list = items.Where(item => item.IsSelected).ToList();
-            List<String> ret = new List<string>();
 
             foreach (var item in list)
             {

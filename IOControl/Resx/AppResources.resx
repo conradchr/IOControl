@@ -237,4 +237,10 @@
   <data name="Module_TEMP" xml:space="preserve">
     <value>Temperature Input</value>
   </data>
+  <data name="CFG_AddIOAlreadyExist" xml:space="preserve">
+    <value />
+  </data>
+  <data name="IOs" xml:space="preserve">
+    <value>In-/outputs</value>
+  </data>
 </root>

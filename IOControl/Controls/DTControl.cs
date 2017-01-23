@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Xamarin.Forms;
 //using XLabs.Forms.Controls;
+using Acr.UserDialogs;
 
 namespace IOControl
 {
@@ -14,52 +15,72 @@ namespace IOControl
             TEXT
         }
 
+        public static void ShowToast(string text)
+        {
+            UserDialogs.Instance.Toast(new ToastConfig(text)
+            {
+            });
+        }
+
+        public static void ShowSuccess(string text)
+        {
+            UserDialogs.Instance.ShowSuccess(text);
+        }
+
+        public static void ShowError(string text)
+        {
+            UserDialogs.Instance.ShowError(text);
+        }
+
+
+
+
         public static Layout View(Dictionary<int, View> dict, string text, IOViewStyle style, int id)
         {
-            StackLayout layout = new StackLayout();
-            layout.Orientation = StackOrientation.Horizontal;
-            layout.Padding = new Thickness(10, 0, 10, 0);
+        StackLayout layout = new StackLayout();
+        layout.Orientation = StackOrientation.Horizontal;
+        layout.Padding = new Thickness(10, 0, 10, 0);
 
-            Label header = new Label();
-            header.Text = text;
-            header.TextColor = Color.White;
-            header.FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label));
-            header.VerticalOptions = LayoutOptions.Center;
-            header.HorizontalOptions = LayoutOptions.StartAndExpand;
+        Label header = new Label();
+        header.Text = text;
+        header.TextColor = Color.White;
+        header.FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label));
+        header.VerticalOptions = LayoutOptions.Center;
+        header.HorizontalOptions = LayoutOptions.StartAndExpand;
 
-            Label val = new Label();
-            val.TextColor = Color.White;
-            val.FontSize = Device.GetNamedSize(NamedSize.Large, typeof(Label));
-            val.VerticalOptions = LayoutOptions.Center;
-            val.HorizontalOptions = LayoutOptions.EndAndExpand;
-            dict.Add(id, val);
+        Label val = new Label();
+        val.TextColor = Color.White;
+        val.FontSize = Device.GetNamedSize(NamedSize.Large, typeof(Label));
+        val.VerticalOptions = LayoutOptions.Center;
+        val.HorizontalOptions = LayoutOptions.EndAndExpand;
+        dict.Add(id, val);
 
-            /*
-            switch (style)
-            {
-                case IOViewStyle.AD:
-                    val.Text = value.ToString("0.000") + " V";
-                    break;
+        /*
+        switch (style)
+        {
+        case IOViewStyle.AD:
+            val.Text = value.ToString("0.000") + " V";
+            break;
 
-                case IOViewStyle.DA:
-                    val.Text = "4.56 V";
-                    val.BackgroundColor = Color.Red;
-                    break;
+        case IOViewStyle.DA:
+            val.Text = "4.56 V";
+            val.BackgroundColor = Color.Red;
+            break;
 
-                case IOViewStyle.TEMP:
-                    val.Text = "7.89 °C";
-                    break;
+        case IOViewStyle.TEMP:
+            val.Text = "7.89 °C";
+            break;
 
-                case IOViewStyle.TEXT:
-                    val.Text = "disconnected";
-                    break;
+        case IOViewStyle.TEXT:
+            val.Text = "disconnected";
+            break;
 
-                default:
-                    break;
-            }
-            */
+        default:
+            break;
+        }
+        */
 
-            layout.Children.Add(header);
+        layout.Children.Add(header);
             layout.Children.Add(val);
 
             return layout;

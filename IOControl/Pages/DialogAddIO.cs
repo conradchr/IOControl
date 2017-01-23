@@ -10,6 +10,8 @@ using System.ComponentModel;    // INotifyPropertyChanged
 using Xamarin.Forms;
 using System.Collections.ObjectModel;
 
+using System.Diagnostics;   // StopWatch
+
 namespace IOControl
 {
     public class DialogAddIO : ContentPage
@@ -23,6 +25,7 @@ namespace IOControl
         public class Constructor
         {
             public IOType IOType { get; set; }
+            public ContentGroup Group { get; set; }
         }
 
         // ------------------------------------
@@ -32,9 +35,11 @@ namespace IOControl
         public class ItemModel : INotifyPropertyChanged
         {
             public event PropertyChangedEventHandler PropertyChanged;
-
+            
             public string Name { get; set; }
             public bool AlreadyAdded { get; set; }
+
+            public uint Channel { get; set; }
             public Object Object { get; set; }
 
             // für Listview, damit dieser Wert sich in der Anzeige aktualisiert
@@ -67,13 +72,27 @@ namespace IOControl
         // ------------------------------------
         // ------------------------------------
 
+        public class HeaderViewCell : ViewCell
+        {
+            public HeaderViewCell()
+            {
+                StackLayout layout = new StackLayout() { Padding = new Thickness(10, 5, 10, 5), BackgroundColor = DT.COLOR };
+
+                Label labelName = new Label() { FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)), HorizontalOptions = LayoutOptions.StartAndExpand, VerticalOptions = LayoutOptions.Center };
+                labelName.SetBinding(Label.TextProperty, new Binding("LongName"));
+                layout.Children.Add(labelName);
+
+                View = layout;
+            }
+        }
+
         public class ItemViewCell : ViewCell
         {
             public ItemViewCell()
             {
                 StackLayout layout = new StackLayout()
                 {
-                    Orientation = StackOrientation.Vertical,
+                    Orientation = StackOrientation.Horizontal,
                     Padding = new Thickness(10, 10, 10, 10)
                 };
 
@@ -92,7 +111,7 @@ namespace IOControl
                 layout.Children.Add(labelName);
 
                 // Already Added
-                Image img = new Image() { Source = ImageSource.FromFile("btn_ok.png"), HorizontalOptions = LayoutOptions.End };
+                Image img = new Image() { Source = ImageSource.FromFile("btn_ok.png"), HeightRequest = 20, WidthRequest = 20, Aspect = Aspect.AspectFill };
                 img.SetBinding(Image.IsVisibleProperty, new Binding("AlreadyAdded"));
                 layout.Children.Add(img);
 
@@ -113,6 +132,10 @@ namespace IOControl
         // ------------------------------------
 
         ObservableCollection<HeaderModel> items;
+        StackLayout slScan;
+        ListView listView;
+        Grid footer;
+        ItemModel selectedItem;
 
         // ----------------------------------------------------------------------------
         // ----------------------------------------------------------------------------
@@ -123,27 +146,45 @@ namespace IOControl
         public DialogAddIO(Constructor ctor)
         {
             Ctor = ctor;
+            Title = Resx.AppResources.CFG_AddIOHeader;
 
             StackLayout slMain;
-            StackLayout slScan;
-            ListView listView;
-            Grid footer;
             TapGestureRecognizer tgp;
 
-            slMain = new StackLayout() { Orientation = StackOrientation.Horizontal, Padding = new Thickness(0, 10, 0, 10) };
+            slMain = new StackLayout() { Padding = new Thickness(0, 10, 0, 10) };
 
 
             // ------------------------------------
             // listView
-            listView = new ListView();
+            items = new ObservableCollection<HeaderModel>();
+            listView = new ListView() { VerticalOptions = LayoutOptions.FillAndExpand, IsVisible = false };
             listView.ItemsSource = items;
             listView.IsGroupingEnabled = true;
             listView.GroupDisplayBinding = new Binding("LongName");
             listView.GroupShortNameBinding = new Binding("ShortName");
             //listView.SeparatorVisibility = SeparatorVisibility.None;
-            listView.GroupHeaderTemplate = new DataTemplate(() => { return new HeaderViewCell(this); });
+            listView.GroupHeaderTemplate = new DataTemplate(typeof(HeaderViewCell));
             listView.ItemTemplate = new DataTemplate(typeof(ItemViewCell));
             listView.HasUnevenRows = true;
+            listView.RowHeight = -1;
+            slMain.Children.Add(listView);
+
+            listView.ItemTapped += (s, e) =>
+            {
+                selectedItem = e.Item as ItemModel;
+                if (selectedItem != null)
+                {
+                    if (!selectedItem.AlreadyAdded)
+                    { 
+                        selectedItem.IsSelected = !selectedItem.IsSelected;
+                    }
+                    else
+                    {
+                        DTControl.ShowToast(Resx.AppResources.CFG_AddIOAlreadyExist);
+                    }
+                    ((ListView)s).SelectedItem = null;
+                }
+            };
 
             // ------------------------------------
             // scan
@@ -174,18 +215,13 @@ namespace IOControl
             tgp = new TapGestureRecognizer();
             tgp.Tapped += async (s, e) => await Scan();
             imgOK.GestureRecognizers.Add(tgp);
-            footer.Children.Add(imgRefresh, 1, 0);
+            footer.Children.Add(imgOK, 2, 0);
 
             slMain.Children.Add(footer);
 
-
-
-
-
-
-
-
             Content = slMain;
+
+            Scan();
         }
 
         // ----------------------------------------------------------------------------
@@ -202,7 +238,7 @@ namespace IOControl
                 foreach (var module in DT.Session.xmlContent.modules)
                 {
                     if (module.OpenModule() != 0)
-                    { 
+                    {
                         module.IOInit();
                     }
                     module.CloseModule();
@@ -214,13 +250,13 @@ namespace IOControl
                     bool ret = false;
                     switch (Ctor.IOType)
                     {
-                        case IOType.DI:         ret = (m.IO.cnt_di > 0);        break;
-                        case IOType.DO:         ret = (m.IO.cnt_do > 0);        break;
-                        case IOType.PWM:        ret = (m.IO.cnt_do_pwm > 0);    break;
+                        case IOType.DI: ret = (m.IO.cnt_di > 0); break;
+                        case IOType.DO: ret = (m.IO.cnt_do > 0); break;
+                        case IOType.PWM: ret = (m.IO.cnt_do_pwm > 0); break;
                         //case IOType.DO_TIMER:   ret = (m.IO.cnt_do_timer > 0);  break;
-                        case IOType.AD:         ret = (m.IO.cnt_ai > 0);        break;
-                        case IOType.DA:         ret = (m.IO.cnt_ao > 0);        break;
-                        case IOType.TEMP:       ret = (m.IO.cnt_temp > 0);      break;
+                        case IOType.AD: ret = (m.IO.cnt_ai > 0); break;
+                        case IOType.DA: ret = (m.IO.cnt_ao > 0); break;
+                        case IOType.TEMP: ret = (m.IO.cnt_temp > 0); break;
                     }
                     return ret;
                 };
@@ -232,52 +268,72 @@ namespace IOControl
                     List<string> ret = null;
                     switch (Ctor.IOType)
                     {
-                        case IOType.DI:         ret = m.IOName.di;      break;
-                        case IOType.DO:         ret = m.IOName.dout;    break;
-                        case IOType.PWM:        ret = m.IOName.pwm;     break;
+                        case IOType.DI: ret = m.IOName.di; break;
+                        case IOType.DO: ret = m.IOName.dout; break;
+                        case IOType.PWM: ret = m.IOName.pwm; break;
                         //case IOType.DO_TIMER:   ret = m.IOName.do_timer;break;
-                        case IOType.AD:         ret = m.IOName.ai;      break;
-                        case IOType.DA:         ret = m.IOName.ao;      break;
-                        case IOType.TEMP:       ret = m.IOName.temp;    break;
+                        case IOType.AD: ret = m.IOName.ai; break;
+                        case IOType.DA: ret = m.IOName.ao; break;
+                        case IOType.TEMP: ret = m.IOName.temp; break;
                     }
                     return ret;
                 };
 
-                foreach(var module in modules)
+                foreach (var module in modules)
                 {
                     var group = new HeaderModel()
                     {
-                        LongName = string.Format("{0}({1}:{2}", module.boardname, module.tcp_hostname, module.tcp_port).ToUpper(),
+                        LongName = string.Format("{0}\n({1}:{2})", module.boardname, module.tcp_hostname, module.tcp_port).ToUpper(),
                         ShortName = module.boardname.ToUpper().Substring(0, 1)
                     };
-
+                    
                     var moduleIOs = getIONames(module);
                     if (moduleIOs != null)
                     {
+                        int i = 0;
+
                         foreach (var ioName in moduleIOs)
                         {
                             group.Add(new ItemModel()
                             {
                                 Name = ioName,
                                 Object = module,
-                                AlreadyAdded = false
+                                AlreadyAdded = (i % 2 == 0)
                             });
+                            i++;
                         }
                     }
-                    
+
                     items.Add(group);
                 }
 
-                return true;
+                return false;
             });
 
+            Func<bool, bool> switchGUI = (isScan) =>
+            {
+                listView.IsVisible = !isScan;
+                slScan.IsVisible = isScan;
+                footer.IsVisible = !isScan;
+                return true;
+            };
 
             // ui stuff davor
+            switchGUI(true);
 
+            Stopwatch sw = new Stopwatch();
+            items.Clear();
+            sw.Start();
             scanning.Start();
             await scanning;
 
+            while (sw.ElapsedMilliseconds < DT.Const.TIME_ANIMATION_MIN_MS)
+            {
+                await Task.Delay(10);
+            }
+
             // ui stuff danach
+            switchGUI(false);
 
             return true;
         }
@@ -287,6 +343,18 @@ namespace IOControl
         // ----------------------------------------------------------------------------
         // ----------------------------------------------------------------------------
         // ----------------------------------------------------------------------------
+
+        public void AddIO()
+        {
+            List<ItemModel> list = new List<ItemModel>();
+
+            foreach (var header in items)
+            {
+                list.AddRange(header.Where(x => x.IsSelected));
+            }
+
+            
+        }
 
 
     }

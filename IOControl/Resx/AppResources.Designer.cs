@@ -154,6 +154,15 @@ namespace IOControl.Resx {
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
         /// </summary>
+        internal static string CFG_AddIOAlreadyExist {
+            get {
+                return ResourceManager.GetString("CFG_AddIOAlreadyExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
         internal static string CFG_AddIOHeader {
             get {
                 return ResourceManager.GetString("CFG_AddIOHeader", resourceCulture);
@@ -256,6 +265,15 @@ namespace IOControl.Resx {
         internal static string Groups {
             get {
                 return ResourceManager.GetString("Groups", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die In-/outputs ähnelt.
+        /// </summary>
+        internal static string IOs {
+            get {
+                return ResourceManager.GetString("IOs", resourceCulture);
             }
         }
         

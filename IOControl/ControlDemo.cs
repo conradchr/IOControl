@@ -230,6 +230,36 @@ namespace IOControl
 
         private async void Btn6_Clicked(object sender, System.EventArgs e)
         {
+            Dictionary<string, IOType> ioTypes = new Dictionary<string, IOType>();
+            ioTypes.Add(Resx.AppResources.Module_DI, IOType.DI);
+            ioTypes.Add(Resx.AppResources.Module_DO, IOType.DO);
+            ioTypes.Add(Resx.AppResources.Module_PWM, IOType.PWM);
+            ioTypes.Add(Resx.AppResources.Module_AI, IOType.AD);
+            ioTypes.Add(Resx.AppResources.Module_AO, IOType.DA);
+            ioTypes.Add(Resx.AppResources.Module_TEMP, IOType.TEMP);
+
+            string[] options = new string[ioTypes.Keys.Count];
+            ioTypes.Keys.CopyTo(options, 0);
+
+            var io = await DisplayActionSheet(
+                Resx.AppResources.CFG_AddIOHeader,
+                Resx.AppResources.MSG_Cancel,
+                null,
+                options
+            );
+
+            if (ioTypes.ContainsKey(io))
+            {
+                await Navigation.PushAsync(new DialogAddIO(new DialogAddIO.Constructor()
+                {
+                    IOType = ioTypes[io]
+                }));
+            }
+
+            //return true;
+
+
+            /*
             Func<Task<bool>> MachTask = () =>
             {
                 return new Task<bool>(() =>
@@ -249,6 +279,7 @@ namespace IOControl
             DT.Log("Action: " + action);
 
             var test2 = await UserDialogs.Instance.ActionSheetAsync("test", "cancel", "destructive", null, new string[] { "a", "b", "c" });
+            */
 
             /*
             UserDialogs.Instance.Toast("bla bla bla ... ich bin ein testtoast!!!");

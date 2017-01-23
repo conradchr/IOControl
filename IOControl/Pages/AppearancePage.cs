@@ -141,15 +141,6 @@ namespace IOControl
                     BackgroundColor = DT.COLOR
                 };
 
-                Label labelType = new Label() { IsVisible = false };
-                labelType.SetBinding(Label.TextProperty, new Binding("GroupType"));
-                layout.Children.Add(labelType);
-
-                //this.
-
-                //this.BindingContext.
-                //items
-
                 // Label Name
                 Label labelName = new Label() { FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)), HorizontalOptions = LayoutOptions.StartAndExpand, VerticalOptions = LayoutOptions.Center };
                 labelName.SetBinding(Label.TextProperty, new Binding("LongName"));
@@ -164,23 +155,18 @@ namespace IOControl
                     {
                         await ((AppearancePage)context).AddModule();
                     }
-                    else
+                    else if (((HeaderModel)BindingContext).Type == typeof(ContentLocation))
                     {
                         await ((AppearancePage)context).AddLocation();
                     }
-                    
-
-                    /*
-                    if (labelType.Text == typeof(Module).ToString())
-                    {
-                        await ((AppearancePage)context).AddModule();
-                    }
-                    else /*if (labelType.Text == typeof(ContentLocation).ToString())*/
-                    /*
+                    else if (((HeaderModel)BindingContext).Type == typeof(ContentGroup))
                     {
                         await ((AppearancePage)context).AddLocation();
                     }
-                    */
+                    else if (((HeaderModel)BindingContext).Type == typeof(ContentIO))
+                    {
+                        await ((AppearancePage)context).AddIO();
+                    }
                 };
                 imgAdd.GestureRecognizers.Add(imgAddTapped);
                 layout.Children.Add(imgAdd);
@@ -283,24 +269,24 @@ namespace IOControl
             // --------------------
             // Locations
 
-            var groupLocation = new HeaderModel()
+            var item = new HeaderModel()
             {
-                LongName = Resx.AppResources.Location.ToUpper(),
-                ShortName = Resx.AppResources.Location.ToUpper().Substring(0, 1),
-                Type = typeof(ContentLocation)
+                LongName = Resx.AppResources.IOs.ToUpper(),
+                ShortName = Resx.AppResources.IOs.ToUpper().Substring(0, 1),
+                Type = typeof(ContentIO)
             };
 
-            foreach (ContentLocation loc in DT.Session.xmlContent.loc)
+            foreach (ContentIO io in ((ContentGroup)Ctor.Object).io)
             {
-                groupLocation.Add(new ItemModel()
+                item.Add(new ItemModel()
                 {
-                    Name = loc.name,
-                    Type = loc.GetType(),
-                    Object = loc,
+                    Name = "aaaa",
+                    Type = io.GetType(),
+                    Object = io,
                 });
             }
 
-            items.Add(groupLocation);
+            items.Add(item);
         }
 
         //protected override 
@@ -405,8 +391,8 @@ namespace IOControl
             // Delete Button
             Image imgDelete = new Image() { Source = ImageSource.FromFile("btn_delete.png") };
             var imgDeleteTapped = new TapGestureRecognizer();
-            //imgDeleteTapped.Tapped += async (s, e) => await DeleteItem();
-            imgDeleteTapped.Tapped += async (s, e) => await AddIO();
+            imgDeleteTapped.Tapped += async (s, e) => await DeleteItem();
+            //imgDeleteTapped.Tapped += async (s, e) => await AddIO();
             imgDelete.GestureRecognizers.Add(imgDeleteTapped);
             gridFooter.Children.Add(imgDelete, 0, 0);
             
@@ -510,14 +496,6 @@ namespace IOControl
             string[] options = new string[ioTypes.Keys.Count];
             ioTypes.Keys.CopyTo(options, 0);
 
-                /*
-            List<string> options = new List<string>();
-            foreach (var key in ioTypes.Keys)
-            {
-                options.Add(key);
-            }
-            */
-
             var io = await DisplayActionSheet(
                 Resx.AppResources.CFG_AddIOHeader,
                 Resx.AppResources.MSG_Cancel,
@@ -527,15 +505,12 @@ namespace IOControl
 
             if (ioTypes.ContainsKey(io))
             {
-                DT.Log(ioTypes[io].ToString());
+                await Navigation.PushAsync(new DialogAddIO(new DialogAddIO.Constructor()
+                {
+                    IOType = ioTypes[io],
+                    Group = Ctor.Object as ContentGroup
+                }));
             }
-            else
-            {
-                DT.Log(io);
-            }
-            
-
-            
 
             return true;
         }
