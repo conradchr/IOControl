@@ -54,6 +54,9 @@ namespace IOControl
         public String mac;
 
         [XmlIgnoreAttribute]
+        public bool ioNamesValid = false;
+
+        [XmlIgnoreAttribute]
         public String enc_pw;
 
         [XmlIgnoreAttribute]
@@ -115,18 +118,21 @@ namespace IOControl
             
         void GetModuleConfig()
         {
-            IO.cnt_do = DT.Delib.DapiSpecialCommand(handle, DT.Delib.DAPI_SPECIAL_CMD_GET_MODULE_CONFIG, DT.Delib.DAPI_SPECIAL_GET_MODULE_CONFIG_PAR_DO, 0, 0);
-            IO.cnt_di = DT.Delib.DapiSpecialCommand(handle, DT.Delib.DAPI_SPECIAL_CMD_GET_MODULE_CONFIG, DT.Delib.DAPI_SPECIAL_GET_MODULE_CONFIG_PAR_DI, 0, 0);
-            IO.cnt_ao = DT.Delib.DapiSpecialCommand(handle, DT.Delib.DAPI_SPECIAL_CMD_GET_MODULE_CONFIG, DT.Delib.DAPI_SPECIAL_GET_MODULE_CONFIG_PAR_DA, 0, 0);
-            IO.cnt_ai = DT.Delib.DapiSpecialCommand(handle, DT.Delib.DAPI_SPECIAL_CMD_GET_MODULE_CONFIG, DT.Delib.DAPI_SPECIAL_GET_MODULE_CONFIG_PAR_AD, 0, 0);
-            IO.cnt_do_pwm = DT.Delib.DapiSpecialCommand(handle, DT.Delib.DAPI_SPECIAL_CMD_GET_MODULE_CONFIG, DT.Delib.DAPI_SPECIAL_GET_MODULE_CONFIG_PAR_PWM_OUT, 0, 0);
-            IO.cnt_temp = DT.Delib.DapiSpecialCommand(handle, DT.Delib.DAPI_SPECIAL_CMD_GET_MODULE_CONFIG, DT.Delib.DAPI_SPECIAL_GET_MODULE_CONFIG_PAR_TEMP, 0, 0);
+            if (handle != 0)
+            { 
+                IO.cnt_do = DT.Delib.DapiSpecialCommand(handle, DT.Delib.DAPI_SPECIAL_CMD_GET_MODULE_CONFIG, DT.Delib.DAPI_SPECIAL_GET_MODULE_CONFIG_PAR_DO, 0, 0);
+                IO.cnt_di = DT.Delib.DapiSpecialCommand(handle, DT.Delib.DAPI_SPECIAL_CMD_GET_MODULE_CONFIG, DT.Delib.DAPI_SPECIAL_GET_MODULE_CONFIG_PAR_DI, 0, 0);
+                IO.cnt_ao = DT.Delib.DapiSpecialCommand(handle, DT.Delib.DAPI_SPECIAL_CMD_GET_MODULE_CONFIG, DT.Delib.DAPI_SPECIAL_GET_MODULE_CONFIG_PAR_DA, 0, 0);
+                IO.cnt_ai = DT.Delib.DapiSpecialCommand(handle, DT.Delib.DAPI_SPECIAL_CMD_GET_MODULE_CONFIG, DT.Delib.DAPI_SPECIAL_GET_MODULE_CONFIG_PAR_AD, 0, 0);
+                IO.cnt_do_pwm = DT.Delib.DapiSpecialCommand(handle, DT.Delib.DAPI_SPECIAL_CMD_GET_MODULE_CONFIG, DT.Delib.DAPI_SPECIAL_GET_MODULE_CONFIG_PAR_PWM_OUT, 0, 0);
+                IO.cnt_temp = DT.Delib.DapiSpecialCommand(handle, DT.Delib.DAPI_SPECIAL_CMD_GET_MODULE_CONFIG, DT.Delib.DAPI_SPECIAL_GET_MODULE_CONFIG_PAR_TEMP, 0, 0);
 
-            fw_ver = DT.Delib.DapiSpecialCommand(handle, DT.Delib.DAPI_SPECIAL_CMD_GET_MODULE_VERSION, DT.Delib.DAPI_SPECIAL_GET_MODULE_PAR_VERSION_0, 0, 0)
-                      + DT.Delib.DapiSpecialCommand(handle, DT.Delib.DAPI_SPECIAL_CMD_GET_MODULE_VERSION, DT.Delib.DAPI_SPECIAL_GET_MODULE_PAR_VERSION_1, 0, 0)
-                      + "." +
-                      +DT.Delib.DapiSpecialCommand(handle, DT.Delib.DAPI_SPECIAL_CMD_GET_MODULE_VERSION, DT.Delib.DAPI_SPECIAL_GET_MODULE_PAR_VERSION_2, 0, 0)
-                      + DT.Delib.DapiSpecialCommand(handle, DT.Delib.DAPI_SPECIAL_CMD_GET_MODULE_VERSION, DT.Delib.DAPI_SPECIAL_GET_MODULE_PAR_VERSION_3, 0, 0);
+                fw_ver = DT.Delib.DapiSpecialCommand(handle, DT.Delib.DAPI_SPECIAL_CMD_GET_MODULE_VERSION, DT.Delib.DAPI_SPECIAL_GET_MODULE_PAR_VERSION_0, 0, 0)
+                          + DT.Delib.DapiSpecialCommand(handle, DT.Delib.DAPI_SPECIAL_CMD_GET_MODULE_VERSION, DT.Delib.DAPI_SPECIAL_GET_MODULE_PAR_VERSION_1, 0, 0)
+                          + "." +
+                          +DT.Delib.DapiSpecialCommand(handle, DT.Delib.DAPI_SPECIAL_CMD_GET_MODULE_VERSION, DT.Delib.DAPI_SPECIAL_GET_MODULE_PAR_VERSION_2, 0, 0)
+                          + DT.Delib.DapiSpecialCommand(handle, DT.Delib.DAPI_SPECIAL_CMD_GET_MODULE_VERSION, DT.Delib.DAPI_SPECIAL_GET_MODULE_PAR_VERSION_3, 0, 0);
+            }
         }
         
 
@@ -136,103 +142,112 @@ namespace IOControl
 
         void GetIONames()
         {
-            int i;
+            if (handle == 0)
+            {
+                return;
+            }
+            
             List<string> pars = new List<string>();
             string[] vals;
-            int pos;
+            int pos = 0;
+            uint ret;
 
-            for (i = 0; i != IO.cnt_di; i++)
+            Func<string, uint, bool> AddParams = (key, cnt) =>
             {
-                pars.Add("io_di#" + i.ToString());
-            }
+                for (int i=0; i!=cnt; i++)
+                {
+                    pars.Add(key + i.ToString());
+                }
+                return true;
+            };
 
-            for (i = 0; i != IO.cnt_do; i++)
+            AddParams("io_di#", IO.cnt_di);
+            AddParams("io_do#", IO.cnt_do);
+            AddParams("io_ai#", IO.cnt_ai);
+            AddParams("io_ao#", IO.cnt_ao);
+            AddParams("io_temp#", IO.cnt_temp);
+            AddParams("io_output_pwm#", IO.cnt_do_pwm);
+
+            if ((ret = DT.Delib.ReadMultipleParams(handle, pars.ToArray(), out vals)) == DT.Error.DAPI_ERR_NONE)
             {
-                pars.Add("io_do#" + i.ToString());
-            }
+                Func<List<string>, uint, bool> ExtractParams = (list, cnt) =>
+                {
+                    for (int i = 0; i != cnt; i++)
+                    {
+                        list.Add(vals[pos++]);
+                    }
+                    return true;
+                };
 
-            for (i = 0; i != IO.cnt_ai; i++)
+                pos = 0;
+                ExtractParams(IOName.di, IO.cnt_di);
+                ExtractParams(IOName.dout, IO.cnt_do);
+                ExtractParams(IOName.ai, IO.cnt_ai);
+                ExtractParams(IOName.ao, IO.cnt_ao);
+                ExtractParams(IOName.temp, IO.cnt_temp);
+                ExtractParams(IOName.pwm, IO.cnt_do_pwm);
+
+                ioNamesValid = true;
+            }
+            else
             {
-                pars.Add("io_ai#" + i.ToString());
+                Func<List<string>, uint, bool> CreateDefault = (list, cnt) =>
+                {
+                    for (int i = 0; i != cnt; i++)
+                    {
+                        list.Add("Channel " + i.ToString());
+                    }
+                    return true;
+                };
+
+                CreateDefault(IOName.di, IO.cnt_di);
+                CreateDefault(IOName.dout, IO.cnt_do);
+                CreateDefault(IOName.ai, IO.cnt_ai);
+                CreateDefault(IOName.ao, IO.cnt_ao);
+                CreateDefault(IOName.temp, IO.cnt_temp);
+                CreateDefault(IOName.pwm, IO.cnt_do_pwm);
             }
-
-            for (i = 0; i != IO.cnt_ao; i++)
-            {
-                pars.Add("io_ao#" + i.ToString());
-            }
-
-            for (i = 0; i != IO.cnt_temp; i++)
-            {
-                pars.Add("io_temp#" + i.ToString());
-            }
-
-            for (i = 0; i != IO.cnt_do_pwm; i++)
-            {
-                pars.Add("io_output_pwm#" + i.ToString());
-            }
-
-
-            DT.Delib.ReadMultipleParams(handle, pars.ToArray(), out vals);
-            //vals = new string[256];
-
-            pos = 0;
-
-            for (i = 0; i != IO.cnt_di; i++)
-            {
-                IOName.di.Add(vals[pos++]);
-            }
-
-            for (i = 0; i != IO.cnt_do; i++)
-            {
-                IOName.dout.Add(vals[pos++]);
-            }
-
-            for (i = 0; i != IO.cnt_ai; i++)
-            {
-                IOName.ai.Add(vals[pos++]);
-            }
-
-            for (i = 0; i != IO.cnt_ao; i++)
-            {
-                IOName.ao.Add(vals[pos++]);
-            }
-
-            for (i = 0; i != IO.cnt_temp; i++)
-            {
-                IOName.temp.Add(vals[pos++]);
-            }
-
-            for (i = 0; i != IO.cnt_do_pwm; i++)
-            {
-                IOName.pwm.Add(vals[pos++]);
-            }
-
-            //DT.DBG.Print("testparams= di4" + IOName.di[4] + " do2" + IOName.dout[2]);
         }
 
         // --------------------
         // --------------------
         // --------------------
 
-        public Module()
+        public List<String> GetIONames(IOType ioType)
         {
+            List<string> ret = null;
+            switch (ioType)
+            {
+                case IOType.DI: ret = IOName.di; break;
+                case IOType.DO: ret = IOName.dout; break;
+                case IOType.PWM: ret = IOName.pwm; break;
+                //case IOType.DO_TIMER:   ret = m.IOName.do_timer;break;
+                case IOType.AD: ret = IOName.ai; break;
+                case IOType.DA: ret = IOName.ao; break;
+                case IOType.TEMP: ret = IOName.temp; break;
+            }
+            return ret;
         }
 
-        // --------------------
-        // --------------------
-        // --------------------
-
-            /*
-        public Module(String name, String ip, int port, int timeout, long id)
+        public String GetIOName(IOType ioType, uint channel)
         {
-            this.boardname = name;
-            this.tcp_hostname = ip;
-            this.tcp_port = port;
-            this.tcp_timeout = timeout;
-            this.id = id;
-        }
-        */
+            List<string> names = GetIONames(ioType);
+            if (names != null)
+            {
+                if (channel < names.Count)
+                {
+                    return names[(int) channel];
+                }
+            }
 
+            return null;
+        }
+
+        // --------------------
+        // --------------------
+        // --------------------
+
+        public Module() { }
         public Module(String name, String ip, int port, int timeout, String mac)
         {
             this.boardname = name;

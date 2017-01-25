@@ -174,7 +174,7 @@
   <data name="CFG_SelectEntry" xml:space="preserve">
     <value>Wählen Sie einen Eintrag aus</value>
   </data>
-  <data name="Configuration" xml:space="preserve">
+  <data name="NAV_Configuration" xml:space="preserve">
     <value>Konfiguration</value>
   </data>
   <data name="Location" xml:space="preserve">
@@ -183,7 +183,7 @@
   <data name="Main_Loading" xml:space="preserve">
     <value>Verbinde</value>
   </data>
-  <data name="Main_OpenError" xml:space="preserve">
+  <data name="MAS_OpenError" xml:space="preserve">
     <value>Fehler beim Verbinden mit Modul {0} (IP={1})</value>
   </data>
   <data name="Modules" xml:space="preserve">
@@ -242,5 +242,23 @@
   </data>
   <data name="IOs" xml:space="preserve">
     <value>Ein-/Ausgänge</value>
+  </data>
+  <data name="MSG_PleaseWait" xml:space="preserve">
+    <value>Bitte warten</value>
+  </data>
+  <data name="NAV_Appearance" xml:space="preserve">
+    <value>Erscheinungsbild</value>
+  </data>
+  <data name="NAV_Modules" xml:space="preserve">
+    <value>Module</value>
+  </data>
+  <data name="NAV_Settings" xml:space="preserve">
+    <value>Einstellungen</value>
+  </data>
+  <data name="BC_ModuleAlreadyExist" xml:space="preserve">
+    <value>Das ausgewählte Modul ist bereits hinzugefügt</value>
+  </data>
+  <data name="CFG_ChNotAvailable" xml:space="preserve">
+    <value>CH{0} (Name nicht verfügbar)</value>
   </data>
 </root>

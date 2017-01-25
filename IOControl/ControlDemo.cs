@@ -55,12 +55,6 @@ namespace IOControl
             btn3.BackgroundColor = Color.White;
             btn3.TextColor = Color.Black;
 
-            Button btn2 = new Button();
-            btn2.Clicked += Btn2_Clicked;
-            btn2.Text = "BC Scan";
-            btn2.BackgroundColor = Color.White;
-            btn2.TextColor = Color.Black;
-
             Button btn4 = new Button();
             btn4.Clicked += Btn4_Clicked;
             btn4.Text = "WLAN Check";
@@ -133,8 +127,6 @@ namespace IOControl
                         DTControl.Separator(),
                         btn3,
                         DTControl.Separator(),
-                        btn2,
-                        DTControl.Separator(),
                         btn4,
                         DTControl.Separator(),
                         btn5,
@@ -186,16 +178,6 @@ namespace IOControl
         
 
         
-        async void Btn2_Clicked(object sender, System.EventArgs e)
-        {
-            // scan
-            DT.Log("zeige BC");
-            DialogBroadcast db = new DialogBroadcast();
-            await Navigation.PushAsync(db);
-            DT.Log("warte auf BC ende");
-            bool add = await db.PageCloseTask;
-            DT.Log("ende BC ** add=" + add.ToString());
-        }
 
         private void Btn4_Clicked(object sender, System.EventArgs e)
         {

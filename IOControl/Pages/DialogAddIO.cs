@@ -25,7 +25,7 @@ namespace IOControl
         public class Constructor
         {
             public IOType IOType { get; set; }
-            public ContentGroup Group { get; set; }
+            public ContentGroup ContentGroup { get; set; }
         }
 
         // ------------------------------------
@@ -40,7 +40,7 @@ namespace IOControl
             public bool AlreadyAdded { get; set; }
 
             public uint Channel { get; set; }
-            public Object Object { get; set; }
+            public Module Module { get; set; }
 
             // für Listview, damit dieser Wert sich in der Anzeige aktualisiert
             bool isSelected = false;
@@ -111,7 +111,7 @@ namespace IOControl
                 layout.Children.Add(labelName);
 
                 // Already Added
-                Image img = new Image() { Source = ImageSource.FromFile("btn_ok.png"), HeightRequest = 20, WidthRequest = 20, Aspect = Aspect.AspectFill };
+                Image img = new Image() { Source = ImageSource.FromFile("btn_ok.png"), HeightRequest = 20, WidthRequest = 20, Aspect = Aspect.AspectFit };
                 img.SetBinding(Image.IsVisibleProperty, new Binding("AlreadyAdded"));
                 layout.Children.Add(img);
 
@@ -126,6 +126,7 @@ namespace IOControl
         // ----------------------------------------------------------------------------
 
         public Constructor Ctor { get; set; }
+        public Task<List<ContentIO>> PageCloseTask { get { return tcs.Task; } }
 
         // ------------------------------------
         // ------------------------------------
@@ -136,6 +137,8 @@ namespace IOControl
         ListView listView;
         Grid footer;
         ItemModel selectedItem;
+        TaskCompletionSource<List<ContentIO>> tcs;
+        List<ContentIO> taskResult = null;
 
         // ----------------------------------------------------------------------------
         // ----------------------------------------------------------------------------
@@ -145,14 +148,19 @@ namespace IOControl
 
         public DialogAddIO(Constructor ctor)
         {
-            Ctor = ctor;
-            Title = Resx.AppResources.CFG_AddIOHeader;
-
             StackLayout slMain;
             TapGestureRecognizer tgp;
 
+            Ctor = ctor;
+            Title = Resx.AppResources.CFG_AddIOHeader;
+
+            tcs = new TaskCompletionSource<List<ContentIO>>();
             slMain = new StackLayout() { Padding = new Thickness(0, 10, 0, 10) };
 
+            this.Disappearing += (s, e) =>
+            {
+                tcs.SetResult(taskResult);
+            };
 
             // ------------------------------------
             // listView
@@ -201,7 +209,7 @@ namespace IOControl
 
             Image imgCancel = new Image() { Source = ImageSource.FromFile("btn_cancel.png") };
             tgp = new TapGestureRecognizer();
-            tgp.Tapped += async (s, e) => await Scan();
+            tgp.Tapped += (s, e) => Navigation.PopAsync();
             imgCancel.GestureRecognizers.Add(tgp);
             footer.Children.Add(imgCancel, 0, 0);
 
@@ -213,7 +221,7 @@ namespace IOControl
 
             Image imgOK = new Image() { Source = ImageSource.FromFile("btn_ok.png") };
             tgp = new TapGestureRecognizer();
-            tgp.Tapped += async (s, e) => await Scan();
+            tgp.Tapped += (s, e) => SaveIO();
             imgOK.GestureRecognizers.Add(tgp);
             footer.Children.Add(imgOK, 2, 0);
 
@@ -221,7 +229,7 @@ namespace IOControl
 
             Content = slMain;
 
-            Scan();
+            //Scan();
         }
 
         // ----------------------------------------------------------------------------
@@ -230,10 +238,11 @@ namespace IOControl
         // ----------------------------------------------------------------------------
         // ----------------------------------------------------------------------------
 
-        async Task<bool> Scan()
+        public async Task<bool> Scan()
         {
             Task<bool> scanning = new Task<bool>(() =>
             {
+                DT.Log("DA: Scan anfang");
                 // alle module scannen
                 foreach (var module in DT.Session.xmlContent.modules)
                 {
@@ -262,23 +271,8 @@ namespace IOControl
                 };
                 var modules = DT.Session.xmlContent.modules.Where(m => checkIO(m) == true);
 
+                DT.Log("DA: Scan Module");
                 // module, inkl. I/Os in eine neue gruppe adden und das dann in die hauptliste
-                Func<Module, List<string>> getIONames = (m) =>
-                {
-                    List<string> ret = null;
-                    switch (Ctor.IOType)
-                    {
-                        case IOType.DI: ret = m.IOName.di; break;
-                        case IOType.DO: ret = m.IOName.dout; break;
-                        case IOType.PWM: ret = m.IOName.pwm; break;
-                        //case IOType.DO_TIMER:   ret = m.IOName.do_timer;break;
-                        case IOType.AD: ret = m.IOName.ai; break;
-                        case IOType.DA: ret = m.IOName.ao; break;
-                        case IOType.TEMP: ret = m.IOName.temp; break;
-                    }
-                    return ret;
-                };
-
                 foreach (var module in modules)
                 {
                     var group = new HeaderModel()
@@ -286,27 +280,30 @@ namespace IOControl
                         LongName = string.Format("{0}\n({1}:{2})", module.boardname, module.tcp_hostname, module.tcp_port).ToUpper(),
                         ShortName = module.boardname.ToUpper().Substring(0, 1)
                     };
-                    
-                    var moduleIOs = getIONames(module);
+
+                    var moduleIOs = module.GetIONames(Ctor.IOType);
                     if (moduleIOs != null)
                     {
-                        int i = 0;
+                        uint chan = 0;
 
                         foreach (var ioName in moduleIOs)
                         {
+                            ContentIO temp = new ContentIO(Ctor.IOType, module.mac, chan);
                             group.Add(new ItemModel()
                             {
+                                Channel = chan,
                                 Name = ioName,
-                                Object = module,
-                                AlreadyAdded = (i % 2 == 0)
+                                Module = module,
+                                AlreadyAdded = (Ctor.ContentGroup.io.Where(x => x.Equals(temp)).ToList().Count != 0)
                             });
-                            i++;
+                            chan++;
                         }
                     }
 
                     items.Add(group);
                 }
 
+                DT.Log("DA: Scan Task ende");
                 return false;
             });
 
@@ -325,15 +322,19 @@ namespace IOControl
             items.Clear();
             sw.Start();
             scanning.Start();
+
+            DT.Log("await");
             await scanning;
+            DT.Log("danach");
 
             while (sw.ElapsedMilliseconds < DT.Const.TIME_ANIMATION_MIN_MS)
             {
                 await Task.Delay(10);
             }
-
+            DT.Log("switchGUI");
             // ui stuff danach
             switchGUI(false);
+            DT.Log("DA: Scan Ende");
 
             return true;
         }
@@ -344,18 +345,25 @@ namespace IOControl
         // ----------------------------------------------------------------------------
         // ----------------------------------------------------------------------------
 
-        public void AddIO()
+        public void SaveIO()
         {
-            List<ItemModel> list = new List<ItemModel>();
+            taskResult = new List<ContentIO>();
 
             foreach (var header in items)
             {
-                list.AddRange(header.Where(x => x.IsSelected));
+                foreach (var selectedItem in header.Where(x => x.IsSelected))
+                {
+                    taskResult.Add(new ContentIO(Ctor.IOType, selectedItem.Module.mac, selectedItem.Channel));
+                }
             }
 
-            
+            Navigation.PopAsync();
         }
 
-
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
     }
 }

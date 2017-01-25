@@ -17,9 +17,13 @@ namespace IOControl
 
         public static void ShowToast(string text)
         {
+            /*
             UserDialogs.Instance.Toast(new ToastConfig(text)
             {
+                Duration = new System.TimeSpan(2000*10)
             });
+            */
+            UserDialogs.Instance.Toast(text);
         }
 
         public static void ShowSuccess(string text)

@@ -116,6 +116,15 @@ namespace IOControl.Resx {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
+        internal static string BC_ModuleAlreadyExist {
+            get {
+                return ResourceManager.GetString("BC_ModuleAlreadyExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Product ähnelt.
         /// </summary>
         internal static string BC_Product {
@@ -197,6 +206,15 @@ namespace IOControl.Resx {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die CH{0} (name not available) ähnelt.
+        /// </summary>
+        internal static string CFG_ChNotAvailable {
+            get {
+                return ResourceManager.GetString("CFG_ChNotAvailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Deleting entry ähnelt.
         /// </summary>
         internal static string CFG_DeleteEntryHeader {
@@ -251,15 +269,6 @@ namespace IOControl.Resx {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Configuration ähnelt.
-        /// </summary>
-        internal static string Configuration {
-            get {
-                return ResourceManager.GetString("Configuration", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Groups ähnelt.
         /// </summary>
         internal static string Groups {
@@ -292,15 +301,6 @@ namespace IOControl.Resx {
         internal static string Main_Loading {
             get {
                 return ResourceManager.GetString("Main_Loading", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Error while connecting to module {0} (IP={1}) ähnelt.
-        /// </summary>
-        internal static string Main_OpenError {
-            get {
-                return ResourceManager.GetString("Main_OpenError", resourceCulture);
             }
         }
         
@@ -395,11 +395,65 @@ namespace IOControl.Resx {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Error while connecting to module {0} (IP={1}) ähnelt.
+        /// </summary>
+        internal static string MSG_OpenError {
+            get {
+                return ResourceManager.GetString("MSG_OpenError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
+        internal static string MSG_PleaseWait {
+            get {
+                return ResourceManager.GetString("MSG_PleaseWait", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Yes ähnelt.
         /// </summary>
         internal static string MSG_Yes {
             get {
                 return ResourceManager.GetString("MSG_Yes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
+        internal static string NAV_Appearance {
+            get {
+                return ResourceManager.GetString("NAV_Appearance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Configuration ähnelt.
+        /// </summary>
+        internal static string NAV_Configuration {
+            get {
+                return ResourceManager.GetString("NAV_Configuration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
+        internal static string NAV_Modules {
+            get {
+                return ResourceManager.GetString("NAV_Modules", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
+        internal static string NAV_Settings {
+            get {
+                return ResourceManager.GetString("NAV_Settings", resourceCulture);
             }
         }
         

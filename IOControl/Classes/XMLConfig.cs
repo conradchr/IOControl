@@ -173,6 +173,11 @@ namespace IOControl
             this.channel = channel;
             this.moduleMAC = moduleMAC;
         }
+
+        public bool Equals(ContentIO io)
+        {
+            return ((ioType == io.ioType) && (moduleMAC == io.moduleMAC) && (channel == io.channel));
+        }
     }
 
     // ----------------------------------------------------------------------------

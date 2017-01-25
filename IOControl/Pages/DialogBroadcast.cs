@@ -34,12 +34,10 @@ namespace IOControl
 
         ListView listView;
         public static ObservableCollection<BCTemplateItem> items;
-        public static ContentPage context;
 
-        public Task<bool> PageCloseTask { get { return tcs.Task; } }
-        TaskCompletionSource<bool> tcs;
-        bool taskComplete = false;
-        bool taskResult = false;
+        public Task<List<Module>> PageCloseTask { get { return tcs.Task; } }
+        TaskCompletionSource<List<Module>> tcs;
+        List<Module> taskResult = null;
 
         public class BCTemplateItem : INotifyPropertyChanged
         {
@@ -50,7 +48,7 @@ namespace IOControl
             public string Mac { get; set; }
             public string Product { get; set; }
 
-            public int Id { get; set; }
+            public bool AlreadyAdded { get; set; }
 
 
             // für Listview, damit dieser Wert sich in der Anzeige aktualisiert
@@ -63,10 +61,7 @@ namespace IOControl
                     if (isSelected != value)
                     {
                         isSelected = value;
-                        if (PropertyChanged != null)
-                        {
-                            PropertyChanged(this, new PropertyChangedEventArgs("IsSelected"));
-                        }
+                        PropertyChanged(this, new PropertyChangedEventArgs("IsSelected"));
                     }
                 }
             }
@@ -86,7 +81,6 @@ namespace IOControl
                 slMain.Padding = new Thickness(0, 10, 0, 10);
 
                 StackLayout layout = new StackLayout() { HorizontalOptions = LayoutOptions.StartAndExpand };
-                //layout.Padding = new Thickness(0, 10, 0, 10);
 
                 Label labelBoardname = new Label() { FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)) };
                 Label labelIP = new Label() { FontSize = Device.GetNamedSize(NamedSize.Small, typeof(Label)) };
@@ -110,15 +104,21 @@ namespace IOControl
                 layout.Children.Add(labelProduct);
                 layout.Children.Add(sw);
 
-                Color temp = layout.BackgroundColor;
-
+                Color temp = slMain.BackgroundColor;
                 sw.Toggled += new EventHandler<ToggledEventArgs>((s, e) =>
                 {
-                    layout.BackgroundColor = sw.IsToggled ? DT.COLOR : temp;
+                    slMain.BackgroundColor = sw.IsToggled ? DT.COLOR_SELECTED : temp;
                 });
 
                 slMain.Children.Add(layout);
 
+
+                // Already Added
+                Image img = new Image() { Source = ImageSource.FromFile("btn_ok.png"), HeightRequest = 20, WidthRequest = 20, Aspect = Aspect.AspectFit };
+                img.SetBinding(Image.IsVisibleProperty, new Binding("AlreadyAdded"));
+                slMain.Children.Add(img);
+
+                /*
                 StackLayout slEdit = new StackLayout() { HorizontalOptions = LayoutOptions.End, VerticalOptions = LayoutOptions.Center };
                 Image imgEdit = new Image() { Source = ImageSource.FromFile("btn_edit.png") };
                 var imgEditTapped = new TapGestureRecognizer();
@@ -154,19 +154,12 @@ namespace IOControl
                 imgEdit.GestureRecognizers.Add(imgEditTapped);
                 slEdit.Children.Add(imgEdit);
                 slMain.Children.Add(slEdit);
+                */
 
                 View = slMain;
 
                 //View = layout;
             }
-        }
-
-        protected override bool OnBackButtonPressed()
-        {
-            taskComplete = true;
-            taskResult = false;
-
-            return base.OnBackButtonPressed();
         }
 
 
@@ -175,18 +168,12 @@ namespace IOControl
             FormInit();
 
             Title = Resx.AppResources.BC_Header;
-            tcs = new TaskCompletionSource<bool>();
+            tcs = new TaskCompletionSource<List<Module>>();
 
             this.Disappearing += (s, e) =>
             {
-                if (taskComplete)
-                { 
-                    tcs.SetResult(taskResult);
-                    DT.Log("DialogBroadcast weg");
-                }
+                tcs.SetResult(taskResult);
             };
-
-            context = this;
 
             Scan();
         }
@@ -198,8 +185,6 @@ namespace IOControl
             slListView.IsVisible = false;
             slFooter.IsVisible = false;
 
-            int deviceId = 0;
-
             Task<int>.Run(() =>
             {
                 uint cnt = DT.Bc.GetEthernetDevicesByBC(DT.eth_devs);
@@ -208,15 +193,15 @@ namespace IOControl
                     items = new ObservableCollection<BCTemplateItem>();
                     lblCountModules.Text = String.Format(Resx.AppResources.BC_ListViewHeader, cnt);
 
-                    foreach (var x in DT.eth_devs)
+                    foreach (var module in DT.eth_devs)
                     {
                         items.Add(new BCTemplateItem
                         {
-                            Boardname = x.BoardName.boardname,
-                            IP = String.Format("{0}:{1}", x.Network.ip, x.Network.port),
-                            Mac = x.Network.mac_formatted,
-                            Product = IntCommands.DapiInternGetModuleName(x.BLFWInfo.delib_module_id),
-                            Id = deviceId++
+                            Boardname = module.BoardName.boardname,
+                            IP = String.Format("{0}:{1}", module.Network.ip, module.Network.port),
+                            Mac = module.Network.mac_formatted,
+                            Product = IntCommands.DapiInternGetModuleName(module.BLFWInfo.delib_module_id),
+                            AlreadyAdded = (DT.Session.xmlContent.modules.Find(x => x.mac == module.Network.mac_formatted) != null)
                         });
                     }
                     listView.ItemsSource = items;
@@ -252,7 +237,8 @@ namespace IOControl
             {
                 foreach (var item in items)
                 {
-                    item.IsSelected = true;
+                    if (!item.AlreadyAdded)
+                        item.IsSelected = true;
                 }
             };
             btnSelectNone = new Button() { Text = Resx.AppResources.BC_SelectNone };
@@ -283,14 +269,20 @@ namespace IOControl
             listView = new ListView();
             listView.HasUnevenRows = true;
             listView.RowHeight = -1;
-            //listView.RowHeight = 140;
             listView.ItemTemplate = new DataTemplate(typeof(BCTemplateViewCell));
             listView.ItemTapped += new EventHandler<ItemTappedEventArgs>((s, e) =>
             {
                 var item = e.Item as BCTemplateItem;
                 if (item != null)
                 {
-                    item.IsSelected = !item.IsSelected;
+                    if (!item.AlreadyAdded)
+                    { 
+                        item.IsSelected = !item.IsSelected;
+                    }
+                    else
+                    {
+                        DTControl.ShowToast(Resx.AppResources.BC_ModuleAlreadyExist);
+                    }
                     ((ListView)s).SelectedItem = null;
                 }
             });
@@ -304,28 +296,19 @@ namespace IOControl
 
             imgCancel = new Image() { Source = ImageSource.FromFile("btn_cancel.png") };
             var imgCancelTapped = new TapGestureRecognizer();
-            imgCancelTapped.Tapped += (s, e) =>
-            {
-                ClosePage(false);
-            };
+            imgCancelTapped.Tapped += (s, e) => Navigation.PopAsync();
             imgCancel.GestureRecognizers.Add(imgCancelTapped);
             grid.Children.Add(imgCancel, 0, 0);
 
             imgRefresh = new Image() { Source = ImageSource.FromFile("btn_refresh.png") };
             var imgRefreshTapped = new TapGestureRecognizer();
-            imgRefreshTapped.Tapped += (s, e) =>
-            {
-                Scan();
-            };
+            imgRefreshTapped.Tapped += (s, e) => Scan();
             imgRefresh.GestureRecognizers.Add(imgRefreshTapped);
             grid.Children.Add(imgRefresh, 1, 0);
 
             imgOK = new Image() { Source = ImageSource.FromFile("btn_ok.png") };
             var imgOKTapped = new TapGestureRecognizer();
-            imgOKTapped.Tapped += (s, e) =>
-            {
-                AddModules();
-            };
+            imgOKTapped.Tapped += (s, e) => AddModules();
             imgOK.GestureRecognizers.Add(imgOKTapped);
             grid.Children.Add(imgOK, 2, 0);
 
@@ -337,33 +320,23 @@ namespace IOControl
 
         void AddModules()
         {
-            List<BCTemplateItem> list = items.Where(item => item.IsSelected).ToList();
+            taskResult = new List<Module>();
 
-            foreach (var item in list)
+            foreach (var selectedItem in items.Where(x => x.IsSelected))
             {
-                var dev = DT.eth_devs.Find(x => x.Network.mac_formatted == item.Mac);
+                var dev = DT.eth_devs.Find(x => x.Network.mac_formatted == selectedItem.Mac);
                 if (dev != null)
                 {
-                    DT.Session.xmlContent.modules.Add(new Module(
+                    taskResult.Add(new Module(
                         dev.BoardName.boardname,
                         dev.Network.ip,
-                        (int) dev.Network.port,
+                        (int)dev.Network.port,
                         5000,
-                        //DT.Session.xmlContent.moduleID++
                         dev.Network.mac_formatted
                     ));
-
-                    DT.Session.xmlContent.Save();
                 }
             }
 
-            ClosePage(true);
-        }
-
-        public void ClosePage(bool result)
-        {
-            taskComplete = true;
-            taskResult = result;
             Navigation.PopAsync();
         }
     }

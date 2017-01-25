@@ -35,7 +35,6 @@
   <ItemGroup>
     <Compile Include="App.cs" />
     <Compile Include="Classes\Module.cs" />
-    <Compile Include="ContactsPageCS.cs" />
     <Compile Include="ControlDemo.cs" />
     <Compile Include="Controls\DTIOControl.cs" />
     <Compile Include="library\delib\Delib.cs" />

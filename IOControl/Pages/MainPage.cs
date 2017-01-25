@@ -96,7 +96,7 @@ namespace IOControl
                         {
                             if (mod.OpenModule() == 0)
                             {
-                                msg = String.Format(Resx.AppResources.Main_OpenError, mod.boardname, mod.tcp_hostname);
+                                msg = String.Format(Resx.AppResources.MSG_OpenError, mod.boardname, mod.tcp_hostname);
                                 mod.CloseModule();
                                 return false;
                             }
@@ -118,7 +118,7 @@ namespace IOControl
 
                         if (module.OpenModule() == 0)
                         {
-                            msg = String.Format(Resx.AppResources.Main_OpenError, module.boardname, module.tcp_hostname);
+                            msg = String.Format(Resx.AppResources.MSG_OpenError, module.boardname, module.tcp_hostname);
                             module.CloseModule();
                             return false;
                         }
@@ -142,12 +142,6 @@ namespace IOControl
                             Object = module
                         }));
                     }
-                    /*
-                    else if (item.GroupType == typeof(ConfigurationPage))
-                    {
-                        navPage = new NavigationPage(new ConfigurationPage());
-                    }
-                    */
                     else if (item.GroupType == typeof(AppearancePage))
                     {
                         navPage = new NavigationPage(new AppearancePage(new AppearancePage.Constructor()
@@ -156,7 +150,6 @@ namespace IOControl
                         }));
                     }
 
-
                     return true;
                 }); // Task openModule
 
@@ -164,7 +157,14 @@ namespace IOControl
                 sw.Start();
                 openModule.Start();
 
-                UserDialogs.Instance.ShowLoading(Resx.AppResources.Main_Loading);
+                if (item.GroupType == typeof(AppearancePage))
+                {
+                    UserDialogs.Instance.ShowLoading(Resx.AppResources.MSG_PleaseWait);
+                }
+                else
+                {
+                    UserDialogs.Instance.ShowLoading(Resx.AppResources.Main_Loading);
+                }
                 bool ok = await openModule;
 
                 // künstlicher sleep damit die search animation durchkommt

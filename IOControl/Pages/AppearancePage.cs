@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 using Acr.UserDialogs;
 using System.ComponentModel;    // INotifyPropertyChanged
 using Xamarin.Forms;
+using System.Diagnostics;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace IOControl
 {
@@ -262,31 +265,75 @@ namespace IOControl
         }
 
 
-        void InitIO()
+        public async Task<bool> InitIO()
         {
             Title = ((ContentGroup)Ctor.Object).name;
+
+
 
             // --------------------
             // Locations
 
-            var item = new HeaderModel()
-            {
-                LongName = Resx.AppResources.IOs.ToUpper(),
-                ShortName = Resx.AppResources.IOs.ToUpper().Substring(0, 1),
-                Type = typeof(ContentIO)
-            };
 
-            foreach (ContentIO io in ((ContentGroup)Ctor.Object).io)
+            Task<bool> t = new Task<bool>(() =>
             {
-                item.Add(new ItemModel()
+                var item = new HeaderModel()
                 {
-                    Name = "aaaa",
-                    Type = io.GetType(),
-                    Object = io,
-                });
-            }
+                    LongName = Resx.AppResources.IOs.ToUpper(),
+                    ShortName = Resx.AppResources.IOs.ToUpper().Substring(0, 1),
+                    Type = typeof(ContentIO)
+                };
 
-            items.Add(item);
+                // führt bei allen verwendeten modulen das IOinit aus
+                List<string> macs = ((ContentGroup)Ctor.Object).io.Select(x => x.moduleMAC).Distinct().ToList();
+                foreach (var mac in macs)
+                {
+                    var module = DT.Session.xmlContent.modules.Find(x => x.mac == mac);
+                    if (module.OpenModule() != 0)
+                    {
+                        module.IOInit();
+                        module.CloseModule();
+                    }
+                    else
+                    {
+                        DTControl.ShowToast(string.Format(Resx.AppResources.MSG_OpenError, module.boardname, module.tcp_hostname));
+                        Task.Delay(500).Wait();
+                    }
+                }
+                
+                // added die ios mit richtigen namen
+                foreach (ContentIO io in ((ContentGroup)Ctor.Object).io)
+                {
+                    var module = DT.Session.xmlContent.modules.Find(x => x.mac == io.moduleMAC);
+                    var ioname = module.GetIOName(io.ioType, io.channel);
+
+                    item.Add(new ItemModel()
+                    {
+                        Name = ((ioname != null) ? ioname : String.Format(Resx.AppResources.CFG_ChNotAvailable, io.channel)),
+                        Type = io.GetType(),
+                        Object = io,
+                    });
+                }
+
+                items.Add(item);
+
+                return true;
+            });
+            
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            t.Start();
+            UserDialogs.Instance.ShowLoading(Resx.AppResources.MSG_PleaseWait);
+
+            await t;
+            
+            while (sw.ElapsedMilliseconds < DT.Const.TIME_ANIMATION_MIN_MS)
+            {
+                Task.Delay(20).Wait();
+            }
+            UserDialogs.Instance.HideLoading();
+
+            return true;
         }
 
         //protected override 
@@ -324,7 +371,7 @@ namespace IOControl
                     break;
 
                 case ViewType.IO:
-                    InitIO();
+                    //InitIO();
                     break;
             }
 
@@ -439,11 +486,15 @@ namespace IOControl
                         break;
 
                     case ViewType.GROUP:
-                        await Navigation.PushAsync(new AppearancePage(new Constructor()
+                        //UserDialogs.Instance.ShowLoading(Resx.AppResources.MSG_PleaseWait);
+                        AppearancePage ap = new AppearancePage(new Constructor()
                         {
                             ViewType = ViewType.IO,
                             Object = selectedItem.Object
-                        }));
+                        });
+                        //UserDialogs.Instance.HideLoading();
+                        await Navigation.PushAsync(ap);
+                        await ap.InitIO();
                         break;
 
                     case ViewType.IO:
@@ -505,11 +556,33 @@ namespace IOControl
 
             if (ioTypes.ContainsKey(io))
             {
-                await Navigation.PushAsync(new DialogAddIO(new DialogAddIO.Constructor()
+                var ioType = ioTypes[io];
+                DialogAddIO da = new DialogAddIO(new DialogAddIO.Constructor()
                 {
-                    IOType = ioTypes[io],
-                    Group = Ctor.Object as ContentGroup
-                }));
+                    IOType = ioType,
+                    ContentGroup = Ctor.Object as ContentGroup
+                });
+                DT.Log("AP: AA");
+                await Navigation.PushAsync(da);
+                await da.Scan();
+
+                // warte auf antwort
+                List<ContentIO> ret = await da.PageCloseTask;
+                if (ret != null)
+                {
+                    foreach (var selectedIO in ret)
+                    {
+                        items[0].Add(new ItemModel()
+                        {
+                            Name = DT.Session.xmlContent.modules.Find(x => x.mac == selectedIO.moduleMAC).GetIOName(ioType, selectedIO.channel),
+                            Object = selectedIO,
+                            Type = selectedIO.GetType()
+                        });
+                    }
+
+                    ((ContentGroup)Ctor.Object).io.AddRange(ret);
+                    DT.Session.xmlContent.Save();
+                }
             }
 
             return true;
@@ -535,7 +608,24 @@ namespace IOControl
                 // scan
                 DialogBroadcast db = new DialogBroadcast();
                 await Navigation.PushAsync(db);
-                await db.PageCloseTask;
+                List<Module> ret = await db.PageCloseTask;
+
+                if (ret != null)
+                { 
+                    foreach (var selectedModule in ret)
+                    {
+                        items[1].Add(new ItemModel()
+                        {
+                            Name = selectedModule.boardname,
+                            Object = selectedModule,
+                            Type = selectedModule.GetType(),
+                        });
+                    }
+                
+                    DT.Session.xmlContent.modules.AddRange(ret);
+                    DT.Session.xmlContent.Save();
+                    MessagingCenter.Send<ContentPage>(this, DT.Const.MSG_REFRESH);
+                }
             }
             else
             {
@@ -765,7 +855,8 @@ namespace IOControl
 
                     if (isModule)
                     {
-                        DT.Session.xmlContent.modules.Remove(selectedItem.Object as Module);
+                        var module = DT.Session.xmlContent.modules.Find(x => x.mac == ((Module)selectedItem.Object).mac);
+                        DT.Session.xmlContent.modules.Remove(module);
                     }
                     else
                     {
@@ -773,17 +864,25 @@ namespace IOControl
                         {
                             case ViewType.MAIN:
                                 DT.Log("MAIN");
-                                DT.Session.xmlContent.loc.Remove(selectedItem.Object as ContentLocation);
+                                DT.Log("Items vor löschen " + DT.Session.xmlContent.loc.Count.ToString());
+                                var loc = DT.Session.xmlContent.loc.Find(x => x.name == ((ContentLocation)selectedItem.Object).name);
+                                DT.Session.xmlContent.loc.Remove(loc);
+                                DT.Log("Items NACH löschen " + DT.Session.xmlContent.loc.Count.ToString());
                                 break;
 
                             case ViewType.GROUP:
                                 DT.Log("GROUP");
-                                ((ContentLocation)Ctor.Object).groups.Remove(selectedItem.Object as ContentGroup);
+                                DT.Log("Items vor löschen " + ((ContentLocation)Ctor.Object).groups.Count.ToString());
+                                var group = ((ContentLocation)Ctor.Object).groups.Find(x => x.name == ((ContentGroup)selectedItem.Object).name);
+                                ((ContentLocation)Ctor.Object).groups.Remove(group);
+                                DT.Log("Items NACH löschen " + ((ContentLocation)Ctor.Object).groups.Count.ToString());
                                 break;
 
                             case ViewType.IO:
                                 DT.Log("IO");
+                                DT.Log("Items vor löschen " + ((ContentGroup)Ctor.Object).io.Count.ToString());
                                 ((ContentGroup)Ctor.Object).io.Remove(selectedItem.Object as ContentIO);
+                                DT.Log("Items NACH löschen " + ((ContentGroup)Ctor.Object).io.Count.ToString());
                                 break;
                         }
                     }

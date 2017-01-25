@@ -20,121 +20,6 @@ namespace IOControl
 
     public class MenuNavigation : ContentPage
 	{
-        /*
-        public class EditorViewCell : ViewCell
-        {
-            public EditorViewCell()
-            {
-                //StackLayout outerLayout = new StackLayout();
-
-                StackLayout layout = new StackLayout()
-                {
-                    Orientation = StackOrientation.Horizontal,
-                    Padding = new Thickness(10, 10, 10, 10)
-                };
-                
-                Label labelName = new Label() { FontSize = Device.GetNamedSize(NamedSize.Large, typeof(Label)), HorizontalOptions = LayoutOptions.StartAndExpand };
-                labelName.SetBinding(Label.TextProperty, new Binding("Name"));
-
-                Image imgEdit = new Image() { Source = ImageSource.FromFile("btn_edit.png") };
-                var imgEditTapped = new TapGestureRecognizer();
-                imgEditTapped.Tapped += (s, e) => {
-                    DT.Log("edit");
-                };
-                imgEdit.GestureRecognizers.Add(imgEditTapped);
-
-                Image imgDelete = new Image() { Source = ImageSource.FromFile("btn_delete.png") };
-                var imgDeleteTapped = new TapGestureRecognizer();
-                imgDeleteTapped.Tapped += (s, e) => {
-                    DT.Log("delete");
-                };
-                imgDelete.GestureRecognizers.Add(imgDeleteTapped);
-
-                layout.Children.Add(labelName);
-                layout.Children.Add(imgEdit);
-                layout.Children.Add(imgDelete);
-
-                //outerLayout.Children.Add(layout);
-                //outerLayout.Children.Add(DTControl.Separator());
-                //View = outerLayout;
-
-                View = layout;
-            }
-        }
-
-        public class EditorHeaderCell : ViewCell
-        {
-            public EditorHeaderCell()
-            {
-                StackLayout layout = new StackLayout()
-                {
-                    Orientation = StackOrientation.Horizontal,
-                    Padding = new Thickness(10, 10, 10, 10),
-                    BackgroundColor = DT.COLOR
-                };
-
-                Label labelName = new Label() { FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)), HorizontalOptions = LayoutOptions.StartAndExpand };
-                labelName.SetBinding(Label.TextProperty, new Binding("LongName"));
-
-                Image imgAdd = new Image() { Source = ImageSource.FromFile("btn_add.png") };
-                var imgAddTapped = new TapGestureRecognizer();
-                imgAddTapped.Tapped += (s, e) => {
-                    DT.Log("add");
-                };
-                imgAdd.GestureRecognizers.Add(imgAddTapped);
-
-                layout.Children.Add(labelName);
-                layout.Children.Add(imgAdd);
-                //layout.Children.Add(DTControl.Separator());
-
-                View = layout;
-            }
-        }*/
-
-        /*
-        public class HeaderTemplateCell : ViewCell
-        {
-            public HeaderTemplateCell()
-            {
-                Label lblHeaderName = new Label
-                {
-                    TextColor = Color.White,
-                    FontAttributes = FontAttributes.Bold,
-                    HorizontalOptions = LayoutOptions.FillAndExpand,
-                    HorizontalTextAlignment = TextAlignment.End,
-                    VerticalTextAlignment = TextAlignment.Center,
-                    VerticalOptions = LayoutOptions.CenterAndExpand,
-                };
-                lblHeaderName.SetBinding(Label.TextProperty, "LongName");
-
-                StackLayout slContent = new StackLayout
-                {
-                    BackgroundColor = Color.White,
-                    HorizontalOptions = LayoutOptions.FillAndExpand,
-                    Children ={
-                    new ContentView{
-                        VerticalOptions=LayoutOptions.CenterAndExpand,
-                        Padding=new Thickness(0,0,5,0),
-                        Content=lblHeaderName,
-                    }
-                }
-                };
-
-                View = slContent;
-            }
-        }
-        */
-            
-
-            /*
-        public class Constructor
-        {
-            public ViewType ViewType { get; set; }
-        }
-
-        public Constructor Ctor { get; set; }
-        */
-
         public ListView ListView { get { return listView; } }
 
 		ListView listView;
@@ -142,33 +27,6 @@ namespace IOControl
 
         public MenuNavigation(/*Constructor ctor*/)
         {
-            //Ctor = ctor;
-
-            /*
-
-            listView = new ListView {
-				ItemsSource = masterPageItems,
-				ItemTemplate = new DataTemplate (() => {
-					var imageCell = new ImageCell ();
-					imageCell.SetBinding (TextCell.TextProperty, "Title");
-					imageCell.SetBinding (ImageCell.ImageSourceProperty, "IconSource");
-					return imageCell;
-				}),
-				VerticalOptions = LayoutOptions.FillAndExpand,
-				SeparatorVisibility = SeparatorVisibility.None
-			};
-
-			Padding = new Thickness (0, 40, 0, 0);
-			Icon = "hamburger.png";
-			Title = "Personal Organiser";
-			Content = new StackLayout {
-				VerticalOptions = LayoutOptions.FillAndExpand,
-				Children = {
-					listView
-				}	
-			};
-            */
-
             items = new ObservableCollection<GroupedMenuNaviModel>();
 
             // --------------------
@@ -200,8 +58,8 @@ namespace IOControl
 
             var groupModule = new GroupedMenuNaviModel()
             {
-                LongName = "MODULES",
-                ShortName = "M"
+                LongName = Resx.AppResources.NAV_Modules.ToUpper(),
+                ShortName = Resx.AppResources.NAV_Modules.ToUpper().Substring(0, 1)
             };
 
             foreach(Module module in DT.Session.xmlContent.modules)
@@ -253,13 +111,13 @@ namespace IOControl
             
             var groupSettings = new GroupedMenuNaviModel()
             {
-                LongName = "SETTINGS",
-                ShortName = "S"
+                LongName = Resx.AppResources.NAV_Settings.ToUpper(),
+                ShortName = Resx.AppResources.NAV_Settings.ToUpper().Substring(0, 1)
             };
 
             groupSettings.Add(new MenuNaviModel()
             {
-                Name = "Appearance",
+                Name = Resx.AppResources.NAV_Configuration,
                 GroupType = typeof(AppearancePage)
             });
 
@@ -308,19 +166,6 @@ namespace IOControl
 
             listView.ItemTemplate = new DataTemplate(typeof(TextCell));
             listView.ItemTemplate.SetBinding(TextCell.TextProperty, "Name");
-                    
-
-
-
-
-            /*
-
-            */
-
-
-
-            //lstView.ItemTemplate.SetBinding (TextCell.DetailProperty, "Comment");
-            //Padding = new Thickness(0, 40, 0, 0);
 
             Icon = "hamburger.png";
             Title = "Configuration";
