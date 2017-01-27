@@ -193,7 +193,7 @@ namespace IOControl
 
         void InitMain()
         {
-            Title = "Configuration";
+            Title = Resx.AppResources.NAV_Configuration;
 
             // --------------------
             // Locations
@@ -355,10 +355,9 @@ namespace IOControl
             */
 
             Icon = "hamburger.png";
-
             Ctor = ctor;
-            
-            
+            ToolbarItems.Add(new ToolbarItem() { Text = "Help", Icon = "btn_help.png", Command = new Command(ShowHelp) });
+
 
             switch (Ctor.ViewType)
             {
@@ -635,7 +634,30 @@ namespace IOControl
                     ViewType = DialogNetworkConfig.ViewType.ADD
                 });
                 await Navigation.PushAsync(dnc);
-                await dnc.PageCloseTask;
+                Module ret = await dnc.PageCloseTask;
+
+                if (ret != null)
+                {
+                    if (DT.Session.xmlContent.modules.Find(x => x.mac == ret.mac) == null)
+                    {
+                        // modul ist nicht drin
+                        items[1].Add(new ItemModel()
+                        {
+                            Name = ret.boardname,
+                            Object = ret,
+                            Type = ret.GetType()
+                        });
+
+                        DT.Session.xmlContent.modules.Add(ret);
+                        DT.Session.xmlContent.Save();
+                        MessagingCenter.Send<ContentPage>(this, DT.Const.MSG_REFRESH);
+
+                        DTControl.ShowToast("module geadded");
+                        return true;
+                    }
+
+                    DTControl.ShowToast("module schon drin");
+                }
             }
 
             return true;
@@ -901,5 +923,23 @@ namespace IOControl
         // ----------------------------------------------------------------------------
         // ----------------------------------------------------------------------------
         // ----------------------------------------------------------------------------
+
+        public async void ShowHelp()
+        {
+            switch (Ctor.ViewType)
+            {
+                case ViewType.MAIN:
+                    await UserDialogs.Instance.AlertAsync("machwas", "MAIN");
+                    break;
+
+                case ViewType.GROUP:
+                    await UserDialogs.Instance.AlertAsync("machwas", "GROUP");
+                    break;
+
+                case ViewType.IO:
+                    await UserDialogs.Instance.AlertAsync("machwas", "IO");
+                    break;
+            }
+        }
     }
 }

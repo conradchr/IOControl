@@ -29,9 +29,9 @@ public class DT_ETH
 
     public const uint DIP_SWITCH_DELIVERY_STANDARD = 0xf; // 1111 [bin] -> alles an!
 
-    
 
-    #if (!__MOBILE__)
+
+#if (!__MOBILE__)
     static uint dummy_uint = 0;
 
     // GetMacOfIP()
@@ -234,6 +234,8 @@ public class DT_ETH
     // ----------------------------------------------------------------------------
     // ----------------------------------------------------------------------------
     // ----------------------------------------------------------------------------
+
+    
 
     public static uint GetEthernetDeviceConfig(uint handle, ETHDeviceConfig eth_device, uint connection_type, ref Byte[] dev_cfg)
     {
@@ -672,6 +674,6 @@ public class DT_ETH
     // ----------------------------------------------------------------
     // ----------------------------------------------------------------
     // ----------------------------------------------------------------
+#endif
 
-    #endif
 }

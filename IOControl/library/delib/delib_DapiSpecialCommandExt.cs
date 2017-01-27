@@ -281,7 +281,7 @@ namespace DELIB
                 // ------------------------------------
                 // ------------------------------------
                 
-                case DT.DAPI_SPECIAL_CMDEXT_TCP_MODULE_GET_CONFIG_DATA:
+                case DT.Ext.DAPI_SPECIAL_CMDEXT_TCP_MODULE_GET_CONFIG_DATA:
                     // 17.03.2016 - neu:
                     // par2: multiple_flag
                     // wenn flag da ist, wird der buff1 1:1 durchgeschleift - muss also selbst vorher zusammen gebaut werden
@@ -396,7 +396,7 @@ namespace DELIB
                 // ------------------------------------
                 // ------------------------------------
                 // ------------------------------------
-                case DT.DAPI_SPECIAL_CMDEXT_TCP_MODULE_SET_CONFIG_DATA:
+                case DT.Ext.DAPI_SPECIAL_CMDEXT_TCP_MODULE_SET_CONFIG_DATA:
                     // 17.03.2016 - neu:
                     // par2: multiple_flag
                     // wenn flag da ist, wird der buff1 1:1 durchgeschleift - muss also selbst vorher zusammen gebaut werden
@@ -575,32 +575,31 @@ namespace DELIB
                         buff_cnt = 0;
                         ret = DapiTCPSpecialCmd(handle32, DEDITEC_TCPSPECIAL_CMD_RELOAD_ETH_CONFIG, buff, buff_cnt, buff, sizeof(buff), &buff_length);
                         break;
-
+                        */
                     // ------------------------------------
                     // ------------------------------------
                     // ------------------------------------
 
-                    case DAPI_SPECIAL_CMDEXT_TCP_MODULE_GET_CURRENT_CONFIG:
-                        // cmd = DEDITEC_TCPSPECIAL_CMD_GET_CURRENT_CONFIG
-                        // gibt einen buffer mit der aktuell benutzten TCP-Config, DIP-Schalter und Verschlüsselungsflags zurück
-                        // return: byte buffer
-                        // verschlüsselung: egal!
+                    case DT.Ext.DAPI_SPECIAL_CMDEXT_TCP_MODULE_GET_CURRENT_CONFIG:
+                    // cmd = DEDITEC_TCPSPECIAL_CMD_GET_CURRENT_CONFIG
+                    // gibt einen buffer mit der aktuell benutzten TCP-Config, DIP-Schalter und Verschlüsselungsflags zurück
+                    // return: byte buffer
+                    // verschlüsselung: egal!
 
-                        sprintf(debug_msg, "DAPI_SPECIAL_CMDEXT_TCP_MODULE_GET_CURRENT_CONFIG");
-                        debug_print(debug_msg);
+                        DT.Log("DAPI_SPECIAL_CMDEXT_TCP_MODULE_GET_CURRENT_CONFIG");
 
                         buff_cnt = 0;
-                        ret = DapiTCPSpecialCmd(handle32, DEDITEC_TCPSPECIAL_CMD_GET_CURRENT_CONFIG, buff, buff_cnt, buff, sizeof(buff), &buff_length);
+                        buff_length = 0;
+                        ret = DT.TCP.DapiTCPSpecialCmd(handle, DT.DEDITEC_TCPSPECIAL_CMD_GET_CURRENT_CONFIG, buff, buff_cnt, buff, buff.Length, ref buff_length);
 
-                        *buff3_length = buff_length;
-                        buffcpy_n(buff3, buff3_size, buff, buff_length);
+                        Array.Copy(buff, buff3, buff_length);
 
                         break;
 
                     // ------------------------------------
                     // ------------------------------------
                     // ------------------------------------
-
+                    /*
                     case DAPI_SPECIAL_CMDEXT_TCP_MODULE_SET_MAC_ADDR:
                         // cmd = DEDITEC_TCPSPECIAL_CMD_SET_MAC_ADDR
                         // setzt MAC-Addr

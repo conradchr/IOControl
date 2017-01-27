@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;    // INotifyPropertyChanged
 
 using Xamarin.Forms;
+using Acr.UserDialogs;
 
 namespace IOControl
 {
@@ -57,9 +58,9 @@ namespace IOControl
         Image imgOK;
         Image imgCancel;
 
-        public Task<bool> PageCloseTask { get { return tcs.Task; } }
-        TaskCompletionSource<bool> tcs;
-        bool taskComplete = false;
+        public Task<Module> PageCloseTask { get { return tcs.Task; } }
+        TaskCompletionSource<Module> tcs;
+        Module taskResult = null;
 
         public DialogNetworkConfig(Constructor ctor)
         {
@@ -78,12 +79,11 @@ namespace IOControl
                 SetForm();
             }
 
-            tcs = new TaskCompletionSource<bool>();
+            tcs = new TaskCompletionSource<Module>();
 
             this.Disappearing += (s, e) =>
             {
-                tcs.SetResult(taskComplete);
-                DT.Log("seite weg");
+                tcs.SetResult(taskResult);
             };
         }
 
@@ -107,16 +107,18 @@ namespace IOControl
 
         public void FormInit()
         {
-            tiHelp = new ToolbarItem() { Text = "Help", Icon = "btn_help.png"};
-            ToolbarItems.Add(tiHelp);
+            ToolbarItems.Add(new ToolbarItem() { Text = "Help", Icon = "btn_help.png", Command = new Command(ShowHelp) });
 
             slMain = new StackLayout() { VerticalOptions = LayoutOptions.FillAndExpand, HorizontalOptions = LayoutOptions.FillAndExpand };
             slContent = new StackLayout() { VerticalOptions = LayoutOptions.FillAndExpand };
 
-            // name
-            slContent.Children.Add(LabelTemplate("Module Name:"));
-            entName = new Entry() { Keyboard = Keyboard.Text, Placeholder = "My DEDITEC Module" };
-            slContent.Children.Add(entName);
+            if (Ctor.ViewType != ViewType.ADD)
+            { 
+                // name
+                slContent.Children.Add(LabelTemplate("Module Name:"));
+                entName = new Entry() { Keyboard = Keyboard.Text, Placeholder = "My DEDITEC Module" };
+                slContent.Children.Add(entName);
+            }
 
             // hostname
             slContent.Children.Add(LabelTemplate("IP/Hostname:"));
@@ -133,10 +135,12 @@ namespace IOControl
             entTimeout = new Entry() { Keyboard = Keyboard.Numeric, Placeholder = "Default: 5000" };
             slContent.Children.Add(entTimeout);
 
+            /*
             // encryption pw
             slContent.Children.Add(LabelTemplate("Encryption password:"));
             entEncryption = new Entry() { Keyboard = Keyboard.Text, Placeholder = "Enter password", IsPassword = true };
             slContent.Children.Add(entEncryption);
+            */
 
             slMain.Children.Add(slContent);
 
@@ -146,18 +150,12 @@ namespace IOControl
 
             imgCancel = new Image() { Source = ImageSource.FromFile("btn_cancel.png") };
             var imgCancelTapped = new TapGestureRecognizer();
-            imgCancelTapped.Tapped += (s, e) => {
-                Navigation.PopAsync();
-            };
+            imgCancelTapped.Tapped += (s, e) => Navigation.PopAsync();
             imgCancel.GestureRecognizers.Add(imgCancelTapped);
 
             imgOK = new Image() { Source = ImageSource.FromFile("btn_ok.png") };
             var imgOKTapped = new TapGestureRecognizer();
-            imgOKTapped.Tapped += async (s, e) => {
-                DT.Log("SetNewModuleConfig START");
-                await SetNewModuleConfig();
-                DT.Log("SetNewModuleConfig ENDE");
-            };
+            imgOKTapped.Tapped += async (s, e) => await SaveModule();
             imgOK.GestureRecognizers.Add(imgOKTapped);
 
             grid.Children.Add(imgCancel, 0, 0);
@@ -175,12 +173,70 @@ namespace IOControl
             Content = slMain;
         }
 
-        public class TaskResult
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+
+        public async Task<bool> SaveModule()
         {
-            public uint ErrorCode { get; set; }
-            public String ErrorMsg { get; set; }
+            if (await SaveModuleX())
+            {
+                await Navigation.PopAsync();
+            }
+
+            return true;
         }
-        
+
+        public async Task<bool> SaveModuleX()
+        {
+            Task<bool> t = new Task<bool>(() =>
+            {
+                uint ret;
+                byte[] buffer = new byte[256];
+
+                Module module = new Module(entHostname.Text, Convert.ToInt32(entPort.Text), Convert.ToInt32(entTimeout.Text));
+                uint handle = module.OpenModule();
+
+                if (handle != 0)
+                {
+                    ret = DT.Delib.DapiSpecialCommandExt(handle, DT.Ext.DAPI_SPECIAL_CMDEXT_TCP_MODULE_GET_CURRENT_CONFIG, 0, 0, 0, ref DT.dummy_uint, ref DT.dummy_uint, ref DT.dummy_uint, new Byte[] { 0 }, 0, new Byte[] { 0 }, 0, buffer, (uint)buffer.Length, ref DT.dummy_uint);
+                    if (ret == 0)
+                    {
+                        // nur dann ok, weil ich die mac als ID brauch
+                        DT.Bc.ETHDeviceConfig devcfg = new DT.Bc.ETHDeviceConfig();
+                        devcfg.SetDeviceConfig(buffer);
+
+                        module.boardname = devcfg.BoardName.boardname;
+                        module.mac = devcfg.Network.mac_formatted;
+
+                        taskResult = module;
+                        return true;
+                    }
+                }                
+                
+                // modul nicht gefunden
+                taskResult = null;
+                return false;
+            });
+
+            if (await DTControl.ShowLoadingWhileTask(t))
+            {
+                return true;
+            }
+
+            DTControl.ShowToast("Communication nicht OK");
+            return false;
+        }
+
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+
+            /*
         public async Task<TaskResult> SetNewModuleConfig()
         {
             Func<bool, int> Visibility;
@@ -206,12 +262,12 @@ namespace IOControl
                     return new TaskResult() { ErrorCode = ret, ErrorMsg = "DEDITEC_BC_PACKET_PARAM_IP_ADDR" };
                 }
 
-                /*
+                
                 if ((ret = DT.Bc.deditec_bc_set_string_parameter(Ctor.Module.mac, DT.Bc.Parameter.DED, entHostname.Text)) != DT.Error.DAPI_ERR_NONE)
                 {
                     DT.Log("DEDITEC_BC_PACKET_PARAM_IP_ADDR");
                 }
-                */
+                
 
                 if ((ret = DT.Bc.deditec_bc_eth0_config(Ctor.Module.mac)) != DT.Error.DAPI_ERR_NONE)
                 {
@@ -227,6 +283,12 @@ namespace IOControl
             Visibility(true);
 
             return await t;
+        }
+        */
+
+        public async void ShowHelp()
+        {
+            await UserDialogs.Instance.AlertAsync("test", "title", "oktext");
         }
     }
 }

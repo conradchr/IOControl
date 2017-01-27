@@ -2,6 +2,9 @@
 using Xamarin.Forms;
 //using XLabs.Forms.Controls;
 using Acr.UserDialogs;
+using System.Threading.Tasks;
+using System.Diagnostics;
+using System;
 
 namespace IOControl
 {
@@ -17,26 +20,45 @@ namespace IOControl
 
         public static void ShowToast(string text)
         {
-            /*
-            UserDialogs.Instance.Toast(new ToastConfig(text)
-            {
-                Duration = new System.TimeSpan(2000*10)
-            });
-            */
-            UserDialogs.Instance.Toast(text);
+            ToastConfig tc = new ToastConfig(text);
+            tc.SetDuration(2000);
+            UserDialogs.Instance.Toast(tc);
         }
 
         public static void ShowSuccess(string text)
         {
-            UserDialogs.Instance.ShowSuccess(text);
+            /*
+            ToastConfig tc = new ToastConfig(text);
+            tc.SetDuration(2000);
+            */
         }
 
         public static void ShowError(string text)
         {
-            UserDialogs.Instance.ShowError(text);
+            //UserDialogs.Instance.ShowError(text);
         }
 
 
+
+        public async static Task<T> ShowLoadingWhileTask<T>(Task<T> task)
+        {
+            Stopwatch sw = new Stopwatch();
+            UserDialogs.Instance.ShowLoading(Resx.AppResources.MSG_PleaseWait);
+            
+            task.Start();
+            sw.Start();
+
+            T ret = await task;
+
+            // künstlicher sleep damit die search animation durchkommt
+            while (sw.ElapsedMilliseconds < DT.Const.TIME_ANIMATION_MIN_MS)
+            {
+                await Task.Delay(50);
+            }
+            UserDialogs.Instance.HideLoading();
+
+            return ret;
+        }
 
 
         public static Layout View(Dictionary<int, View> dict, string text, IOViewStyle style, int id)

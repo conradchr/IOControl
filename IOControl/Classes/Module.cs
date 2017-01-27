@@ -257,6 +257,13 @@ namespace IOControl
             this.mac = mac;
         }
 
+        public Module(String ip, int port, int timeout)
+        {
+            this.tcp_hostname = ip;
+            this.tcp_port = port;
+            this.tcp_timeout = timeout;
+        }
+
         // --------------------
         // --------------------
         // --------------------

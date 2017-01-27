@@ -103,7 +103,7 @@ namespace DELIB
                 }
             }
 
-            ret = DT.Delib.DapiSpecialCommandExt( handle, DT.DAPI_SPECIAL_CMDEXT_TCP_MODULE_GET_CONFIG_DATA, 0, 1, 0, ref DT.dummy_uint, ref DT.dummy_uint, ref DT.dummy_uint,
+            ret = DT.Delib.DapiSpecialCommandExt( handle, DT.Ext.DAPI_SPECIAL_CMDEXT_TCP_MODULE_GET_CONFIG_DATA, 0, 1, 0, ref DT.dummy_uint, ref DT.dummy_uint, ref DT.dummy_uint,
                                             tx, (uint)tx_pos, DT.dummy_byte, 0, rx, (uint)rx.Length, ref len);
 
             //empfangen
