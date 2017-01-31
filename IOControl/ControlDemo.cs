@@ -24,6 +24,7 @@ using Java.Net;
 
 using Acr.UserDialogs;
 
+using Rg.Plugins.Popup.Extensions;
 
 namespace IOControl
 {
@@ -212,9 +213,16 @@ namespace IOControl
 
         private async void Btn6_Clicked(object sender, System.EventArgs e)
         {
+            /*
             TimePromptConfig tpc = new TimePromptConfig();
             tpc.MaximumMinutesTimeOfDay = 10;
             await UserDialogs.Instance.TimePromptAsync(tpc);
+            */
+
+            PopupSetDA da = new PopupSetDA();
+            await Navigation.PushPopupAsync(da);
+            float? val = await da.PageCloseTask;
+            DT.Log(string.Format("val = {0}V", val));
         }
 
 

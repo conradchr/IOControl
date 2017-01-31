@@ -39,7 +39,11 @@ namespace IOControl
         public static Layout ADView(Dictionary<int, View> dict, string text, int id)
         {
             return DTControl.View(dict, text, DTControl.IOViewStyle.AD, id);
+        }
 
+        public static Layout DAView(Dictionary<int, View> dict, string text, int id)
+        {
+            return DTControl.View(dict, text, DTControl.IOViewStyle.DA, id);
         }
 
         //public static Layout View(Dictionary<int, View> dict, string text, IOViewStyle style, float value, int id)

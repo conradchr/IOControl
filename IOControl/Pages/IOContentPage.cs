@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using Rg.Plugins.Popup.Extensions;
 using Xamarin.Forms;
 
 namespace IOControl
@@ -199,17 +199,26 @@ namespace IOControl
                     break;
                 // ------------------------------------
                 case IOType.DA:
-                    //DT.Mobile.GUI.AddAnalogOutput(view.Context, layout, module.IOName.ao[(int)ch], valID, val);
-                    sl.Children.Add(DTIOControl.ADView(dict, module.IOName.ao[(int)ch], valID));
+                    sl.Children.Add(DTIOControl.DAView(dict, module.IOName.ao[(int)ch], valID));
+                    userAction = CreateTodoEvent(ioType, module, dict, ch, valID);  // achtung "+1", weil DA noch ein hidden label hat
 
-                    /*
-                    todoEvent = CreateTodoEvent(IOType.DA, module, layout, ch, valID);
-                    ((TextView)view.FindViewById(valID)).TextChanged += (object sender, Android.Text.TextChangedEventArgs e) =>
+                    DTControl.SpecialLabel label = dict[valID] as DTControl.SpecialLabel;
+                    TapGestureRecognizer tgr = new TapGestureRecognizer();
+                    tgr.Tapped += async (s, e) =>
                     {
-                        if (!DT.Session.blockTodoTask)
-                            DT.Session.todoTasks.Add(todoEvent);
+                        PopupSetDA da = new PopupSetDA();
+                        await Navigation.PushPopupAsync(da);
+                        float? value = await da.PageCloseTask;
+                        if (value != null)
+                        {
+                            label.Value = value;
+                            if (!BlockUserAction)
+                            {
+                                UserActions.Add(userAction);
+                            }
+                        }
                     };
-                    */
+                    label.GestureRecognizers.Add(tgr);
                     break;
             // ------------------------------------
             /*
@@ -275,16 +284,10 @@ namespace IOControl
                         DT.Delib.DapiDOSet1(module.handle, ch,  (((Switch)PageControls[id]).IsToggled ? (uint)1 : (uint)0));
                         break;
                     // ------------------------------------
-                    /*
                     case IOType.DA:
-                        string text = ((TextView)layout.FindViewById(id)).Text;
-                        string val = text.Substring(0, text.Length - 2);  // leerzeichen + V
-                        DT.DBG.Print(val);
-                        double floatval = Convert.ToDouble(val);
-                        DT.DBG.Print(floatval.ToString());
+                        DTControl.SpecialLabel label = PageControls[id] as DTControl.SpecialLabel;
+                        DT.Delib.DapiDASetVolt(module.handle, ch, Convert.ToSingle(label.Value));
                         break;
-                        //DT.Delib.DapiDASetVolt(
-                    */
                     // ------------------------------------
                     case IOType.PWM:
                         DT.Delib.DapiPWMOutSet(module.handle, ch, (float)((Slider)PageControls[id]).Value);

@@ -10,6 +10,7 @@ public partial class DT
 {
     public static Color COLOR = Color.FromHex("#996d0a12");
     public static Color COLOR_SELECTED = Color.FromHex("#A0AAAAAA");
+    public static Color COLOR_POPUP = Color.FromHex("#282828");
     
     public static List<DT_BCFunctions.ETHDeviceConfig> eth_devs = new List<DT_BCFunctions.ETHDeviceConfig>();
 
