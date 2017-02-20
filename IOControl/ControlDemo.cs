@@ -214,15 +214,34 @@ namespace IOControl
         private async void Btn6_Clicked(object sender, System.EventArgs e)
         {
             /*
-            TimePromptConfig tpc = new TimePromptConfig();
-            tpc.MaximumMinutesTimeOfDay = 10;
-            await UserDialogs.Instance.TimePromptAsync(tpc);
-            */
-
-            PopupSetDA da = new PopupSetDA();
+            PopupSetDA da = new PopupSetDA(new PopupSetDA.Constructor()
+            {
+                Name = "Analoger Ausgang 3",
+                Value = "1,234 V"
+            });
             await Navigation.PushPopupAsync(da);
             float? val = await da.PageCloseTask;
             DT.Log(string.Format("val = {0}V", val));
+             */
+
+            PopUpHelp help;
+            bool val;
+
+            help = new PopUpHelp(new PopUpHelp.Constructor()
+            {
+                Title = "Wussten Sie schon?",
+                Content = ContentHelp.ContentHelpLocation()
+            });
+            await Navigation.PushPopupAsync(help);
+            val = await help.PageCloseTask;
+
+            help = new PopUpHelp(new PopUpHelp.Constructor()
+            {
+                Title = "Wussten Sie schon?",
+                Content = ContentHelp.ContentHelpLocationButtons()
+            });
+            await Navigation.PushPopupAsync(help);
+            val = await help.PageCloseTask;
         }
 
 

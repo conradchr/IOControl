@@ -397,8 +397,12 @@ namespace IOControl
                 return 0;
             });
 
-            moduleThread.Start();
-            moduleThreadActive = true;
+
+            if (page.RefreshTasks.Count != 0)
+            { 
+                moduleThread.Start();
+                moduleThreadActive = true;
+            }
         }
 
         // ----------------------------------------------------------------------------

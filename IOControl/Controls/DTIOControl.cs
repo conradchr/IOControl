@@ -46,6 +46,34 @@ namespace IOControl
             return DTControl.View(dict, text, DTControl.IOViewStyle.DA, id);
         }
 
+        public static Layout Placeholder(string text1/*, string text2*/)
+        {
+            StackLayout layout = new StackLayout()
+            {
+                Padding = new Thickness(10, 0, 10, 0)
+            };
+
+            Label lblText1 = new Label()
+            {
+                Text = text1,
+                TextColor = Color.White,
+                FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
+            };
+            layout.Children.Add(lblText1);
+
+            /*
+            Label lblText2 = new Label()
+            {
+                Text = text2,
+                TextColor = Color.White,
+                FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
+            };
+            layout.Children.Add(lblText2);
+            */
+
+            return layout;
+        }
+
         //public static Layout View(Dictionary<int, View> dict, string text, IOViewStyle style, float value, int id)
 
         /*

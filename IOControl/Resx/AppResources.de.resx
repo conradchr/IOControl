@@ -261,4 +261,26 @@
   <data name="CFG_ChNotAvailable" xml:space="preserve">
     <value>CH{0} (Name nicht verfügbar)</value>
   </data>
+  <data name="DA_InvalidValue" xml:space="preserve">
+    <value>Bitte geben Sie einen gültigen Wert ein</value>
+  </data>
+  <data name="IO_InvalidGroup" xml:space="preserve">
+    <value>In dieser Gruppe sind bisher keine Ein-/Ausgänge konfiguriert</value>
+  </data>
+  <data name="IO_InvalidIOText1" xml:space="preserve">
+    <value>Ein-/Ausgang nicht verfügbar
+(IP={0} Typ={1} Kanal={2})</value>
+  </data>
+  <data name="IO_InvalidIOText2" xml:space="preserve">
+    <value />
+  </data>
+  <data name="HELP_ShowTooltip" xml:space="preserve">
+    <value>Tooltips anzeigen</value>
+  </data>
+  <data name="HELP_HelpLocation" xml:space="preserve">
+    <value>Sie möchten mehrere Ein-/Ausgängen von mehreren Modulen in einer Ansicht zusammenfassen?
+-kein Problem. Hierzu können Sie eine eigene Gruppe erstellen. Zur besseren Übersicht müssen Gruppen
+einem Ort zugeordnet sein.
+	</value>
+  </data>
 </root>

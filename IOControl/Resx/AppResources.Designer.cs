@@ -269,11 +269,56 @@ namespace IOControl.Resx {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
+        internal static string DA_InvalidValue {
+            get {
+                return ResourceManager.GetString("DA_InvalidValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Groups ähnelt.
         /// </summary>
         internal static string Groups {
             get {
                 return ResourceManager.GetString("Groups", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
+        internal static string HELP_HelpLocation {
+            get {
+                return ResourceManager.GetString("HELP_HelpLocation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
+        internal static string HELP_ShowTooltip {
+            get {
+                return ResourceManager.GetString("HELP_ShowTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
+        internal static string IO_InvalidGroup {
+            get {
+                return ResourceManager.GetString("IO_InvalidGroup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
+        internal static string IO_InvalidIOText {
+            get {
+                return ResourceManager.GetString("IO_InvalidIOText", resourceCulture);
             }
         }
         

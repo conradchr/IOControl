@@ -261,4 +261,19 @@
   <data name="CFG_ChNotAvailable" xml:space="preserve">
     <value>CH{0} (name not available)</value>
   </data>
+  <data name="DA_InvalidValue" xml:space="preserve">
+    <value />
+  </data>
+  <data name="HELP_HelpLocation" xml:space="preserve">
+    <value />
+  </data>
+  <data name="HELP_ShowTooltip" xml:space="preserve">
+    <value />
+  </data>
+  <data name="IO_InvalidGroup" xml:space="preserve">
+    <value />
+  </data>
+  <data name="IO_InvalidIOText" xml:space="preserve">
+    <value />
+  </data>
 </root>

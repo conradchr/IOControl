@@ -14,35 +14,62 @@ namespace IOControl
 {
     public class PopupSetDA : PopupPage
     {
+        public class Constructor
+        {
+            public String Name { get; set; }
+            public String Value { get; set; }
+        }
+
+        public Constructor Ctor { get; set; }
         public Task<float?> PageCloseTask { get { return tcs.Task; } }
+
         TaskCompletionSource<float?> tcs;
         float? taskResult = null;
 
-        public PopupSetDA()
+        public PopupSetDA(Constructor ctor)
         {
+            Ctor = ctor;
             tcs = new TaskCompletionSource<float?>();
 
             StackLayout slMain = new StackLayout()
             {
                 VerticalOptions = LayoutOptions.Center,
                 BackgroundColor = DT.COLOR_POPUP,
-                Padding = new Thickness(10, 0, 10, 0)
+                Padding = new Thickness(20, 20, 20, 20)
             };
 
             Label header = new Label()
             { 
-                Text = "Neuen D/A-Wert setzen",
-                TextColor = Color.White,
+                Text = Ctor.Name,
+                TextColor = DT.COLOR_POPUP_HEADER,
                 FontSize = Device.GetNamedSize(NamedSize.Large, typeof(Label)),
                 HorizontalOptions = LayoutOptions.Center,
             };
             slMain.Children.Add(header);
 
+            Label headline = new Label()
+            {
+                BackgroundColor = DT.COLOR_POPUP_HEADER,
+                HeightRequest = 0.4
+            };
+            slMain.Children.Add(headline);
+
+            /*
+            Label text = new Label()
+            {
+                Text = "Neuen D/A-Wert setzen",
+                TextColor = Color.White,
+                FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
+                HorizontalOptions = LayoutOptions.Center,
+            };
+            slMain.Children.Add(text);
+            */
+
             StackLayout slPicker = new StackLayout()
             {
                 Orientation = StackOrientation.Horizontal,
                 HorizontalOptions = LayoutOptions.Center,
-                Padding = new Thickness(0, 10, 0, 10)
+                Padding = new Thickness(0, 20, 0, 20)
             };
 
             Picker pickerV = new Picker() { Title = "V", Scale = 1.3 };
@@ -51,8 +78,13 @@ namespace IOControl
             for (int i = 0; i != 10; i++)
             {
                 pickerV.Items.Add(i.ToString());
-                pickermV.Items.Add((i * 100).ToString());
+                pickermV.Items.Add((i * 100).ToString("D3"));
             }
+
+            string val = Ctor.Value.Substring(0, Ctor.Value.Length - 2);    // leerzeichen + 'V';
+            string[] split = val.Split(',');
+            pickerV.SelectedIndex = Convert.ToInt32(split[0]);
+            pickermV.SelectedIndex = Convert.ToInt32(split[1].Substring(0, 1));
 
             slPicker.Children.Add(pickerV);
             slPicker.Children.Add(pickermV);
@@ -80,7 +112,7 @@ namespace IOControl
                 }
                 else
                 {
-                    DTControl.ShowToast("Bitte geben Sie einen gültigen Wert ein");
+                    DTControl.ShowToast(Resx.AppResources.DA_InvalidValue);
                 }
             };
             imgOK.GestureRecognizers.Add(tgp);

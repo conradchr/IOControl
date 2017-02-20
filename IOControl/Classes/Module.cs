@@ -243,6 +243,16 @@ namespace IOControl
             return null;
         }
 
+        public String GetIONameView(IOType ioType, uint channel)
+        {
+            String ret = GetIOName(ioType, channel);
+            if (ret == null)
+            {
+                ret = String.Format("nicht verfügbar (typ{0} ch{1}", ioType, channel);
+            }
+            return ret;
+        }
+
         // --------------------
         // --------------------
         // --------------------

@@ -98,10 +98,7 @@ namespace IOControl
                         // ------------------------------------
                         case IOType.DI:
                             for (i = 0; i != Ctor.Module.IO.cnt_di; i++)
-                            { 
                                 AddIOView(sl, PageControls, Ctor.IOType, Ctor.Module, i);
-                                DT.Log(i.ToString());
-                            }
                             break;
                         // ------------------------------------
                         case IOType.DO:
@@ -143,10 +140,25 @@ namespace IOControl
 
                 case ViewType.CUSTOM:
                     
-                    foreach (var io in Ctor.Group.io)
+                    if (Ctor.Group.io.Count != 0)
+                    { 
+                        foreach (var io in Ctor.Group.io)
+                        {
+                            var module = DT.Session.xmlContent.modules.Find(x => x.mac == io.moduleMAC);
+                            AddIOView(sl, PageControls, io.ioType, module, io.channel);
+                        }
+                    }
+                    else
                     {
-                        var module = DT.Session.xmlContent.modules.Find(x => x.mac == io.moduleMAC);
-                        AddIOView(sl, PageControls, io.ioType, module, io.channel);
+                        sl.Children.Add(new Label()
+                        {
+                            Text = Resx.AppResources.IO_InvalidGroup,
+                            TextColor = Color.White,
+                            FontSize = Device.GetNamedSize(NamedSize.Large, typeof(Label)),
+                            VerticalOptions = LayoutOptions.CenterAndExpand,
+                            HorizontalOptions = LayoutOptions.CenterAndExpand,
+                            HorizontalTextAlignment = TextAlignment.Center
+                        });
                     }
 
                     break;
@@ -154,10 +166,6 @@ namespace IOControl
                 // ------------------------------------
                 // ------------------------------------
                 // ------------------------------------
-
-
-                default:
-                    break;
             }
             
             sv.Content = sl;
@@ -174,86 +182,100 @@ namespace IOControl
         {
             Action userAction;
 
-            switch (ioType)
-            {
-                // ------------------------------------
-                case IOType.DI:
-                    sl.Children.Add(DTIOControl.DISwitch(dict, module.IOName.di[(int)ch], valID));
-                    break;
-                // ------------------------------------
-                case IOType.DO:
-                    sl.Children.Add(DTIOControl.DOSwitch(dict, module.IOName.dout[(int)ch], valID));
-                    userAction = CreateTodoEvent(ioType, module, dict, ch, valID);
-                    ((Switch)dict[valID]).Toggled += (s, e) =>
-                    {
-                        if (!BlockUserAction)
-                        {
-                            UserActions.Add(userAction);
-                        }
-                    };
-                    break;
-                
-                // ------------------------------------
-                case IOType.AD:
-                    sl.Children.Add(DTIOControl.ADView(dict, module.IOName.ai[(int)ch], valID));
-                    break;
-                // ------------------------------------
-                case IOType.DA:
-                    sl.Children.Add(DTIOControl.DAView(dict, module.IOName.ao[(int)ch], valID));
-                    userAction = CreateTodoEvent(ioType, module, dict, ch, valID);  // achtung "+1", weil DA noch ein hidden label hat
+            DT.Log(string.Format("IOType={0}, ch={1}", ioType, ch));;
 
-                    DTControl.SpecialLabel label = dict[valID] as DTControl.SpecialLabel;
-                    TapGestureRecognizer tgr = new TapGestureRecognizer();
-                    tgr.Tapped += async (s, e) =>
-                    {
-                        PopupSetDA da = new PopupSetDA();
-                        await Navigation.PushPopupAsync(da);
-                        float? value = await da.PageCloseTask;
-                        if (value != null)
+            if (module.GetIOName(ioType, ch) != null)
+            {
+                switch (ioType)
+                {
+                    // ------------------------------------
+                    case IOType.DI:
+                        module.GetIOName(ioType, ch);
+                        sl.Children.Add(DTIOControl.DISwitch(dict, module.IOName.di[(int)ch], valID));
+                        break;
+                    // ------------------------------------
+                    case IOType.DO:
+                        sl.Children.Add(DTIOControl.DOSwitch(dict, module.IOName.dout[(int)ch], valID));
+                        userAction = CreateTodoEvent(ioType, module, dict, ch, valID);
+                        ((Switch)dict[valID]).Toggled += (s, e) =>
                         {
-                            label.Value = value;
                             if (!BlockUserAction)
                             {
                                 UserActions.Add(userAction);
                             }
-                        }
-                    };
-                    label.GestureRecognizers.Add(tgr);
-                    break;
-            // ------------------------------------
-            /*
-        case "DO Timer":
-            DT.Mobile.GUI.AddDigitalOutputTimer(view.Context, layout, "Digital Output Timer", textID++, "0h 0m 0s", valID++, "Timer", helpID++);
-            DT.Mobile.GUI.AddSpacer(view.Context, layout);
-            break;
-            */
-                // ------------------------------------
-                case IOType.PWM:
-                    sl.Children.Add(DTIOControl.PWMView(dict, module.IOName.pwm[(int)ch], valID));
-                    userAction = CreateTodoEvent(ioType, module, dict, ch, valID);
-                    ((Slider)dict[valID]).ValueChanged += (s, e) =>
-                    {
-                        if (!BlockUserAction)
-                        {
-                            UserActions.Add(userAction);
-                        }
-                    };
-                    break;
-                    
-                // ------------------------------------
-                case IOType.TEMP:
-                    sl.Children.Add(DTIOControl.ADView(dict, module.IOName.temp[(int)ch], valID));
-                    break;
+                        };
+                        break;
+
                     // ------------------------------------
+                    case IOType.AD:
+                        sl.Children.Add(DTIOControl.ADView(dict, module.IOName.ai[(int)ch], valID));
+                        break;
+                    // ------------------------------------
+                    case IOType.DA:
+                        sl.Children.Add(DTIOControl.DAView(dict, module.IOName.ao[(int)ch], valID));
+                        userAction = CreateTodoEvent(ioType, module, dict, ch, valID);
+
+                        DTControl.SpecialLabel label = dict[valID] as DTControl.SpecialLabel;
+                        TapGestureRecognizer tgr = new TapGestureRecognizer();
+                        tgr.Tapped += async (s, e) =>
+                        {
+                            PopupSetDA da = new PopupSetDA(new PopupSetDA.Constructor()
+                            {
+                                Name = module.IOName.ao[(int)ch],
+                                Value = label.Text
+                            });
+                            await Navigation.PushPopupAsync(da);
+                            float? value = await da.PageCloseTask;
+                            if (value != null)
+                            {
+                                label.Value = value;
+                                if (!BlockUserAction)
+                                {
+                                    UserActions.Add(userAction);
+                                }
+                            }
+                        };
+                        label.GestureRecognizers.Add(tgr);
+                        break;
+                    // ------------------------------------
+                    /*
+                case "DO Timer":
+                    DT.Mobile.GUI.AddDigitalOutputTimer(view.Context, layout, "Digital Output Timer", textID++, "0h 0m 0s", valID++, "Timer", helpID++);
+                    DT.Mobile.GUI.AddSpacer(view.Context, layout);
+                    break;
+                    */
+                    // ------------------------------------
+                    case IOType.PWM:
+                        sl.Children.Add(DTIOControl.PWMView(dict, module.IOName.pwm[(int)ch], valID));
+                        userAction = CreateTodoEvent(ioType, module, dict, ch, valID);
+                        ((Slider)dict[valID]).ValueChanged += (s, e) =>
+                        {
+                            if (!BlockUserAction)
+                            {
+                                UserActions.Add(userAction);
+                            }
+                        };
+                        break;
+
+                    // ------------------------------------
+                    case IOType.TEMP:
+                        sl.Children.Add(DTIOControl.ADView(dict, module.IOName.temp[(int)ch], valID));
+                        break;
+                        // ------------------------------------
+                }   // switch (ioType)
+
+                AddModuleTask(module, ioType, new ModuleTaskParam(ch, valID), dict);
+                valID++;
+            }   // if (channelValid)
+            else
+            {
+                
+                sl.Children.Add(DTIOControl.Placeholder(string.Format(Resx.AppResources.IO_InvalidIOText,
+                    module.tcp_hostname, ioType, ch
+                )));
             }
 
-
-            AddModuleTask(module, ioType, new ModuleTaskParam(ch, valID), dict);
-
-
             sl.Children.Add(DTControl.Separator());
-
-            valID++;
         }
 
         // ----------------------------------------------------------------------------
@@ -286,6 +308,7 @@ namespace IOControl
                     // ------------------------------------
                     case IOType.DA:
                         DTControl.SpecialLabel label = PageControls[id] as DTControl.SpecialLabel;
+                        Device.BeginInvokeOnMainThread(() => label.Text = String.Format("{0} V", ((float)label.Value).ToString("0.000")));
                         DT.Delib.DapiDASetVolt(module.handle, ch, Convert.ToSingle(label.Value));
                         break;
                     // ------------------------------------

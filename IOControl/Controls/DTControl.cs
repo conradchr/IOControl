@@ -118,12 +118,22 @@ namespace IOControl
 
         // achtung: es gibt auch "SwitchCell" hat direkt schon label drin
 
+        public static Layout Switch(string text, bool toggled, NamedSize textSize)
+        {
+            return Switch(null, text, true, toggled, DT.NULL, textSize);
+        }
+
         public static Layout Switch(string text, bool enabled, bool toggled)
         {
-            return Switch(null, text, enabled, toggled, DT.NULL);
+            return Switch(null, text, enabled, toggled, DT.NULL, NamedSize.Medium);
         }
 
         public static Layout Switch(Dictionary<int, View> dict, string text, bool enabled, bool toggled, int id)
+        {
+            return Switch(null, text, enabled, toggled, DT.NULL, NamedSize.Medium);
+        }
+
+        public static Layout Switch(Dictionary<int, View> dict, string text, bool enabled, bool toggled, int id, NamedSize textSize)
         {
             //var xx = new SwitchCell();
 
@@ -136,9 +146,7 @@ namespace IOControl
             label.TextColor = Color.White;
             label.VerticalOptions = LayoutOptions.Center;
             label.HorizontalOptions = LayoutOptions.StartAndExpand;
-            label.FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label));
-
-
+            label.FontSize = Device.GetNamedSize(textSize, typeof(Label));
 
             Switch sw = new Switch();
             //ExtendedSwitch sw = new ExtendedSwitch();

@@ -99,6 +99,52 @@ namespace IOControl
         // ----------------------------------------------------------------------------
         // ----------------------------------------------------------------------------
 
+
+        public class IOViewCell : ViewCell
+        { 
+            public IOViewCell(IOType ioType)
+            {
+                StackLayout layout = new StackLayout()
+                {
+                    Orientation = StackOrientation.Horizontal,
+                    Padding = new Thickness(10, 10, 10, 10)
+                };
+
+                Color temp = layout.BackgroundColor;
+                Switch sw = new Switch() { IsVisible = false };
+                sw.SetBinding(Switch.IsToggledProperty, new Binding("IsSelected"));
+                sw.Toggled += new EventHandler<ToggledEventArgs>((s, e) =>
+                {
+                    layout.BackgroundColor = sw.IsToggled ? DT.COLOR_SELECTED : temp;
+                });
+                layout.Children.Add(sw);
+
+                // Label Name
+                Label labelName = new Label() { FontSize = Device.GetNamedSize(NamedSize.Large, typeof(Label)), HorizontalOptions = LayoutOptions.StartAndExpand, VerticalOptions = LayoutOptions.Center };
+                labelName.SetBinding(Label.TextProperty, new Binding("Name"));
+                layout.Children.Add(labelName);
+
+                // Picker
+                Picker picker = new Picker();
+
+                switch (ioType)
+                {
+                    case IOType.DO:
+                        picker.Items.Add("Ein/Aus Schalter");
+                        picker.Items.Add("Taster");
+                        break;
+
+                    case IOType.AD:
+                    case IOType.DA:
+                        picker.Items.Add("±10V");
+                        picker.Items.Add("0-10V");
+                        break;
+                }
+
+                View = layout;
+            }
+        }
+
         public class ItemViewCell : ViewCell
         {
             public ItemViewCell()
@@ -268,8 +314,6 @@ namespace IOControl
         public async Task<bool> InitIO()
         {
             Title = ((ContentGroup)Ctor.Object).name;
-
-
 
             // --------------------
             // Locations

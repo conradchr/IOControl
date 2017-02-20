@@ -57,6 +57,8 @@
     <Compile Include="library\cs\deditec_string_utils.cs" />
     <Compile Include="library\delib\deditec_tcp_bc_io.cs" />
     <Compile Include="library\delib\delib_error_codes.cs" />
+    <Compile Include="PopUp\PopUpHelp.cs" />
+    <Compile Include="PopUp\ContentHelp.cs" />
     <Compile Include="PopUp\PopUpSetDA.cs" />
     <Compile Include="Pages\AppearancePage.cs" />
     <Compile Include="Pages\ConfigurationPage.cs" />
