@@ -274,7 +274,7 @@ namespace IOControl
                                                 case IOType.DO: longVal3 = DT.Delib.DapiDOReadback32(task.module.handle, 96); break;
                                             }
                                         }
-
+                                        /*
                                         foreach (var request in task.param)
                                         {
                                             Device.BeginInvokeOnMainThread(() =>
@@ -301,6 +301,7 @@ namespace IOControl
                                                 page.BlockUserAction = false;
                                             });
                                         }
+                                        */
 
                                         break;
 

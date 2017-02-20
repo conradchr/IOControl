@@ -145,7 +145,7 @@ namespace IOControl
                         foreach (var io in Ctor.Group.io)
                         {
                             var module = DT.Session.xmlContent.modules.Find(x => x.mac == io.moduleMAC);
-                            AddIOView(sl, PageControls, io.ioType, module, io.channel);
+                            AddIOView(sl, PageControls, io.ioType, module, io.channel, io.ch_config);
                         }
                     }
                     else
@@ -180,9 +180,19 @@ namespace IOControl
 
         public void AddIOView(StackLayout sl, Dictionary<int, View> dict, IOType ioType, Module module, uint ch)
         {
+            //AddIOView(sl, dict, ioType, module, ch, new Int64());
+            AddIOView(sl, dict, ioType, module, ch, IOCfgDO.BUTTON);
+        }
+
+        public void AddIOView(StackLayout sl, Dictionary<int, View> dict, IOType ioType, Module module, uint ch, object ch_config)
+        {
             Action userAction;
 
-            DT.Log(string.Format("IOType={0}, ch={1}", ioType, ch));;
+            DT.Log(string.Format("IOType={0}, ch={1}", ioType, ch));
+            if (ch_config is Int64)
+            {
+                DT.Log("dummy!");
+            }
 
             if (module.GetIOName(ioType, ch) != null)
             {
@@ -195,15 +205,38 @@ namespace IOControl
                         break;
                     // ------------------------------------
                     case IOType.DO:
-                        sl.Children.Add(DTIOControl.DOSwitch(dict, module.IOName.dout[(int)ch], valID));
-                        userAction = CreateTodoEvent(ioType, module, dict, ch, valID);
-                        ((Switch)dict[valID]).Toggled += (s, e) =>
+                        if (ch_config is IOCfgDO)
                         {
-                            if (!BlockUserAction)
+                            if ((IOCfgDO)ch_config == IOCfgDO.BUTTON)
                             {
-                                UserActions.Add(userAction);
+                                sl.Children.Add(DTIOControl.DOButton(dict, module.IOName.dout[(int)ch], valID));
+                                ((DTControl.DOButton)dict[valID]).Pressed += (s, e) =>
+                                {
+                                    module.OpenModule();
+                                    DT.Delib.DapiDOSet1(module.handle, ch, 1);
+                                    module.CloseModule();
+                                };
+
+                                ((DTControl.DOButton)dict[valID]).Released += (s, e) =>
+                                {
+                                    module.OpenModule();
+                                    DT.Delib.DapiDOSet1(module.handle, ch, 0);
+                                    module.CloseModule();
+                                };
                             }
-                        };
+                        }
+                        else
+                        {
+                            sl.Children.Add(DTIOControl.DOSwitch(dict, module.IOName.dout[(int)ch], valID));
+                            userAction = CreateTodoEvent(ioType, module, dict, ch, valID);
+                            ((Switch)dict[valID]).Toggled += (s, e) =>
+                            {
+                                if (!BlockUserAction)
+                                {
+                                    UserActions.Add(userAction);
+                                }
+                            };
+                        }
                         break;
 
                     // ------------------------------------

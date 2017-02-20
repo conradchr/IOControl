@@ -276,4 +276,16 @@
   <data name="IO_InvalidIOText" xml:space="preserve">
     <value />
   </data>
+  <data name="IO_CFG_ADDA_Current" xml:space="preserve">
+    <value>Current (0..24mA)</value>
+  </data>
+  <data name="IO_CFG_ADDA_Voltage" xml:space="preserve">
+    <value>Voltage (±10V)</value>
+  </data>
+  <data name="IO_CFG_DO_OnOffSwitch" xml:space="preserve">
+    <value>On/Off Switch</value>
+  </data>
+  <data name="IO_CFG_DO_PushButton" xml:space="preserve">
+    <value>Pushbutton</value>
+  </data>
 </root>

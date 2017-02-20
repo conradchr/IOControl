@@ -63,6 +63,9 @@
     <MtouchDebug>true</MtouchDebug>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Mono.Android">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\MonoAndroid\v7.0\Mono.Android.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
@@ -127,11 +130,13 @@
     <Compile Include="PlatformImplementations\FileUtils_Android.cs" />
     <Compile Include="PlatformImplementations\LocalizeUtils_iOS.cs" />
     <Compile Include="PlatformImplementations\UDPUtils_Android.cs" />
+    <Compile Include="Renderer\DOButtonRenderer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ITunesArtwork Include="ITunesArtwork" />
     <ITunesArtwork Include="ITunesArtwork%402x" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

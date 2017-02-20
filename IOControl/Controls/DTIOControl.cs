@@ -21,6 +21,11 @@ namespace IOControl
             return DTControl.Switch(dict, text, true, false, id);
         }
 
+        public static Layout DOButton(Dictionary<int, View> dict, string text, int id)
+        {
+            return DTControl.xDOButton(dict, text, id, NamedSize.Medium);
+        }
+
         public static Layout DISwitch()
         {
             return DTControl.Switch("Digital Input 2 (on)", false, true);

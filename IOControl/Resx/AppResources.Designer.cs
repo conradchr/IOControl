@@ -305,6 +305,42 @@ namespace IOControl.Resx {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Current (0..24mA) ähnelt.
+        /// </summary>
+        internal static string IO_CFG_ADDA_Current {
+            get {
+                return ResourceManager.GetString("IO_CFG_ADDA_Current", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Voltage (±10V) ähnelt.
+        /// </summary>
+        internal static string IO_CFG_ADDA_Voltage {
+            get {
+                return ResourceManager.GetString("IO_CFG_ADDA_Voltage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die On/Off Switch ähnelt.
+        /// </summary>
+        internal static string IO_CFG_DO_OnOffSwitch {
+            get {
+                return ResourceManager.GetString("IO_CFG_DO_OnOffSwitch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Pushbutton ähnelt.
+        /// </summary>
+        internal static string IO_CFG_DO_PushButton {
+            get {
+                return ResourceManager.GetString("IO_CFG_DO_PushButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
         /// </summary>
         internal static string IO_InvalidGroup {

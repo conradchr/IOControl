@@ -126,22 +126,23 @@ namespace IOControl
 
                 // Picker
                 Picker picker = new Picker();
-
                 switch (ioType)
                 {
-                    case IOType.DO:
-                        picker.Items.Add("Ein/Aus Schalter");
-                        picker.Items.Add("Taster");
+                    case IOType.DO:                        
+                        picker.Items.Add(Resx.AppResources.IO_CFG_DO_OnOffSwitch);
+                        picker.Items.Add(Resx.AppResources.IO_CFG_DO_PushButton);
                         break;
 
                     case IOType.AD:
                     case IOType.DA:
-                        picker.Items.Add("±10V");
-                        picker.Items.Add("0-10V");
+                        picker.Items.Add(Resx.AppResources.IO_CFG_ADDA_Voltage);
+                        picker.Items.Add(Resx.AppResources.IO_CFG_ADDA_Current);
                         break;
                 }
+                layout.Children.Add(picker);
 
                 View = layout;
+
             }
         }
 

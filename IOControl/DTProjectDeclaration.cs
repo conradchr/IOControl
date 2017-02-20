@@ -19,6 +19,7 @@ public partial class DT
     public const uint RETURN_OK =       0;
     public const uint RETURN_ERROR =    1;
     public const int NULL = -1337;
+    //public const object object_null = new object();
 
     public static uint dummy_uint = 0;
     public static byte[] dummy_byte = new byte[] { 0 };

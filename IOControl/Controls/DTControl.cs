@@ -130,7 +130,8 @@ namespace IOControl
 
         public static Layout Switch(Dictionary<int, View> dict, string text, bool enabled, bool toggled, int id)
         {
-            return Switch(null, text, enabled, toggled, DT.NULL, NamedSize.Medium);
+            //return Switch(null, text, enabled, toggled, DT.NULL, NamedSize.Medium);
+            return Switch(dict, text, enabled, toggled, id, NamedSize.Medium);
         }
 
         public static Layout Switch(Dictionary<int, View> dict, string text, bool enabled, bool toggled, int id, NamedSize textSize)
@@ -286,6 +287,61 @@ namespace IOControl
             }
 
 
+        }
+
+        public class DOButton : Button
+        {
+            public event EventHandler Pressed;
+            public event EventHandler Released;
+            Color bgColor;
+            Color txtColor;
+
+            public virtual void OnPressed()
+            {
+                bgColor = this.BackgroundColor;
+                txtColor = this.TextColor;
+
+                this.BackgroundColor = Color.White;
+                this.TextColor = Color.Black;
+
+                Pressed?.Invoke(this, EventArgs.Empty);
+            }
+
+            public virtual void OnReleased()
+            {
+                this.BackgroundColor = bgColor;
+                this.TextColor = txtColor;
+
+                Released?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
+
+        public static Layout xDOButton(Dictionary<int, View> dict, string text, int id, NamedSize textSize)
+        {
+            StackLayout layout = new StackLayout();
+            layout.Orientation = StackOrientation.Horizontal;
+            layout.Padding = new Thickness(10, 0, 10, 0);
+
+            Label label = new Label();
+            label.Text = text;
+            label.TextColor = Color.White;
+            label.VerticalOptions = LayoutOptions.Center;
+            label.HorizontalOptions = LayoutOptions.StartAndExpand;
+            label.FontSize = Device.GetNamedSize(textSize, typeof(Label));
+
+            DOButton btn = new DOButton();
+            btn.FontSize = Device.GetNamedSize(textSize, typeof(Button));
+            btn.Text = "SET";
+            btn.VerticalOptions = LayoutOptions.Center;
+            btn.HorizontalOptions = LayoutOptions.EndAndExpand;
+            
+            dict.Add(id, btn);
+
+            layout.Children.Add(label);
+            layout.Children.Add(btn);
+
+            return layout;
         }
     }
 }
