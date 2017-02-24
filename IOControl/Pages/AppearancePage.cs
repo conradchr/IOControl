@@ -102,11 +102,11 @@ namespace IOControl
 
         public class IOViewCell : ViewCell
         { 
-            public IOViewCell(IOType ioType)
+            public IOViewCell()
             {
                 StackLayout layout = new StackLayout()
                 {
-                    Orientation = StackOrientation.Horizontal,
+                    //Orientation = StackOrientation.Horizontal,
                     Padding = new Thickness(10, 10, 10, 10)
                 };
 
@@ -120,13 +120,17 @@ namespace IOControl
                 layout.Children.Add(sw);
 
                 // Label Name
-                Label labelName = new Label() { FontSize = Device.GetNamedSize(NamedSize.Large, typeof(Label)), HorizontalOptions = LayoutOptions.StartAndExpand, VerticalOptions = LayoutOptions.Center };
+                Label labelName = new Label() { FontSize = Device.GetNamedSize(NamedSize.Large, typeof(Label))/*, HorizontalOptions = LayoutOptions.StartAndExpand, VerticalOptions = LayoutOptions.Center*/ };
                 labelName.SetBinding(Label.TextProperty, new Binding("Name"));
                 layout.Children.Add(labelName);
 
                 // Picker
+                //DT.Log(string.Format("object={0} type={1}", ((ItemModel)BindingContext)., ((ItemModel)BindingContext).Type));
+
                 Picker picker = new Picker();
-                switch (ioType)
+
+                var bla = ((ItemModel)BindingContext);
+                switch (((ContentIO)bla.Object).ioType)
                 {
                     case IOType.DO:                        
                         picker.Items.Add(Resx.AppResources.IO_CFG_DO_OnOffSwitch);
@@ -139,6 +143,7 @@ namespace IOControl
                         picker.Items.Add(Resx.AppResources.IO_CFG_ADDA_Current);
                         break;
                 }
+                
                 layout.Children.Add(picker);
 
                 View = layout;
@@ -429,7 +434,16 @@ namespace IOControl
             listView.GroupShortNameBinding = new Binding("ShortName");
             //listView.SeparatorVisibility = SeparatorVisibility.None;
             listView.GroupHeaderTemplate = new DataTemplate(() => { return new HeaderViewCell(this); });
-            listView.ItemTemplate = new DataTemplate(typeof(ItemViewCell));
+
+            if (Ctor.ViewType == ViewType.IO)
+            {
+                listView.ItemTemplate = new DataTemplate(typeof(IOViewCell));
+            }
+            else
+            {
+                listView.ItemTemplate = new DataTemplate(typeof(ItemViewCell));
+            }
+            
             listView.HasUnevenRows = true;
 
             
