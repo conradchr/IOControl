@@ -40,9 +40,6 @@ namespace IOControl
         }
         public Constructor Ctor { get; set; }
 
-
-
-
         public Dictionary<int, View> PageControls { get; set; }
         public List<Action> UserActions { get; set; }
         public bool BlockUserAction { get; set; }
@@ -55,16 +52,11 @@ namespace IOControl
         // ----------------------------------------------------------------------------
 
         public IOContentPage(Constructor ctor)
-        { 
+        {
             Ctor = ctor;
-
             Title = Ctor.Title;
 
             DT.Log(String.Format("VType={0}, IOType={1}, Title={2}", Ctor.ViewType, Ctor.IOType, Title));
-
-            PageControls = new Dictionary<int, View>();
-            UserActions = new List<Action>();
-            RefreshTasks = new List<ModuleTask>();
 
             Init();
         }
@@ -79,7 +71,25 @@ namespace IOControl
         {
             uint i;
 
+            DT.Session.btns.Clear();
+
             ScrollView sv = new ScrollView();
+            sv.Scrolled += (s, e) =>
+            {
+                foreach (var ctrl in DT.Session.btns)
+                {
+                    if (ctrl.IsPressed)
+                    {
+                        DT.Log("Release Button");
+                        ctrl.Release();
+                    }
+                }
+            };
+
+            PageControls = new Dictionary<int, View>();
+            UserActions = new List<Action>();
+            RefreshTasks = new List<ModuleTask>();
+
             StackLayout sl = new StackLayout();
 
             sl.Children.Add(DTControl.Separator());
@@ -145,7 +155,7 @@ namespace IOControl
                         foreach (var io in Ctor.Group.io)
                         {
                             var module = DT.Session.xmlContent.modules.Find(x => x.mac == io.moduleMAC);
-                            AddIOView(sl, PageControls, io.ioType, module, io.channel, io.ch_config);
+                            AddIOView(sl, PageControls, io.ioType, module, io.channel, io.ioCfg);
                         }
                     }
                     else
@@ -180,19 +190,14 @@ namespace IOControl
 
         public void AddIOView(StackLayout sl, Dictionary<int, View> dict, IOType ioType, Module module, uint ch)
         {
-            //AddIOView(sl, dict, ioType, module, ch, new Int64());
-            AddIOView(sl, dict, ioType, module, ch, IOCfgDO.BUTTON);
+            AddIOView(sl, dict, ioType, module, ch, IOCfg.NONE);
         }
 
-        public void AddIOView(StackLayout sl, Dictionary<int, View> dict, IOType ioType, Module module, uint ch, object ch_config)
+        public void AddIOView(StackLayout sl, Dictionary<int, View> dict, IOType ioType, Module module, uint ch, IOCfg ioCfg)
         {
             Action userAction;
 
-            DT.Log(string.Format("IOType={0}, ch={1}", ioType, ch));
-            if (ch_config is Int64)
-            {
-                DT.Log("dummy!");
-            }
+            DT.Log(string.Format("IOType={0}, ch={1} ioCfg={2}", ioType, ch, ioCfg));
 
             if (module.GetIOName(ioType, ch) != null)
             {
@@ -205,25 +210,23 @@ namespace IOControl
                         break;
                     // ------------------------------------
                     case IOType.DO:
-                        if (ch_config is IOCfgDO)
-                        {
-                            if ((IOCfgDO)ch_config == IOCfgDO.BUTTON)
-                            {
-                                sl.Children.Add(DTIOControl.DOButton(dict, module.IOName.dout[(int)ch], valID));
-                                ((DTControl.DOButton)dict[valID]).Pressed += (s, e) =>
-                                {
-                                    module.OpenModule();
-                                    DT.Delib.DapiDOSet1(module.handle, ch, 1);
-                                    module.CloseModule();
-                                };
 
-                                ((DTControl.DOButton)dict[valID]).Released += (s, e) =>
-                                {
-                                    module.OpenModule();
-                                    DT.Delib.DapiDOSet1(module.handle, ch, 0);
-                                    module.CloseModule();
-                                };
-                            }
+                        if (ioCfg == IOCfg.BUTTON)
+                        {
+                            sl.Children.Add(DTIOControl.DOButton(dict, module.IOName.dout[(int)ch], valID));
+                            ((DTControl.DOButton)dict[valID]).Pressed += (s, e) =>
+                            {
+                                module.OpenModule();
+                                DT.Delib.DapiDOSet1(module.handle, ch, 1);
+                                module.CloseModule();
+                            };
+
+                            ((DTControl.DOButton)dict[valID]).Released += (s, e) =>
+                            {
+                                module.OpenModule();
+                                DT.Delib.DapiDOSet1(module.handle, ch, 0);
+                                module.CloseModule();
+                            };
                         }
                         else
                         {
@@ -297,7 +300,7 @@ namespace IOControl
                         // ------------------------------------
                 }   // switch (ioType)
 
-                AddModuleTask(module, ioType, new ModuleTaskParam(ch, valID), dict);
+                AddModuleTask(module, ioType, new ModuleTaskParam(ch, valID, ioCfg), dict);
                 valID++;
             }   // if (channelValid)
             else

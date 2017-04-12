@@ -45,13 +45,18 @@ namespace IOControl
 
         public IOTabbedPage(Constructor ctor)
         {
-            //TintColor = Color.Black;
-            //BarTintColor = Color.Red;
-            //BackgroundColor = Color.Green;
-            //SwipeEnabled = true;
-
             Ctor = ctor;
             Title = Ctor.Title;
+
+            Action PageChanging = () =>
+            {
+                IOContentPage page = (IOContentPage)this.CurrentPage;
+                
+                DT.Log("page-init");
+                page.Init();
+                IOContentPageSelect(page);
+            };
+
 
             if (Ctor.ObType == typeof(Module))
             {
@@ -77,48 +82,36 @@ namespace IOControl
                         Title = group.name
                     }));
                 }
+
+                ToolbarItems.Add(new ToolbarItem()
+                {
+                    Text = "Settings",
+                    Icon = "btn_setting.png",
+                    Command = new Command(async () =>
+                    {
+                        AppearancePage ap = new AppearancePage(new AppearancePage.Constructor()
+                        {
+                            ViewType = AppearancePage.ViewType.IO,
+                            Object = ((IOContentPage)this.CurrentPage).Ctor.Group
+                        });
+
+                        DT.Log("ToolbarItems AA");
+                        await Navigation.PushAsync(ap);
+                        DT.Log("ToolbarItems BB");
+                        await ap.InitIO();
+                        DT.Log("ToolbarItems CC");
+                        await ap.PageCloseTaskIO;
+
+                        DT.Log("IOs geadded -> PageChanging");
+                        PageChanging();
+                    })
+                });
             }
             
-
-            
-
-
-
-            /*
-            OnSwipeLeft += (s, e) =>
-            {
-                CurrentPage = Children[1];
-            };
-
-            OnSwipeRight += (s, e) =>
-            {
-                CurrentPage = Children[0];
-            };
-
-            /*
-            OnCurrentPageChanged += (s, e) =>
-            {
-                IOContentPage page = (IOContentPage)((IOTabbedPage)s).CurrentPage;
-                //IOContentPage page = (IOContentPage)CurrentPage;
-
-                DT.Log(page.Title);
-                page.Init();
-                IOContentPageSelect(page);
-            };
-            */
-
-            
             CurrentPageChanged += (s, e) =>
-            //CurrentPageChanged += () =>
             {
-                IOContentPage page = (IOContentPage)((IOTabbedPage)s).CurrentPage;
-                //IOContentPage page = (IOContentPage)CurrentPage;
-
-                DT.Log(page.Title);
-                page.Init();
-                IOContentPageSelect(page);
+                PageChanging();
             };
-            
 
             IOContentPageSelect((IOContentPage)CurrentPage);
         }
@@ -276,31 +269,32 @@ namespace IOControl
                                         }
                                         foreach (var request in task.param)
                                         {
-                                                /*
-                                            Device.BeginInvokeOnMainThread(() =>
+                                            if (request.ioCfg == IOCfg.SWITCH)
                                             { 
-                                                page.BlockUserAction = true;
+                                                Device.BeginInvokeOnMainThread(() =>
+                                                { 
+                                                    page.BlockUserAction = true;
 
-                                                if (request.ch <= 31)
-                                                {
-                                                    ((Switch)page.PageControls[request.id]).IsToggled = (((((int)longVal0 >> (int)(request.ch & 0x1f)) & 1)) == 1 ? true : false);
-                                                }
-                                                else if (request.ch <= 63)
-                                                {
-                                                    ((Switch)page.PageControls[request.id]).IsToggled = (((((int)longVal1 >> (int)(request.ch & 0x1f)) & 1)) == 1 ? true : false);
-                                                }
-                                                else if (request.ch <= 95)
-                                                {
-                                                    ((Switch)page.PageControls[request.id]).IsToggled = (((((int)longVal2 >> (int)(request.ch & 0x1f)) & 1)) == 1 ? true : false);
-                                                }
-                                                else
-                                                {
-                                                    ((Switch)page.PageControls[request.id]).IsToggled = (((((int)longVal3 >> (int)(request.ch & 0x1f)) & 1)) == 1 ? true : false);
-                                                }
+                                                    if (request.ch <= 31)
+                                                    {
+                                                        ((Switch)page.PageControls[request.id]).IsToggled = (((((int)longVal0 >> (int)(request.ch & 0x1f)) & 1)) == 1 ? true : false);
+                                                    }
+                                                    else if (request.ch <= 63)
+                                                    {
+                                                        ((Switch)page.PageControls[request.id]).IsToggled = (((((int)longVal1 >> (int)(request.ch & 0x1f)) & 1)) == 1 ? true : false);
+                                                    }
+                                                    else if (request.ch <= 95)
+                                                    {
+                                                        ((Switch)page.PageControls[request.id]).IsToggled = (((((int)longVal2 >> (int)(request.ch & 0x1f)) & 1)) == 1 ? true : false);
+                                                    }
+                                                    else
+                                                    {
+                                                        ((Switch)page.PageControls[request.id]).IsToggled = (((((int)longVal3 >> (int)(request.ch & 0x1f)) & 1)) == 1 ? true : false);
+                                                    }
 
-                                                page.BlockUserAction = false;
-                                            });
-                                            */
+                                                    page.BlockUserAction = false;
+                                                });
+                                            }
                                         }
 
                                         break;

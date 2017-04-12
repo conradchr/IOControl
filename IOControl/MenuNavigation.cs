@@ -130,26 +130,12 @@ namespace IOControl
             // --------------------
             // ListView
 
-            listView = new ListView();
+            listView = VCModels.ListViewInit();
+            listView.GroupHeaderTemplate = new DataTemplate(typeof(VCModels.NaviHeader));
+            listView.ItemTemplate = new DataTemplate(typeof(VCModels.NaviIcon));
             listView.ItemsSource = items;
-            listView.IsGroupingEnabled = true;
-            listView.GroupDisplayBinding = new Binding("LongName");
-            listView.GroupShortNameBinding = new Binding("ShortName");
 
-
-
-            // problem mit blauen separator...
-            // listView.SeparatorVisibility = SeparatorVisibility.None;
-            // dann im group und item template denn strich selbst mit ins layout machen
-
-            
-
-            
-
-
-
-
-
+            /*
             listView.GroupHeaderTemplate = new DataTemplate(() =>
             {
                 var textCell = new TextCell();
@@ -166,6 +152,9 @@ namespace IOControl
 
             listView.ItemTemplate = new DataTemplate(typeof(TextCell));
             listView.ItemTemplate.SetBinding(TextCell.TextProperty, "Name");
+            */
+
+
 
             Icon = "hamburger.png";
             Title = "Configuration";

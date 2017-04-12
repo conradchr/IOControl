@@ -7,7 +7,6 @@ using Rg.Plugins.Popup.Pages;
 using Rg.Plugins.Popup.Animations;
 using Rg.Plugins.Popup.Services;
 using System.Threading.Tasks;
-using System.Linq;
 
 using Xamarin.Forms;
 

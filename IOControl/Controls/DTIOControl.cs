@@ -5,6 +5,11 @@ namespace IOControl
 {
     public class DTIOControl
     {
+        /*
+        public static Layout ADDARange(Dictionary<int, View> dict, string text, int id)
+        {
+            return new Layout();
+        }*/
 
         public static Layout PWMView(Dictionary<int, View> dict, string text, int id)
         {

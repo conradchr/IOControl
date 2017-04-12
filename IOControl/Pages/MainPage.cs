@@ -39,6 +39,7 @@ namespace IOControl
 			}
 
             RefreshNavigation();
+            IsPresented = true;
         }
 
         public void RefreshNavigation()

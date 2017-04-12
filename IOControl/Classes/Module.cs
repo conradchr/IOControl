@@ -31,11 +31,13 @@ namespace IOControl
     {
         public uint ch;
         public int id;
+        public IOCfg ioCfg;
 
-        public ModuleTaskParam(uint ch, int viewId)
+        public ModuleTaskParam(uint ch, int viewId, IOCfg ioCfg)
         {
             this.ch = ch;
             this.id = viewId;
+            this.ioCfg = ioCfg;
         }
     }
 

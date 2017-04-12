@@ -112,53 +112,12 @@ namespace IOControl
 
                 slMain.Children.Add(layout);
 
-
                 // Already Added
                 Image img = new Image() { Source = ImageSource.FromFile("btn_ok.png"), HeightRequest = 20, WidthRequest = 20, Aspect = Aspect.AspectFit };
                 img.SetBinding(Image.IsVisibleProperty, new Binding("AlreadyAdded"));
                 slMain.Children.Add(img);
 
-                /*
-                StackLayout slEdit = new StackLayout() { HorizontalOptions = LayoutOptions.End, VerticalOptions = LayoutOptions.Center };
-                Image imgEdit = new Image() { Source = ImageSource.FromFile("btn_edit.png") };
-                var imgEditTapped = new TapGestureRecognizer();
-                imgEditTapped.Tapped += async (s, e) =>
-                {
-                    DT.Log(String.Format("machwas id={0}!!!", lblId.Text));
-                    var id = Convert.ToInt32(lblId.Text);
-                    var dev = DT.eth_devs.Find(x => x.Network.mac_formatted == items[id].Mac);
-                    Module module = null;
-                    if (dev != null)
-                    {
-                        module = new Module(
-                            dev.BoardName.boardname,
-                            dev.Network.ip,
-                            (int)dev.Network.port,
-                            5000,
-                            dev.Network.mac
-                        );
-                    }
-
-                    DialogNetworkConfig dnc = new DialogNetworkConfig(new DialogNetworkConfig.Constructor()
-                    {
-                        ViewType = DialogNetworkConfig.ViewType.EDIT,
-                        Module = module
-                    });
-                    DT.Log("starte EDIT");
-                    await context.Navigation.PushAsync(dnc);
-                    DT.Log("warte auf EDIT ende");
-                    await dnc.PageCloseTask;
-                    DT.Log("ende EDIT");
-
-                };
-                imgEdit.GestureRecognizers.Add(imgEditTapped);
-                slEdit.Children.Add(imgEdit);
-                slMain.Children.Add(slEdit);
-                */
-
                 View = slMain;
-
-                //View = layout;
             }
         }
 
@@ -181,11 +140,11 @@ namespace IOControl
         public void Scan()
         {
             slHeader.IsVisible = false;
-            slScan.IsVisible = true;
+            //slScan.IsVisible = true;
             slListView.IsVisible = false;
             slFooter.IsVisible = false;
 
-            Task<int>.Run(() =>
+            Task<bool> t = new Task<bool>(() =>
             {
                 uint cnt = DT.Bc.GetEthernetDevicesByBC(DT.eth_devs);
                 Device.BeginInvokeOnMainThread(() =>
@@ -207,14 +166,18 @@ namespace IOControl
                     listView.ItemsSource = items;
 
                     slHeader.IsVisible = true;
-                    slScan.IsVisible = false;
                     slListView.IsVisible = true;
                     slFooter.IsVisible = true;
 
                 }); // Device.BeginInvokeOnMainThread
-            }); // Task<int>.Run
-        }
 
+                return true;
+            });
+
+#pragma warning disable CS4014 // Da dieser Aufruf nicht abgewartet wird, wird die Ausführung der aktuellen Methode fortgesetzt, bevor der Aufruf abgeschlossen ist
+            DTControl.ShowLoadingWhileTask(t);
+#pragma warning restore CS4014 // Da dieser Aufruf nicht abgewartet wird, wird die Ausführung der aktuellen Methode fortgesetzt, bevor der Aufruf abgeschlossen ist
+        }
 
         public void FormInit()
         {
@@ -254,6 +217,7 @@ namespace IOControl
             slHeader.Children.Add(slInnerHeader);
             slMain.Children.Add(slHeader);
 
+            /*
             // ------------------------------------
             // scan
             slScan = new StackLayout() { VerticalOptions = LayoutOptions.CenterAndExpand };
@@ -262,6 +226,7 @@ namespace IOControl
             slScan.Children.Add(aiScan);
             slScan.Children.Add(lblScan);
             slMain.Children.Add(slScan);
+            */
 
             // ------------------------------------
             // listView
@@ -291,7 +256,7 @@ namespace IOControl
 
             // ------------------------------------
             // footer
-            slFooter = new StackLayout() { Orientation = StackOrientation.Vertical, VerticalOptions = LayoutOptions.End, IsVisible = false };
+            slFooter = new StackLayout() { Orientation = StackOrientation.Vertical, VerticalOptions = LayoutOptions.End, IsVisible = false, Padding = VCModels.PAD_FOOTER };
             grid = new Grid();
 
             imgCancel = new Image() { Source = ImageSource.FromFile("btn_cancel.png") };

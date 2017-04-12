@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿#define OPTIMAL_S5
+
+using System.Collections.Generic;
 using Xamarin.Forms;
 //using XLabs.Forms.Controls;
 using Acr.UserDialogs;
@@ -99,6 +101,26 @@ namespace IOControl
             return layout;
         }
 
+
+        public static Layout ListViewSeparator()
+        {
+            StackLayout layout = new StackLayout();
+
+            Label label = new Label()
+            {
+                BackgroundColor = Color.White,
+#if (OPTIMAL_S5)
+                HeightRequest = 1
+#else
+                HeightRequest = 0.2
+#endif
+            };
+
+            layout.Children.Add(label);
+
+            return layout;
+        }
+
         public static Layout Separator()
         {
             StackLayout layout = new StackLayout();
@@ -106,7 +128,11 @@ namespace IOControl
             Label label = new Label()
             {
                 BackgroundColor = Color.White,
+#if (OPTIMAL_S5)
+                HeightRequest = 1
+#else
                 HeightRequest = 0.2
+#endif
             };   
 
             layout.Children.Add(label);
@@ -140,7 +166,13 @@ namespace IOControl
 
             StackLayout layout = new StackLayout();
             layout.Orientation = StackOrientation.Horizontal;
+
+#if (OPTIMAL_S5)
             layout.Padding = new Thickness(10, 0, 10, 0);
+#else
+            layout.Padding = new Thickness(10, 3, 10, 3);
+#endif
+
 
             Label label = new Label();
             label.Text = text;
@@ -295,6 +327,12 @@ namespace IOControl
             public event EventHandler Released;
             Color bgColor;
             Color txtColor;
+            public bool IsPressed { get; set; } = false;
+
+            public void Release()
+            {
+                OnReleased();
+            }
 
             public virtual void OnPressed()
             {
@@ -305,6 +343,7 @@ namespace IOControl
                 this.TextColor = Color.Black;
 
                 Pressed?.Invoke(this, EventArgs.Empty);
+                IsPressed = true;
             }
 
             public virtual void OnReleased()
@@ -313,6 +352,7 @@ namespace IOControl
                 this.TextColor = txtColor;
 
                 Released?.Invoke(this, EventArgs.Empty);
+                IsPressed = false;
             }
         }
 
@@ -321,7 +361,14 @@ namespace IOControl
         {
             StackLayout layout = new StackLayout();
             layout.Orientation = StackOrientation.Horizontal;
+
+            /*
+#if (OPTIMAL_S5)
             layout.Padding = new Thickness(10, 0, 10, 0);
+#else
+*/
+            layout.Padding = new Thickness(10, -3, 10, -3);
+//#endif
 
             Label label = new Label();
             label.Text = text;
@@ -335,8 +382,10 @@ namespace IOControl
             btn.Text = "SET";
             btn.VerticalOptions = LayoutOptions.Center;
             btn.HorizontalOptions = LayoutOptions.EndAndExpand;
+            //btn.Scale = 0.7f;
             
             dict.Add(id, btn);
+            DT.Session.btns.Add(btn);
 
             layout.Children.Add(label);
             layout.Children.Add(btn);

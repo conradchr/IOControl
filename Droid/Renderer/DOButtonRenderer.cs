@@ -2,6 +2,7 @@
 using IOControl.Droid;
 using Xamarin.Forms.Platform.Android;
 using Android.Views;
+using System.ComponentModel;
 
 [assembly: ExportRenderer(typeof(IOControl.DTControl.DOButton), typeof(CustomButtonRenderer))]
 namespace IOControl.Droid
@@ -26,6 +27,13 @@ namespace IOControl.Droid
                     customButton.OnReleased();
                 }
             };
+        }
+
+        protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            base.OnElementPropertyChanged(sender, e);
+
+            this.Invalidate();
         }
     }
 }

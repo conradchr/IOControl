@@ -48,7 +48,7 @@ namespace IOControl.Droid
             {
                 ipAddressString = InetAddress.GetByAddress(ipByteArray).HostAddress;
             }
-            catch (UnknownHostException ex)
+            catch (Java.Lang.Exception)
             {
                 ipAddressString = null;
             }

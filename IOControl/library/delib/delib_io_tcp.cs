@@ -8,7 +8,7 @@ using Xamarin.Forms;    // DependencyService
 public class DT_TCPUtils
 {
     const int BUFF_TCP_RECV_SIZE 			= 16384;  	// better don't touch, used by read() and recv()
-	const int TX_BUFFER_CP_LENGTH 			= 2000;
+	const int TX_BUFFER_CP_LENGTH 			= 4096;
 
 	const int TCP_RO_TX_ENCRYPTION_START	= 4;		// id(2) + ro-cmd(1) + job_id(1)
 	const int TCP_RO_RX_ENCRYPTION_START	= 5;		// id(2) + answer(1) + ok(1) + job_id(1)
@@ -17,8 +17,11 @@ public class DT_TCPUtils
 	const int TCP_RO_BIG_TX_HEADER_LENGTH 	= 8;		// id(2) + ro-cmd(1) + job_id(1) + length(4)
 	const int TCP_RO_BIG_RX_HEADER_LENGTH 	= 9;		// id(2) + answer(1) + ok(1) + job_id(1) + length(4)
 
-	static byte[] tx_buff = new byte[2048];
-	static byte[] rx_buff = new byte[2048];
+
+
+
+	static byte[] tx_buff = new byte[4096];
+	static byte[] rx_buff = new byte[4096];
 
     public static uint SendRecData(uint handle, uint cmd, byte[] tx_buffer, uint tx_buffer_size, byte[] rx_buffer, uint rx_buffer_size, ref int rx_buffer_length)
 	{

@@ -288,4 +288,10 @@
   <data name="IO_CFG_DO_PushButton" xml:space="preserve">
     <value>Pushbutton</value>
   </data>
+  <data name="IO_CFG_Configuration" xml:space="preserve">
+    <value>Configuration</value>
+  </data>
+  <data name="HELP_Header" xml:space="preserve">
+    <value />
+  </data>
 </root>

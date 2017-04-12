@@ -159,6 +159,7 @@ namespace IOControl
 
             this.Disappearing += (s, e) =>
             {
+                DT.Log("DialogAddIO SetResult");
                 tcs.SetResult(taskResult);
             };
 
@@ -166,7 +167,6 @@ namespace IOControl
             // listView
             items = new ObservableCollection<HeaderModel>();
             listView = new ListView() { VerticalOptions = LayoutOptions.FillAndExpand, IsVisible = false };
-            listView.ItemsSource = items;
             listView.IsGroupingEnabled = true;
             listView.GroupDisplayBinding = new Binding("LongName");
             listView.GroupShortNameBinding = new Binding("ShortName");
@@ -272,6 +272,7 @@ namespace IOControl
                 var modules = DT.Session.xmlContent.modules.Where(m => checkIO(m) == true);
 
                 DT.Log("DA: Scan Module");
+                int cnt = 0;
                 // module, inkl. I/Os in eine neue gruppe adden und das dann in die hauptliste
                 foreach (var module in modules)
                 {
@@ -301,6 +302,8 @@ namespace IOControl
                     }
 
                     items.Add(group);
+                    DT.Log("adde " + cnt.ToString());
+                    cnt++;
                 }
 
                 DT.Log("DA: Scan Task ende");
@@ -319,6 +322,7 @@ namespace IOControl
             switchGUI(true);
 
             Stopwatch sw = new Stopwatch();
+            listView.ItemsSource = null;
             items.Clear();
             sw.Start();
             scanning.Start();
@@ -335,6 +339,8 @@ namespace IOControl
             // ui stuff danach
             switchGUI(false);
             DT.Log("DA: Scan Ende");
+
+            listView.ItemsSource = items;
 
             return true;
         }

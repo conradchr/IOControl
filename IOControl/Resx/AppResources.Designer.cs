@@ -289,6 +289,15 @@ namespace IOControl.Resx {
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
         /// </summary>
+        internal static string HELP_Header {
+            get {
+                return ResourceManager.GetString("HELP_Header", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
         internal static string HELP_HelpLocation {
             get {
                 return ResourceManager.GetString("HELP_HelpLocation", resourceCulture);
@@ -319,6 +328,15 @@ namespace IOControl.Resx {
         internal static string IO_CFG_ADDA_Voltage {
             get {
                 return ResourceManager.GetString("IO_CFG_ADDA_Voltage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Configuration ähnelt.
+        /// </summary>
+        internal static string IO_CFG_Configuration {
+            get {
+                return ResourceManager.GetString("IO_CFG_Configuration", resourceCulture);
             }
         }
         

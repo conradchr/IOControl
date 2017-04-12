@@ -8,6 +8,9 @@ using IOControl;
 
 public partial class DT
 {
+
+    public static int TEMP_MESSE_CH_NAME_CNT;
+
     public static Color COLOR = Color.FromHex("#996d0a12");
     public static Color COLOR_SELECTED = Color.FromHex("#A0AAAAAA");
 
@@ -57,6 +60,8 @@ public partial class DT
 
         // TabItems 
         public static List<string>tabItems = new List<string>();
+
+        public static List<DTControl.DOButton> btns = new List<DTControl.DOButton>();
 
         // IO Refresh + Set
         //public static System.Threading.Thread todoThread;

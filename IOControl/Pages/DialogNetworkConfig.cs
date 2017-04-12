@@ -53,7 +53,7 @@ namespace IOControl
         Entry entPort;
         Entry entTimeout;
         Entry entEncryption;
-
+        
         Grid grid;
         Image imgOK;
         Image imgCancel;

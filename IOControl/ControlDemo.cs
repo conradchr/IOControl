@@ -37,12 +37,14 @@ namespace IOControl
 
 		public ControlDemo ()
 		{
+            /*
             var settings = new ToolbarItem
             {
                 Text = "Settings",
                 Command = new Command(MachWas)
             };
             ToolbarItems.Add(settings);
+            */
 
             Button btn = new Button();
             btn.Clicked += Btn_Clicked;
@@ -98,7 +100,7 @@ namespace IOControl
                     break;
             }
 
-            Title = "Control Demo";
+            Title = "I/O Control";
 
             Content = new ScrollView()
             {
@@ -122,7 +124,8 @@ namespace IOControl
                         DTIOControl.TempView(),
                         DTControl.Separator(),
                         DTIOControl.TempView2(),
-                        */
+                        
+
                         DTControl.Separator(),
                         btn,
                         DTControl.Separator(),
@@ -134,6 +137,7 @@ namespace IOControl
                         DTControl.Separator(),
                         btn6,
                         DTControl.Separator()
+                        */
                     }
                 }
             };

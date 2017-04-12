@@ -165,7 +165,7 @@ namespace IOControl
         public IOType ioType;
         public String moduleMAC;
         public uint channel;
-        public Object ch_config;
+        public IOCfg ioCfg;
 
         public ContentIO() { }
         public ContentIO(IOType ioType, String moduleMAC, uint channel)
@@ -177,12 +177,12 @@ namespace IOControl
             switch (ioType)
             {
                 case IOType.DO:
-                    ch_config = IOCfgDO.SWITCH;
+                    ioCfg = IOCfg.SWITCH;
                     break;
 
                 case IOType.AD:
                 case IOType.DA:
-                    ch_config = IOCfgADDA.VOLTAGE;
+                    ioCfg = IOCfg.VOLTAGE;
                     break;
             }
         }
@@ -199,16 +199,13 @@ namespace IOControl
     // ----------------------------------------------------------------------------
     // ----------------------------------------------------------------------------
 
-    public enum IOCfgDO
+    public enum IOCfg
     {
         SWITCH,
-        BUTTON
-    }
-
-    public enum IOCfgADDA
-    {
+        BUTTON,
         VOLTAGE,
-        CURRENT
+        CURRENT,
+        NONE
     }
 
     public enum IOType

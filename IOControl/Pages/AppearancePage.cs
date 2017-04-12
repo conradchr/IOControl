@@ -6,8 +6,8 @@ using Acr.UserDialogs;
 using System.ComponentModel;    // INotifyPropertyChanged
 using Xamarin.Forms;
 using System.Diagnostics;
-using System.Threading.Tasks;
 using System.Linq;
+using Rg.Plugins.Popup.Extensions;
 
 namespace IOControl
 {
@@ -40,16 +40,17 @@ namespace IOControl
 
         public Constructor Ctor { get; set; }
 
-        /*
-        public Task<bool> PageCloseTask { get { return tcs.Task; } }
+        
+        public Task<bool> PageCloseTaskIO { get { return tcs.Task; } }
+        public bool taskComplete = true;
         TaskCompletionSource<bool> tcs;
-        bool taskComplete = false;
-        */
+        
+        
 
         ObservableCollection<HeaderModel> items;
+        ListView listView;
+
         ItemModel selectedItem = null;
-        
-        Image imgContinue;
         Grid gridFooter;
         Label labelFooter;
 
@@ -77,10 +78,27 @@ namespace IOControl
                     if (isSelected != value)
                     {
                         isSelected = value;
-                        if (PropertyChanged != null)
-                        {
-                            PropertyChanged(this, new PropertyChangedEventArgs("IsSelected"));
-                        }
+                        PropertyChanged(this, new PropertyChangedEventArgs("IsSelected"));
+                    }
+                }
+            }
+
+
+            // Spezial für IOs
+            public event PropertyChangedEventHandler Changing;
+            public IOType IOType { get; set; }
+            public String ModuleInfo { get; set; }
+
+            IOCfg iocfg = IOCfg.NONE;
+            public IOCfg IOCfg
+            {
+                get { return iocfg; }
+                set
+                {
+                    if (iocfg != value)
+                    {
+                        iocfg = value;
+                        Changing(this, new PropertyChangedEventArgs("IOCfg"));
                     }
                 }
             }
@@ -99,65 +117,17 @@ namespace IOControl
         // ----------------------------------------------------------------------------
         // ----------------------------------------------------------------------------
 
-
-        public class IOViewCell : ViewCell
-        { 
-            public IOViewCell()
-            {
-                StackLayout layout = new StackLayout()
-                {
-                    //Orientation = StackOrientation.Horizontal,
-                    Padding = new Thickness(10, 10, 10, 10)
-                };
-
-                Color temp = layout.BackgroundColor;
-                Switch sw = new Switch() { IsVisible = false };
-                sw.SetBinding(Switch.IsToggledProperty, new Binding("IsSelected"));
-                sw.Toggled += new EventHandler<ToggledEventArgs>((s, e) =>
-                {
-                    layout.BackgroundColor = sw.IsToggled ? DT.COLOR_SELECTED : temp;
-                });
-                layout.Children.Add(sw);
-
-                // Label Name
-                Label labelName = new Label() { FontSize = Device.GetNamedSize(NamedSize.Large, typeof(Label))/*, HorizontalOptions = LayoutOptions.StartAndExpand, VerticalOptions = LayoutOptions.Center*/ };
-                labelName.SetBinding(Label.TextProperty, new Binding("Name"));
-                layout.Children.Add(labelName);
-
-                // Picker
-                //DT.Log(string.Format("object={0} type={1}", ((ItemModel)BindingContext)., ((ItemModel)BindingContext).Type));
-
-                Picker picker = new Picker();
-
-                var bla = ((ItemModel)BindingContext);
-                switch (((ContentIO)bla.Object).ioType)
-                {
-                    case IOType.DO:                        
-                        picker.Items.Add(Resx.AppResources.IO_CFG_DO_OnOffSwitch);
-                        picker.Items.Add(Resx.AppResources.IO_CFG_DO_PushButton);
-                        break;
-
-                    case IOType.AD:
-                    case IOType.DA:
-                        picker.Items.Add(Resx.AppResources.IO_CFG_ADDA_Voltage);
-                        picker.Items.Add(Resx.AppResources.IO_CFG_ADDA_Current);
-                        break;
-                }
-                
-                layout.Children.Add(picker);
-
-                View = layout;
-
-            }
-        }
-
         public class ItemViewCell : ViewCell
         {
+            StackLayout slPicker;
+            Picker picker;
+            Label labelModule;
+
             public ItemViewCell()
             {
                 StackLayout layout = new StackLayout()
                 {
-                    Orientation = StackOrientation.Horizontal,
+                    Orientation = StackOrientation.Vertical,
                     Padding = new Thickness(10, 10, 10, 10)
                 };
 
@@ -175,7 +145,94 @@ namespace IOControl
                 labelName.SetBinding(Label.TextProperty, new Binding("Name"));
                 layout.Children.Add(labelName);
 
+                // Label Name
+                labelModule = new Label() { FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)), HorizontalOptions = LayoutOptions.StartAndExpand, VerticalOptions = LayoutOptions.Center };
+                labelModule.SetBinding(Label.TextProperty, new Binding("ModuleInfo"));
+                layout.Children.Add(labelModule);
+
+                // Picker
+                slPicker = new StackLayout() { Orientation = StackOrientation.Horizontal };
+                slPicker.Children.Add(new Label()
+                {
+                    FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
+                    HorizontalOptions = LayoutOptions.StartAndExpand,
+                    VerticalOptions = LayoutOptions.Center,
+                    Text = Resx.AppResources.IO_CFG_Configuration + ":"
+                });
+
+                picker = new Picker() { Title = Resx.AppResources.IO_CFG_Configuration };
+                slPicker.Children.Add(picker);
+
+                layout.Children.Add(slPicker);
+
                 View = layout;
+            }
+
+            protected override void OnBindingContextChanged()
+            {
+                ItemModel itemModel;
+
+                base.OnBindingContextChanged();
+
+                if ((itemModel = ((ItemModel)BindingContext)) != null)
+                {
+                    if (itemModel.Type == typeof(ContentIO))
+                    {
+                        var io = (ContentIO)itemModel.Object;
+                        switch (io.ioType)
+                        {
+                            case IOType.DO:
+                                picker.Items.Add(Resx.AppResources.IO_CFG_DO_OnOffSwitch);
+                                picker.Items.Add(Resx.AppResources.IO_CFG_DO_PushButton);
+                                switch (io.ioCfg)
+                                {
+                                    case IOCfg.SWITCH: picker.SelectedIndex = 0; break;
+                                    case IOCfg.BUTTON: picker.SelectedIndex = 1; break;
+                                }
+
+                                picker.SelectedIndexChanged += (s, e) =>
+                                {
+                                    switch (picker.SelectedIndex)
+                                    {
+                                        case 0: io.ioCfg = IOCfg.SWITCH; break;
+                                        case 1: io.ioCfg = IOCfg.BUTTON; break;
+                                    }
+                                    DT.Session.xmlContent.Save();
+                                };
+                                break;
+
+                            case IOType.AD:
+                            case IOType.DA:
+                                picker.Items.Add(Resx.AppResources.IO_CFG_ADDA_Voltage);
+                                picker.Items.Add(Resx.AppResources.IO_CFG_ADDA_Current);
+                                switch (io.ioCfg)
+                                {
+                                    case IOCfg.VOLTAGE: picker.SelectedIndex = 0; break;
+                                    case IOCfg.CURRENT: picker.SelectedIndex = 1; break;
+                                }
+
+                                picker.SelectedIndexChanged += (s, e) =>
+                                {
+                                    switch (picker.SelectedIndex)
+                                    {
+                                        case 0: io.ioCfg = IOCfg.VOLTAGE; break;
+                                        case 1: io.ioCfg = IOCfg.CURRENT; break;
+                                    }
+                                    DT.Session.xmlContent.Save();
+                                };
+                                break;
+
+                            default:
+                                slPicker.IsVisible = false;
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        labelModule.IsVisible = false;
+                        slPicker.IsVisible = false;
+                    }
+                }
             }
         }
 
@@ -220,20 +277,25 @@ namespace IOControl
                     }
                     else if (((HeaderModel)BindingContext).Type == typeof(ContentIO))
                     {
+                        ((AppearancePage)context).taskComplete = false;
+                        DT.Log("await AddIO");
                         await ((AppearancePage)context).AddIO();
+                        DT.Log("AddIO fertig");
+                        ((AppearancePage)context).taskComplete = true;
                     }
                 };
                 imgAdd.GestureRecognizers.Add(imgAddTapped);
                 layout.Children.Add(imgAdd);
 
-                /*
-                StackLayout outerLayout = new StackLayout();
-                outerLayout.Children.Add(layout);
-                outerLayout.Children.Add(DTControl.Separator());
-                View = outerLayout;
-                */
 
+#if (LV_SEP)
+                StackLayout outerLayout = new StackLayout() { Orientation = StackOrientation.Vertical };
+                outerLayout.Children.Add(layout);
+                outerLayout.Children.Add(DTControl.ListViewSeparator());
+                View = outerLayout;
+#else
                 View = layout;
+#endif
             }
         }
 
@@ -362,6 +424,9 @@ namespace IOControl
                         Name = ((ioname != null) ? ioname : String.Format(Resx.AppResources.CFG_ChNotAvailable, io.channel)),
                         Type = io.GetType(),
                         Object = io,
+                        IOType = io.ioType,
+                        IOCfg = io.ioCfg,
+                        ModuleInfo = String.Format("{0} ({1})", module.boardname, module.tcp_hostname)
                     });
                 }
 
@@ -369,19 +434,11 @@ namespace IOControl
 
                 return true;
             });
-            
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-            t.Start();
-            UserDialogs.Instance.ShowLoading(Resx.AppResources.MSG_PleaseWait);
 
-            await t;
-            
-            while (sw.ElapsedMilliseconds < DT.Const.TIME_ANIMATION_MIN_MS)
-            {
-                Task.Delay(20).Wait();
-            }
-            UserDialogs.Instance.HideLoading();
+            await DTControl.ShowLoadingWhileTask(t);
+
+            listView.ItemsSource = items;
+            listView.ItemTemplate = new DataTemplate(typeof(ItemViewCell));
 
             return true;
         }
@@ -390,22 +447,25 @@ namespace IOControl
 
         public AppearancePage(Constructor ctor)
         {
-            items = new ObservableCollection<HeaderModel>();
+            Ctor = ctor;
 
-            /*
+            items = new ObservableCollection<HeaderModel>();
             tcs = new TaskCompletionSource<bool>();
-            this.Disappearing += (s, e) =>
-            {
-                if (taskComplete)
+
+            if (Ctor.ViewType == ViewType.IO)
+            { 
+                this.Disappearing += (s, e) =>
                 {
-                    tcs.SetResult(true);
-                    DT.Log(string.Format("AppearancePage {0} weg", Ctor.ViewType));
-                }
-            };
-            */
+                    if (taskComplete)
+                    { 
+                        tcs.SetResult(true);
+                        DT.Log(string.Format("AppearancePage {0} weg", Ctor.ViewType));
+                    }
+                };
+            }
 
             Icon = "hamburger.png";
-            Ctor = ctor;
+            
             ToolbarItems.Add(new ToolbarItem() { Text = "Help", Icon = "btn_help.png", Command = new Command(ShowHelp) });
 
 
@@ -418,35 +478,20 @@ namespace IOControl
                 case ViewType.GROUP:
                     InitGroup();
                     break;
-
-                case ViewType.IO:
-                    //InitIO();
-                    break;
             }
 
             // --------------------
             // ListView
 
-            ListView listView = new ListView();
-            listView.ItemsSource = items;
-            listView.IsGroupingEnabled = true;
-            listView.GroupDisplayBinding = new Binding("LongName");
-            listView.GroupShortNameBinding = new Binding("ShortName");
-            //listView.SeparatorVisibility = SeparatorVisibility.None;
-            listView.GroupHeaderTemplate = new DataTemplate(() => { return new HeaderViewCell(this); });
 
-            if (Ctor.ViewType == ViewType.IO)
-            {
-                listView.ItemTemplate = new DataTemplate(typeof(IOViewCell));
-            }
-            else
+            listView = VCModels.ListViewInit();
+            listView.GroupHeaderTemplate = new DataTemplate(() => { return new VCModels.CfgHeader(this); });
+            if (Ctor.ViewType != ViewType.IO)
             {
                 listView.ItemTemplate = new DataTemplate(typeof(ItemViewCell));
+                listView.ItemsSource = items;
             }
-            
-            listView.HasUnevenRows = true;
 
-            
             listView.ItemTapped += (s, e) =>
             {
                 selectedItem = e.Item as ItemModel;
@@ -463,9 +508,7 @@ namespace IOControl
                     selectedItem.IsSelected = true;
                     ((ListView)s).SelectedItem = null;
 
-                    // weiter button kommt NUR, wenns kein modul ist
-                    imgContinue.IsVisible = selectedItem.Type != typeof(Module);
-
+                    SetFooterIcons();
                     labelFooter.IsVisible = false;
                     gridFooter.IsVisible = true;
                 }
@@ -494,63 +537,57 @@ namespace IOControl
             gridFooter = new Grid() { IsVisible = false };
 
             // Delete Button
-            Image imgDelete = new Image() { Source = ImageSource.FromFile("btn_delete.png") };
-            var imgDeleteTapped = new TapGestureRecognizer();
-            imgDeleteTapped.Tapped += async (s, e) => await DeleteItem();
-            //imgDeleteTapped.Tapped += async (s, e) => await AddIO();
-            imgDelete.GestureRecognizers.Add(imgDeleteTapped);
-            gridFooter.Children.Add(imgDelete, 0, 0);
-            
-            /*
-            DTControl.ImageButton imgDelete = new DTControl.ImageButton("btn_down");
+            DTControl.ImageButton imgDelete = new DTControl.ImageButton("btn_delete");
             imgDelete.TGR.Tapped += async (s, e) => await DeleteItem();
-            gridFooter.Children.Add(imgDelete, 0, 0);
-            */
+            gridFooter.Children.Add(imgDelete, (int)Buttons.DELETE, 0);
 
             // Edit Button
-            Image imgEdit = new Image() { Source = ImageSource.FromFile("btn_edit.png") };
-            var imgEditTapped = new TapGestureRecognizer();
-            imgEditTapped.Tapped += async (s, e) => await EditItem();
-            //imgEditTapped.Tapped += (s, e) => imgDelete.Enabled = !imgDelete.Enabled;
-            imgEdit.GestureRecognizers.Add(imgEditTapped);
-            gridFooter.Children.Add(imgEdit, 1, 0);
+            DTControl.ImageButton imgEdit = new DTControl.ImageButton("btn_edit");
+            imgEdit.TGR.Tapped += async (s, e) => await EditItem();
+            gridFooter.Children.Add(imgEdit, (int)Buttons.EDIT, 0);
 
             // swap up
-            Image imgUp = new Image() { Source = ImageSource.FromFile("btn_up.png") };
-            var imgUpTapped = new TapGestureRecognizer();
-            imgUpTapped.Tapped += (s, e) => SwapItems(Swap.UP);
-            imgUp.GestureRecognizers.Add(imgUpTapped);
-            gridFooter.Children.Add(imgUp, 2, 0);
+            DTControl.ImageButton imgUp = new DTControl.ImageButton("btn_up");
+            imgUp.TGR.Tapped += (s, e) => SwapItems(Swap.UP);
+            gridFooter.Children.Add(imgUp, (int)Buttons.UP, 0);
 
             // swap down
-            Image imgDown = new Image() { Source = ImageSource.FromFile("btn_down.png") };
-            var imgDownTapped = new TapGestureRecognizer();
-            imgDownTapped.Tapped += (s, e) => SwapItems(Swap.DOWN);
-            imgDown.GestureRecognizers.Add(imgDownTapped);
-            gridFooter.Children.Add(imgDown, 3, 0);
+            DTControl.ImageButton imgDown = new DTControl.ImageButton("btn_down");
+            imgDown.TGR.Tapped += (s, e) => SwapItems(Swap.DOWN);
+            gridFooter.Children.Add(imgDown, (int)Buttons.DOWN, 0);
 
-            imgContinue = new Image() { Source = ImageSource.FromFile("btn_continue.png"), IsVisible = false };
-            var imgContinueTapped = new TapGestureRecognizer();
-            imgContinueTapped.Tapped += async (s, e) =>
+            DTControl.ImageButton imgContinue = new DTControl.ImageButton("btn_continue");
+            imgContinue.TGR.Tapped += async (s, e) =>
             {
                 switch (Ctor.ViewType)
                 {
                     case ViewType.MAIN:
-                        await Navigation.PushAsync(new AppearancePage(new Constructor()
+
+                        if (selectedItem.Type == typeof(Module))
                         {
-                            ViewType = ViewType.GROUP,
-                            Object = selectedItem.Object
-                        }));
+                            await Navigation.PushAsync(new DialogNetworkConfig(new DialogNetworkConfig.Constructor()
+                            {
+                                ViewType = DialogNetworkConfig.ViewType.EDIT,
+                                Module = selectedItem.Object as Module
+                            }));
+                        }
+                        else
+                        {
+                            await Navigation.PushAsync(new AppearancePage(new Constructor()
+                            {
+                                ViewType = ViewType.GROUP,
+                                Object = selectedItem.Object
+                            }));
+                        }
                         break;
 
                     case ViewType.GROUP:
-                        //UserDialogs.Instance.ShowLoading(Resx.AppResources.MSG_PleaseWait);
                         AppearancePage ap = new AppearancePage(new Constructor()
                         {
                             ViewType = ViewType.IO,
                             Object = selectedItem.Object
                         });
-                        //UserDialogs.Instance.HideLoading();
+                        
                         await Navigation.PushAsync(ap);
                         await ap.InitIO();
                         break;
@@ -558,27 +595,8 @@ namespace IOControl
                     case ViewType.IO:
                         break;
                 }
-
-
-
-                /*
-                DT.Log("zeige GROUP");
-                AppearancePage ap = new AppearancePage(new Constructor()
-                {
-                    ViewType = ViewType.GROUP,
-                    Object = selectedItem.Object
-                });
-                await Navigation.PushAsync(ap);
-                DT.Log("warte auf GROUP ende");
-                await ap.PageCloseTask;
-                DT.Log("ende GROUP");
-                */
-
-
             };
-
-            imgContinue.GestureRecognizers.Add(imgContinueTapped);
-            gridFooter.Children.Add(imgContinue, 4, 0);
+            gridFooter.Children.Add(imgContinue, (int)Buttons.CONTINUE, 0);
 
             slFooter.Children.Add(gridFooter);
             slMain.Children.Add(slFooter);
@@ -630,11 +648,16 @@ namespace IOControl
                 {
                     foreach (var selectedIO in ret)
                     {
+                        var module = DT.Session.xmlContent.modules.Find(x => x.mac == selectedIO.moduleMAC);
+
                         items[0].Add(new ItemModel()
                         {
-                            Name = DT.Session.xmlContent.modules.Find(x => x.mac == selectedIO.moduleMAC).GetIOName(ioType, selectedIO.channel),
+                            Name = module.GetIOName(ioType, selectedIO.channel),
                             Object = selectedIO,
-                            Type = selectedIO.GetType()
+                            Type = selectedIO.GetType(),
+                            IOType = selectedIO.ioType,
+                            IOCfg = selectedIO.ioCfg,
+                            ModuleInfo = String.Format("{0} ({1})", module.boardname, module.tcp_hostname)
                         });
                     }
 
@@ -903,7 +926,12 @@ namespace IOControl
                     }
 
                     DT.Session.xmlContent.Save();
-                    MessagingCenter.Send<ContentPage>(this, DT.Const.MSG_REFRESH);
+                    if (Ctor.ViewType != ViewType.IO)
+                    { 
+                        // bei I/Os nicht refreshen, da sonst die namen weg sind
+                        MessagingCenter.Send<ContentPage>(this, DT.Const.MSG_REFRESH);
+                    }
+                    SetFooterIcons();
                 }
             }
         }
@@ -962,6 +990,7 @@ namespace IOControl
                             case ViewType.IO:
                                 DT.Log("IO");
                                 DT.Log("Items vor löschen " + ((ContentGroup)Ctor.Object).io.Count.ToString());
+                                DT.Log("Lösche " + ((ContentIO)selectedItem.Object).channel.ToString());
                                 ((ContentGroup)Ctor.Object).io.Remove(selectedItem.Object as ContentIO);
                                 DT.Log("Items NACH löschen " + ((ContentGroup)Ctor.Object).io.Count.ToString());
                                 break;
@@ -969,7 +998,11 @@ namespace IOControl
                     }
 
                     DT.Session.xmlContent.Save();
-                    MessagingCenter.Send<ContentPage>(this, DT.Const.MSG_REFRESH);
+                    if (Ctor.ViewType != ViewType.IO)
+                    {
+                        // bei I/Os nicht refreshen, da sonst die namen weg sind
+                        MessagingCenter.Send<ContentPage>(this, DT.Const.MSG_REFRESH);
+                    }
                     selectedItem = null;
                 }
             }
@@ -985,9 +1018,30 @@ namespace IOControl
 
         public async void ShowHelp()
         {
+            PopUpHelp help;
+            bool val;
+
+            help = new PopUpHelp(new PopUpHelp.Constructor()
+            {
+                Title = "Wussten Sie schon?",
+                Content = ContentHelp.ContentHelpLocation()
+            });
+            await Navigation.PushPopupAsync(help);
+            val = await help.PageCloseTask;
+
+            help = new PopUpHelp(new PopUpHelp.Constructor()
+            {
+                Title = "Wussten Sie schon?",
+                Content = ContentHelp.ContentHelpLocationButtons()
+            });
+            await Navigation.PushPopupAsync(help);
+            val = await help.PageCloseTask;
+
+            /*
             switch (Ctor.ViewType)
             {
                 case ViewType.MAIN:
+
                     await UserDialogs.Instance.AlertAsync("machwas", "MAIN");
                     break;
 
@@ -998,6 +1052,45 @@ namespace IOControl
                 case ViewType.IO:
                     await UserDialogs.Instance.AlertAsync("machwas", "IO");
                     break;
+            }
+            */
+        }
+
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+
+        enum Buttons
+        {
+            DELETE = 0,
+            EDIT,
+            UP,
+            DOWN,
+            CONTINUE
+        }
+
+        public void SetFooterIcons()
+        {
+            int index;
+            bool isModule = false;
+
+            Func<Buttons, DTControl.ImageButton> GetButton = (btn) =>
+            {
+                return (DTControl.ImageButton)gridFooter.Children.FirstOrDefault(x => ((Grid.GetRow(x) == 0) && (Grid.GetColumn(x) == (int)btn)));
+            };
+
+            if (selectedItem != null)
+            {
+                isModule = (selectedItem.Type == typeof(Module));
+                var itemList = (isModule ? items[1] : items[0]);
+                index = itemList.IndexOf(selectedItem);
+                
+                GetButton(Buttons.UP).Enabled = (index != 0);
+                GetButton(Buttons.DOWN).Enabled = (index != (itemList.Count - 1));
+                GetButton(Buttons.EDIT).Enabled = ((selectedItem.Type != typeof(Module)) && (selectedItem.Type != typeof(ContentIO)));
+                GetButton(Buttons.CONTINUE).Enabled = (selectedItem.Type != typeof(ContentIO));
             }
         }
     }

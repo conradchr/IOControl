@@ -278,9 +278,8 @@
     <value>Tooltips anzeigen</value>
   </data>
   <data name="HELP_HelpLocation" xml:space="preserve">
-    <value>Sie möchten mehrere Ein-/Ausgängen von mehreren Modulen in einer Ansicht zusammenfassen?
--kein Problem. Hierzu können Sie eine eigene Gruppe erstellen. Zur besseren Übersicht müssen Gruppen
-einem Ort zugeordnet sein.
+    <value>Sie können mehrere Ein-/Ausgängen von unterschiedlichen Modulen in einer Ansicht zusammenfassen. Hierzu können Sie eine eigene Gruppe erstellen. 
+Zur besseren Übersicht müssen Gruppen einem Ort zugeordnet sein.
 	</value>
   </data>
   <data name="IO_CFG_ADDA_Current" xml:space="preserve">
@@ -294,5 +293,8 @@ einem Ort zugeordnet sein.
   </data>
   <data name="IO_CFG_DO_PushButton" xml:space="preserve">
     <value>Taster</value>
+  </data>
+  <data name="IO_CFG_Configuration" xml:space="preserve">
+    <value>Konfiguration</value>
   </data>
 </root>
