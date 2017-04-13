@@ -8,6 +8,8 @@ using Android.Views;
 using Android.Widget;
 using Android.OS;
 
+// https://material.io/icons/
+
 // New Xlabs
 /*
 using XLabs.Ioc; // Using for SimpleContainer

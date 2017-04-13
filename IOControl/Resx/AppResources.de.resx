@@ -297,4 +297,45 @@ Zur besseren Übersicht müssen Gruppen einem Ort zugeordnet sein.
   <data name="IO_CFG_Configuration" xml:space="preserve">
     <value>Konfiguration</value>
   </data>
+  <data name="NC_WarningConfig" xml:space="preserve">
+    <value>Achtung:
+Diese Konfiguration wird nur lokal auf dem Gerät gespeichert.
+Die Konfiguration auf dem Modul wird nicht überschrieben!</value>
+  </data>
+  <data name="NC_CommErrorHeader" xml:space="preserve">
+    <value>Keine Verbindung</value>
+  </data>
+  <data name="NC_CommErrorText" xml:space="preserve">
+    <value>Es konnte keine Verbindung zu einem Modul mit dieser Konfiguration hergestellt werden.</value>
+  </data>
+  <data name="NC_EditToastOK" xml:space="preserve">
+    <value>Die Modul Konfiguration wurde erfolgreich geändert!</value>
+  </data>
+  <data name="NC_LoadModulConfigErrorHeader" xml:space="preserve">
+    <value>Fehler</value>
+  </data>
+  <data name="NC_LoadModulConfigErrorText" xml:space="preserve">
+    <value>Fehler beim Laden der aktuellen Module Konfiguration.
+Stellen Sie sicher, das Ihr mobiles Gerät und das Modul im selben Netzwerk sind!</value>
+  </data>
+  <data name="NC_LoadModulConfigOK" xml:space="preserve">
+    <value>Die Modul Konfiguration wurde erfolgriech geladen!</value>
+  </data>
+  <data name="NC_LoadModuleConfigHeader" xml:space="preserve">
+    <value>Modul Konfiguration laden</value>
+  </data>
+  <data name="NC_LoadModuleConfigText" xml:space="preserve">
+    <value>Mit dieser Einstellung wird die aktuelle Modul Konfiguration geladen.
+
+Achtung:
+Die lokale Konfiguration auf diesem Gerät wird damit überschrieben.
+
+Möchten Sie fortfahren?</value>
+  </data>
+  <data name="NC_AddModuleExistText" xml:space="preserve">
+    <value>Dieses Modul ist bereits vorhanden und wurde deshalb nicht hinzugefügt.</value>
+  </data>
+  <data name="NC_AddModuleToastOK" xml:space="preserve">
+    <value>Modul wurde erfolgreich hinzugefügt!</value>
+  </data>
 </root>

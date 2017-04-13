@@ -294,4 +294,37 @@
   <data name="HELP_Header" xml:space="preserve">
     <value />
   </data>
+  <data name="NC_WarningConfig" xml:space="preserve">
+    <value />
+  </data>
+  <data name="NC_CommErrorHeader" xml:space="preserve">
+    <value />
+  </data>
+  <data name="NC_CommErrorText" xml:space="preserve">
+    <value />
+  </data>
+  <data name="NC_EditToastOK" xml:space="preserve">
+    <value />
+  </data>
+  <data name="NC_LoadModulConfigErrorHeader" xml:space="preserve">
+    <value />
+  </data>
+  <data name="NC_LoadModulConfigErrorText" xml:space="preserve">
+    <value />
+  </data>
+  <data name="NC_LoadModulConfigOK" xml:space="preserve">
+    <value />
+  </data>
+  <data name="NC_LoadModuleConfigHeader" xml:space="preserve">
+    <value />
+  </data>
+  <data name="NC_LoadModuleConfigText" xml:space="preserve">
+    <value />
+  </data>
+  <data name="NC_AddModuleExistText" xml:space="preserve">
+    <value />
+  </data>
+  <data name="NC_AddModuleToastOK" xml:space="preserve">
+    <value />
+  </data>
 </root>

@@ -12,6 +12,58 @@ namespace IOControl
 {
     public class DTControl
     {
+
+        public static Label GetLabel(String text)
+        {
+            return new Label()
+            {
+                Text = text,
+                TextColor = Color.White,
+                FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
+                VerticalOptions = LayoutOptions.Center
+            };
+        }
+
+        public enum Images
+        {
+            WARNING,
+            UPDATE,
+        }
+
+        public static Image GetImage(Images img)
+        {
+            string imgSource = "";
+
+            switch (img)
+            {
+                case Images.WARNING: imgSource = "ic_error_outline_white"; break;
+                case Images.UPDATE: imgSource = "ic_system_update_white"; break;       
+            }
+
+            imgSource += "_48dp.png";
+            return new Image() { Source = ImageSource.FromFile(imgSource) };
+        }
+
+        public static View GetImageCell(string imgSource, string text)
+        {
+            Image img = new Image() { Source = ImageSource.FromFile(imgSource), HorizontalOptions = LayoutOptions.Start };
+            StackLayout layout = new StackLayout() { Orientation = StackOrientation.Horizontal };
+            layout.Children.Add(img);
+            layout.Children.Add(GetLabel(text));
+            return layout;
+        }
+
+        public static View GetImageCell(Images image, string text)
+        {
+            Image img = GetImage(image);
+            img.HorizontalOptions = LayoutOptions.Start;
+            StackLayout layout = new StackLayout() { Orientation = StackOrientation.Horizontal };
+            layout.Children.Add(img);
+            layout.Children.Add(GetLabel(text));
+            return layout;
+        }
+
+
         public enum IOViewStyle
         {
             AD,
@@ -61,18 +113,7 @@ namespace IOControl
 
             return ret;
         }
-
-
-
-        public static Label GetLabel(String text)
-        {
-            Label header = new Label();
-            header.Text = text;
-            header.TextColor = Color.White;
-            header.FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label));
-            header.VerticalOptions = LayoutOptions.Center;
-            return header;
-        }
+        
 		
 
         public static Layout View(Dictionary<int, View> dict, string text, IOViewStyle style, int id)

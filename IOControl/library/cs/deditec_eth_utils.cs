@@ -19,8 +19,15 @@ public class DT_ETH
     public const uint TCP_DEFAULT_TIMEOUT = 5000;
     public const uint TCP_DEFAULT_PORT = 9912;
 
+    public enum ConnectionType
+    {
+        TCP,
+        UDP
+    }
+    /*
     public const uint CONNECTION_TCP = 1;
     public const uint CONNECTION_UDP = 2;
+    */
 
     public const uint ETH_TIMEOUT_MIN = 5;
     public const uint ETH_TIMEOUT_MAX = 30000;
@@ -29,6 +36,36 @@ public class DT_ETH
 
     public const uint DIP_SWITCH_DELIVERY_STANDARD = 0xf; // 1111 [bin] -> alles an!
 
+
+
+
+
+    public static uint GetEthernetDeviceConfig(uint handle, string mac, ConnectionType connection_type, ref Byte[] dev_cfg)
+    {
+        uint dummy_uint = 0;
+        uint ret;
+
+        switch (connection_type)
+        {
+            case ConnectionType.TCP:
+                ret = DT.Delib.DapiSpecialCommandExt(handle, DT.Ext.DAPI_SPECIAL_CMDEXT_TCP_MODULE_GET_CURRENT_CONFIG, 0, 0, 0, ref dummy_uint, ref dummy_uint, ref dummy_uint, new Byte[] { 0 }, 0, new Byte[] { 0 }, 0, dev_cfg, (uint)dev_cfg.Length, ref dummy_uint);
+                if (ret != DT.Error.DAPI_ERR_NONE)
+                {
+                    return DT.RETURN_ERROR;
+                }
+                break;
+
+            case ConnectionType.UDP:
+                ret = DT.Bc.deditec_bc_get_byte_parameter(mac, DT.Bc.Parameter.DEDITEC_BC_PACKET_PARAM_TCP_CONFIG_USED, ref dev_cfg);
+                if (ret != DT.Error.DAPI_ERR_NONE)
+                {
+                    return DT.RETURN_ERROR;
+                }
+                break;
+        }
+
+        return DT.RETURN_OK;
+    }
 
 
 #if (!__MOBILE__)
@@ -234,8 +271,6 @@ public class DT_ETH
     // ----------------------------------------------------------------------------
     // ----------------------------------------------------------------------------
     // ----------------------------------------------------------------------------
-
-    
 
     public static uint GetEthernetDeviceConfig(uint handle, ETHDeviceConfig eth_device, uint connection_type, ref Byte[] dev_cfg)
     {

@@ -22,7 +22,8 @@ namespace IOControl
         public enum ViewType
         {
             EDIT,
-            ADD
+            ADD,
+            CONFIG
         }
 
         public class Constructor
@@ -40,13 +41,13 @@ namespace IOControl
         // ----------------------------------------------------------------------------
 
         StackLayout slMain;
-        StackLayout slUploading;
+        
         StackLayout slContent;
         StackLayout slFooter;
 
         ToolbarItem tiHelp;
 
-        ActivityIndicator aiUploading;
+        
 
         Entry entName;
         Entry entHostname;
@@ -89,10 +90,13 @@ namespace IOControl
 
         public void SetForm()
         {
-            entName.Text = Ctor.Module.boardname;
-            entHostname.Text = Ctor.Module.tcp_hostname;
-            entPort.Text = Ctor.Module.tcp_port.ToString();
-            entTimeout.Text = Ctor.Module.tcp_timeout.ToString();
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                entName.Text = Ctor.Module.boardname;
+                entHostname.Text = Ctor.Module.tcp_hostname;
+                entPort.Text = Ctor.Module.tcp_port.ToString();
+                entTimeout.Text = Ctor.Module.tcp_timeout.ToString();
+            });
         }
 
         public Label LabelTemplate(String text)
@@ -109,7 +113,7 @@ namespace IOControl
         {
             ToolbarItems.Add(new ToolbarItem() { Text = "Help", Icon = "btn_help.png", Command = new Command(ShowHelp) });
 
-            slMain = new StackLayout() { VerticalOptions = LayoutOptions.FillAndExpand, HorizontalOptions = LayoutOptions.FillAndExpand };
+            slMain = new StackLayout() { VerticalOptions = LayoutOptions.FillAndExpand, HorizontalOptions = LayoutOptions.FillAndExpand, Padding = VCModels.PAD_HEADER };
             slContent = new StackLayout() { VerticalOptions = LayoutOptions.FillAndExpand };
 
             if (Ctor.ViewType != ViewType.ADD)
@@ -145,13 +149,25 @@ namespace IOControl
             slMain.Children.Add(slContent);
 
             // footer
-            slFooter = new StackLayout() { Orientation = StackOrientation.Vertical, VerticalOptions = LayoutOptions.End };
+            slFooter = new StackLayout() { Orientation = StackOrientation.Vertical, VerticalOptions = LayoutOptions.End, Padding = VCModels.PAD_FOOTER };
+
+            if (Ctor.ViewType == ViewType.EDIT)
+            {
+                slFooter.Children.Add(DTControl.GetImageCell(DTControl.Images.WARNING, Resx.AppResources.NC_WarningConfig));
+            }
+
             grid = new Grid();
+            grid.Padding = new Thickness(0, 5, 0, 0);
 
             imgCancel = new Image() { Source = ImageSource.FromFile("btn_cancel.png") };
             var imgCancelTapped = new TapGestureRecognizer();
             imgCancelTapped.Tapped += (s, e) => Navigation.PopAsync();
             imgCancel.GestureRecognizers.Add(imgCancelTapped);
+
+            Image imgUpdate = DTControl.GetImage(DTControl.Images.UPDATE);
+            var imgUpdateTapped = new TapGestureRecognizer();
+            imgUpdateTapped.Tapped += async (s, e) => await LoadConfigFromModule();
+            imgUpdate.GestureRecognizers.Add(imgUpdateTapped);
 
             imgOK = new Image() { Source = ImageSource.FromFile("btn_ok.png") };
             var imgOKTapped = new TapGestureRecognizer();
@@ -159,19 +175,74 @@ namespace IOControl
             imgOK.GestureRecognizers.Add(imgOKTapped);
 
             grid.Children.Add(imgCancel, 0, 0);
-            grid.Children.Add(imgOK, 1, 0);
+            if (Ctor.ViewType == ViewType.EDIT)
+            { 
+                grid.Children.Add(imgUpdate, 1, 0);
+            }
+            grid.Children.Add(imgOK, 2, 0);
             slFooter.Children.Add(grid);
             slMain.Children.Add(slFooter);
-
-
-            slUploading = new StackLayout() { VerticalOptions = LayoutOptions.CenterAndExpand, IsVisible = false };
-            aiUploading = new ActivityIndicator() { Color = Color.Red, IsRunning = true };
-            slUploading.Children.Add(aiUploading);
-            slUploading.Children.Add(new Label() { Text = Resx.AppResources.NC_SetNewModuleConfig, VerticalOptions = LayoutOptions.Center, HorizontalOptions = LayoutOptions.Center, TextColor = Color.White, HorizontalTextAlignment = TextAlignment.Center, FontSize = Device.GetNamedSize(NamedSize.Large, typeof(Label)) });
-            slMain.Children.Add(slUploading);
-
-            Content = slMain;
+            
+            Content = new ScrollView() { Content = slMain };
         }
+
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+
+        public async Task<bool> LoadConfigFromModule()
+        {
+            Task<bool> t = new Task<bool>(() =>
+            {
+                byte[] buffer = new byte[256];
+                
+                if (DT.ETH.GetEthernetDeviceConfig(0, Ctor.Module.mac.Replace(":", ""), DT_ETH.ConnectionType.UDP, ref buffer) == 0)
+                {
+                    DT.Bc.ETHDeviceConfig devcfg = new DT.Bc.ETHDeviceConfig();
+                    devcfg.SetDeviceConfig(buffer);
+
+                    Ctor.Module.boardname = devcfg.BoardName.boardname;
+                    Ctor.Module.tcp_hostname = devcfg.Network.ip;
+                    Ctor.Module.tcp_port = (int) devcfg.Network.port;
+
+                    SetForm();
+                    return true;
+                }
+
+                // modul nicht gefunden
+                return false;
+            });
+
+            var answer = await UserDialogs.Instance.ConfirmAsync(
+                Resx.AppResources.NC_LoadModuleConfigText,
+                Resx.AppResources.NC_LoadModuleConfigHeader,
+                Resx.AppResources.MSG_Yes,
+                Resx.AppResources.MSG_No
+            );
+
+            if (answer)
+            {
+                // user hat confirmed
+                if (await DTControl.ShowLoadingWhileTask(t))
+                {
+                    // modul wurde geupdated
+                    DTControl.ShowToast(Resx.AppResources.NC_LoadModulConfigOK);
+                    return true;
+                }
+
+                // modul konfig konnte nicht ausgelesen werden
+                await UserDialogs.Instance.AlertAsync(
+                    Resx.AppResources.NC_LoadModulConfigErrorText,
+                    Resx.AppResources.NC_LoadModulConfigErrorHeader,
+                    Resx.AppResources.MSG_OK
+                );
+            }
+
+            return false;
+        }
+
 
         // ----------------------------------------------------------------------------
         // ----------------------------------------------------------------------------
@@ -183,33 +254,50 @@ namespace IOControl
         {
             if (await SaveModuleX())
             {
+                // Communcation OK
                 await Navigation.PopAsync();
+                DTControl.ShowToast(Resx.AppResources.NC_EditToastOK);
+                return true;
             }
 
-            return true;
+            var answer = await UserDialogs.Instance.ConfirmAsync(
+                Resx.AppResources.NC_CommErrorText,
+                Resx.AppResources.NC_CommErrorHeader,
+                Resx.AppResources.MSG_Yes,
+                Resx.AppResources.MSG_No
+            );
+
+            if (answer)
+            {
+                // User möchte trotzdem fortfahren..
+                await Navigation.PopAsync();
+                return true;
+            }
+
+            return false;
         }
 
         public async Task<bool> SaveModuleX()
         {
             Task<bool> t = new Task<bool>(() =>
             {
-                uint ret;
                 byte[] buffer = new byte[256];
-
                 Module module = new Module(entHostname.Text, Convert.ToInt32(entPort.Text), Convert.ToInt32(entTimeout.Text));
                 uint handle = module.OpenModule();
 
                 if (handle != 0)
                 {
-                    ret = DT.Delib.DapiSpecialCommandExt(handle, DT.Ext.DAPI_SPECIAL_CMDEXT_TCP_MODULE_GET_CURRENT_CONFIG, 0, 0, 0, ref DT.dummy_uint, ref DT.dummy_uint, ref DT.dummy_uint, new Byte[] { 0 }, 0, new Byte[] { 0 }, 0, buffer, (uint)buffer.Length, ref DT.dummy_uint);
-                    if (ret == 0)
+                    if (DT.ETH.GetEthernetDeviceConfig(handle, null, DT_ETH.ConnectionType.TCP, ref buffer) == 0)
                     {
-                        // nur dann ok, weil ich die mac als ID brauch
-                        DT.Bc.ETHDeviceConfig devcfg = new DT.Bc.ETHDeviceConfig();
-                        devcfg.SetDeviceConfig(buffer);
+                        if (Ctor.ViewType == ViewType.ADD)
+                        { 
+                            // nur dann ok, weil ich die mac als ID brauch
+                            DT.Bc.ETHDeviceConfig devcfg = new DT.Bc.ETHDeviceConfig();
+                            devcfg.SetDeviceConfig(buffer);
 
-                        module.boardname = devcfg.BoardName.boardname;
-                        module.mac = devcfg.Network.mac_formatted;
+                            module.boardname = devcfg.BoardName.boardname;
+                            module.mac = devcfg.Network.mac_formatted;
+                        }
 
                         taskResult = module;
                         return true;
@@ -221,13 +309,7 @@ namespace IOControl
                 return false;
             });
 
-            if (await DTControl.ShowLoadingWhileTask(t))
-            {
-                return true;
-            }
-
-            DTControl.ShowToast("Communication nicht OK");
-            return false;
+            return await DTControl.ShowLoadingWhileTask(t);
         }
 
         // ----------------------------------------------------------------------------

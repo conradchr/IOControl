@@ -566,6 +566,42 @@ namespace IOControl.Resx {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
+        internal static string NC_AddModuleExistText {
+            get {
+                return ResourceManager.GetString("NC_AddModuleExistText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
+        internal static string NC_AddModuleToastOK {
+            get {
+                return ResourceManager.GetString("NC_AddModuleToastOK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
+        internal static string NC_CommErrorHeader {
+            get {
+                return ResourceManager.GetString("NC_CommErrorHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
+        internal static string NC_CommErrorText {
+            get {
+                return ResourceManager.GetString("NC_CommErrorText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Edit modul configuration ähnelt.
         /// </summary>
         internal static string NC_EditHeader {
@@ -575,11 +611,74 @@ namespace IOControl.Resx {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
+        internal static string NC_EditToastOK {
+            get {
+                return ResourceManager.GetString("NC_EditToastOK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
+        internal static string NC_LoadModulConfigErrorHeader {
+            get {
+                return ResourceManager.GetString("NC_LoadModulConfigErrorHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
+        internal static string NC_LoadModulConfigErrorText {
+            get {
+                return ResourceManager.GetString("NC_LoadModulConfigErrorText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
+        internal static string NC_LoadModulConfigOK {
+            get {
+                return ResourceManager.GetString("NC_LoadModulConfigOK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
+        internal static string NC_LoadModuleConfigHeader {
+            get {
+                return ResourceManager.GetString("NC_LoadModuleConfigHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
+        internal static string NC_LoadModuleConfigText {
+            get {
+                return ResourceManager.GetString("NC_LoadModuleConfigText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Uploading network configuration to the module ähnelt.
         /// </summary>
         internal static string NC_SetNewModuleConfig {
             get {
                 return ResourceManager.GetString("NC_SetNewModuleConfig", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
+        internal static string NC_WarningConfig {
+            get {
+                return ResourceManager.GetString("NC_WarningConfig", resourceCulture);
             }
         }
         

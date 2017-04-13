@@ -7,6 +7,7 @@ namespace IOControl
         public static Thickness PAD_HEADER = new Thickness(10, 5, 10, 5);
         public static Thickness PAD_ICON = new Thickness(10, 10, 10, 10);
         public static Thickness PAD_FOOTER = new Thickness(10, 10, 10, 10);
+        public static Thickness PAD_MAIN = new Thickness(0, 5, 0, 0);
 
         // ----------------------------------------------------------------------------
         // ----------------------------------------------------------------------------

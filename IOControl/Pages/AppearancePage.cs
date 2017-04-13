@@ -514,14 +514,14 @@ namespace IOControl
                 }
             };
 
-            StackLayout slMain = new StackLayout() { Padding = new Thickness(0, 5, 0, 0) };
+            StackLayout slMain = new StackLayout() { Padding = VCModels.PAD_MAIN };
             StackLayout slListView = new StackLayout() { VerticalOptions = LayoutOptions.FillAndExpand };
             slListView.Children.Add(listView);
             slMain.Children.Add(slListView);
 
             // ------------------------------------
             // footer
-            StackLayout slFooter = new StackLayout() { Orientation = StackOrientation.Vertical, VerticalOptions = LayoutOptions.End, Padding = new Thickness(10, 10, 10, 10) };
+            StackLayout slFooter = new StackLayout() { Orientation = StackOrientation.Vertical, VerticalOptions = LayoutOptions.End, Padding = VCModels.PAD_FOOTER };
 
             labelFooter = new Label()
             {
@@ -565,11 +565,20 @@ namespace IOControl
 
                         if (selectedItem.Type == typeof(Module))
                         {
-                            await Navigation.PushAsync(new DialogNetworkConfig(new DialogNetworkConfig.Constructor()
+                            DialogNetworkConfig dnc = new DialogNetworkConfig(new DialogNetworkConfig.Constructor()
                             {
                                 ViewType = DialogNetworkConfig.ViewType.EDIT,
                                 Module = selectedItem.Object as Module
-                            }));
+                            });
+                            await Navigation.PushAsync(dnc);
+                            Module ret = await dnc.PageCloseTask;
+                            if (ret != null)
+                            {
+                                // alles ok
+                                selectedItem.Name = ret.boardname;
+                                DT.Session.xmlContent.Save();
+                                MessagingCenter.Send<ContentPage>(this, DT.Const.MSG_REFRESH);
+                            }
                         }
                         else
                         {
@@ -734,15 +743,20 @@ namespace IOControl
                         DT.Session.xmlContent.Save();
                         MessagingCenter.Send<ContentPage>(this, DT.Const.MSG_REFRESH);
 
-                        DTControl.ShowToast("module geadded");
+                        DTControl.ShowToast(Resx.AppResources.NC_AddModuleToastOK);
                         return true;
                     }
 
-                    DTControl.ShowToast("module schon drin");
+                    // modul ist schon geadded
+                    await UserDialogs.Instance.AlertAsync(
+                        Resx.AppResources.NC_AddHeader,
+                        Resx.AppResources.NC_AddModuleExistText,
+                        Resx.AppResources.MSG_OK
+                    );
                 }
             }
 
-            return true;
+            return false;
         }
 
         // ----------------------------------------------------------------------------
