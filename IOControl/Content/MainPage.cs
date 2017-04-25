@@ -65,11 +65,11 @@ namespace IOControl
         {
             menuNavigation.ListView.SelectedItem = null;
 
-            var item = e.Item as MenuNaviModel;
+            var item = e.Item as MainNaviItem;
             if (item != null)
             {
                 List<String> tabs = new List<String>();
-                SessModule.Module module = null;
+                ETHModule.Module module = null;
                 NavigationPage navPage = null;
                 String msg = null;
 
@@ -78,13 +78,13 @@ namespace IOControl
                     if (item.GroupType == typeof(XML.XMLView))
                     {
                         var location = (XML.XMLView)item.Object;
-                        List<SessModule.Module> locModules = new List<SessModule.Module>();
+                        List<ETHModule.Module> locModules = new List<ETHModule.Module>();
 
                         foreach (var group in location.Groups)
                         {
                             foreach (var io in group.IOs)
                             {
-                                var mod = Sess.Xml.modules.Find(x => x.mac == io.MAC);
+                                var mod = Sess.Xml.Modules.Find(x => x.mac == io.MAC);
 
                                 if (mod == null)
                                 {
@@ -97,7 +97,7 @@ namespace IOControl
                                         {
                                             if (ok)
                                             {
-                                                foreach(var l in Sess.Xml.loc)
+                                                foreach(var l in Sess.Xml.Views)
                                                 {
                                                     foreach(var g in l.Groups)
                                                     {
@@ -136,9 +136,9 @@ namespace IOControl
                             Object = location
                         }));
                     }
-                    else if (item.GroupType == typeof(SessModule.Module))
+                    else if (item.GroupType == typeof(ETHModule.Module))
                     {
-                        module = (SessModule.Module)item.Object;
+                        module = (ETHModule.Module)item.Object;
 
                         if (module.OpenModule() == 0)
                         {

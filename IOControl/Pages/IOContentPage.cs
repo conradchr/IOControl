@@ -32,7 +32,7 @@ namespace IOControl
 
             // ModulView
             public XML.IOTypes IOType { get; set; }
-            public SessModule.Module Module { get; set; }
+            public ETHModule.Module Module { get; set; }
 
             // CustomView
             public XML.XMLViewGroup Group { get; set; }
@@ -154,7 +154,7 @@ namespace IOControl
                     { 
                         foreach (var io in Ctor.Group.IOs)
                         {
-                            var module = Sess.Xml.modules.Find(x => x.mac == io.MAC);
+                            var module = Sess.Xml.Modules.Find(x => x.mac == io.MAC);
                             AddIOView(sl, PageControls, io.IOType, module, io.Channel, io.GUICfg);
                         }
                     }
@@ -188,12 +188,12 @@ namespace IOControl
         // ----------------------------------------------------------------------------
         // ----------------------------------------------------------------------------
 
-        public void AddIOView(StackLayout sl, Dictionary<int, View> dict, XML.IOTypes ioType, SessModule.Module module, uint ch)
+        public void AddIOView(StackLayout sl, Dictionary<int, View> dict, XML.IOTypes ioType, ETHModule.Module module, uint ch)
         {
             AddIOView(sl, dict, ioType, module, ch, XML.GUIConfigs.NONE);
         }
 
-        public void AddIOView(StackLayout sl, Dictionary<int, View> dict, XML.IOTypes ioType, SessModule.Module module, uint ch, XML.GUIConfigs ioCfg)
+        public void AddIOView(StackLayout sl, Dictionary<int, View> dict, XML.IOTypes ioType, ETHModule.Module module, uint ch, XML.GUIConfigs ioCfg)
         {
             Action userAction;
 
@@ -300,7 +300,7 @@ namespace IOControl
                         // ------------------------------------
                 }   // switch (ioType)
 
-                AddModuleTask(module, ioType, new SessModule.ModuleTaskParam(ch, valID, ioCfg), dict);
+                AddModuleTask(module, ioType, new ETHModule.ModuleTaskParam(ch, valID, ioCfg), dict);
                 valID++;
             }   // if (channelValid)
             else
@@ -320,12 +320,12 @@ namespace IOControl
         // ----------------------------------------------------------------------------
         // ----------------------------------------------------------------------------
 
-        public Action CreateTodoEvent(XML.IOTypes ioType, SessModule.Module module, Dictionary<int, View> dict, uint ch, int id)
+        public Action CreateTodoEvent(XML.IOTypes ioType, ETHModule.Module module, Dictionary<int, View> dict, uint ch, int id)
         {
             return CreateTodoEvent(ioType, module, dict, ch, id, DT.NULL);
         }
 
-        public Action CreateTodoEvent(XML.IOTypes ioType, SessModule.Module module, Dictionary<int, View> dict, uint ch, int id, int id2)
+        public Action CreateTodoEvent(XML.IOTypes ioType, ETHModule.Module module, Dictionary<int, View> dict, uint ch, int id, int id2)
         {
             return new Action(() => {
 
@@ -365,19 +365,19 @@ namespace IOControl
 
         public class ModuleTask
         {
-            public SessModule.Module module;
-            public List<SessModule.ModuleTask> tasks = new List<SessModule.ModuleTask>();
+            public ETHModule.Module module;
+            public List<ETHModule.ModuleTask> tasks = new List<ETHModule.ModuleTask>();
 
-            public ModuleTask(SessModule.Module module)
+            public ModuleTask(ETHModule.Module module)
             {
                 this.module = module;
             }
         }
 
-        public void AddModuleTask(SessModule.Module module, XML.IOTypes ioType, SessModule.ModuleTaskParam param, Dictionary<int, View> dict)
+        public void AddModuleTask(ETHModule.Module module, XML.IOTypes ioType, ETHModule.ModuleTaskParam param, Dictionary<int, View> dict)
         {
             ModuleTask mTask;
-            SessModule.ModuleTask task;
+            ETHModule.ModuleTask task;
 
             // Modul in die TaskListe aufnehmen
             if ((mTask = RefreshTasks.Find(x => x.module == module)) == null)
@@ -387,14 +387,14 @@ namespace IOControl
             }
 
             // ModulTask 
-            if ((task = mTask.tasks.Find(x => x.ioType == ioType)) == null)
+            if ((task = mTask.tasks.Find(x => x.IOType == ioType)) == null)
             {
-                task = new SessModule.ModuleTask(ioType, module, dict);
+                task = new ETHModule.ModuleTask() { IOType = ioType, Module = module, dict = dict };
                 mTask.tasks.Add(task);
             }
 
             // IOTask
-            task.param.Add(param);
+            task.Params.Add(param);
         }
     }
 }

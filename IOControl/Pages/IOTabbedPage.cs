@@ -58,14 +58,14 @@ namespace IOControl
             };
 
 
-            if (Ctor.ObType == typeof(SessModule.Module))
+            if (Ctor.ObType == typeof(ETHModule.Module))
             {
                 foreach (var tab in Ctor.Tabs)
                 {
                     Children.Add(new IOContentPage(new IOContentPage.Constructor()
                     {
                         ViewType = IOContentPage.ViewType.MODULE,
-                        Module = (SessModule.Module)Ctor.Object,
+                        Module = (ETHModule.Module)Ctor.Object,
                         Title = tab,
                         IOType = GetIOType(tab)
                     }));
@@ -214,10 +214,10 @@ namespace IOControl
                             foreach (var task in refreshTask.tasks)
                             {
 
-                                uint min = task.param.Min(p => p.ch);
-                                uint max = task.param.Max(p => p.ch);
+                                uint min = task.Params.Min(p => p.ch);
+                                uint max = task.Params.Max(p => p.ch);
 
-                                Sess.Log(String.Format("IP: {3} - task: {2} - min: {0} - max: {1}", min, max, task.ioType, refreshTask.module.tcp_hostname));
+                                Sess.Log(String.Format("IP: {3} - task: {2} - min: {0} - max: {1}", min, max, task.IOType, refreshTask.module.tcp_hostname));
 
                                 uint longVal0 = 0;
                                 uint longVal1 = 0;
@@ -226,7 +226,7 @@ namespace IOControl
 
                                 float floatVal = 0;
 
-                                switch (task.ioType)
+                                switch (task.IOType)
                                 {
                                     // ------------------------------------
                                     // ------------------------------------
@@ -237,37 +237,37 @@ namespace IOControl
 
                                         if ((min <= 31) || (max <= 31))
                                         {
-                                            switch (task.ioType)
+                                            switch (task.IOType)
                                             {
-                                                case XML.IOTypes.DI: longVal0 = DT.Delib.DapiDIGet32(task.module.handle, 0); break;
-                                                case XML.IOTypes.DO: longVal0 = DT.Delib.DapiDOReadback32(task.module.handle, 0); break;
+                                                case XML.IOTypes.DI: longVal0 = DT.Delib.DapiDIGet32(task.Module.handle, 0); break;
+                                                case XML.IOTypes.DO: longVal0 = DT.Delib.DapiDOReadback32(task.Module.handle, 0); break;
                                             }
                                         }
                                         else if ((min <= 63) || (max <= 63))
                                         {
-                                            switch (task.ioType)
+                                            switch (task.IOType)
                                             {
-                                                case XML.IOTypes.DI: longVal1 = DT.Delib.DapiDIGet32(task.module.handle, 32); break;
-                                                case XML.IOTypes.DO: longVal1 = DT.Delib.DapiDOReadback32(task.module.handle, 32); break;
+                                                case XML.IOTypes.DI: longVal1 = DT.Delib.DapiDIGet32(task.Module.handle, 32); break;
+                                                case XML.IOTypes.DO: longVal1 = DT.Delib.DapiDOReadback32(task.Module.handle, 32); break;
                                             }
                                         }
                                         else if ((min <= 95) || (max <= 95))
                                         {
-                                            switch (task.ioType)
+                                            switch (task.IOType)
                                             {
-                                                case XML.IOTypes.DI: longVal2 = DT.Delib.DapiDIGet32(task.module.handle, 64); break;
-                                                case XML.IOTypes.DO: longVal2 = DT.Delib.DapiDOReadback32(task.module.handle, 64); break;
+                                                case XML.IOTypes.DI: longVal2 = DT.Delib.DapiDIGet32(task.Module.handle, 64); break;
+                                                case XML.IOTypes.DO: longVal2 = DT.Delib.DapiDOReadback32(task.Module.handle, 64); break;
                                             }
                                         }
                                         else
                                         {
-                                            switch (task.ioType)
+                                            switch (task.IOType)
                                             {
-                                                case XML.IOTypes.DI: longVal3 = DT.Delib.DapiDIGet32(task.module.handle, 96); break;
-                                                case XML.IOTypes.DO: longVal3 = DT.Delib.DapiDOReadback32(task.module.handle, 96); break;
+                                                case XML.IOTypes.DI: longVal3 = DT.Delib.DapiDIGet32(task.Module.handle, 96); break;
+                                                case XML.IOTypes.DO: longVal3 = DT.Delib.DapiDOReadback32(task.Module.handle, 96); break;
                                             }
                                         }
-                                        foreach (var request in task.param)
+                                        foreach (var request in task.Params)
                                         {
                                             if (request.ioCfg == XML.GUIConfigs.SWITCH)
                                             { 
@@ -304,12 +304,12 @@ namespace IOControl
                                     // ------------------------------------
 
                                     case XML.IOTypes.AD:
-                                        DT.Delib.DapiSpecialCommand(task.module.handle, DT.Delib.DAPI_SPECIAL_CMD_AD, DT.Delib.DAPI_SPECIAL_AD_READ_MULTIPLE_AD, min, max);
-                                        foreach (var request in task.param)
+                                        DT.Delib.DapiSpecialCommand(task.Module.handle, DT.Delib.DAPI_SPECIAL_CMD_AD, DT.Delib.DAPI_SPECIAL_AD_READ_MULTIPLE_AD, min, max);
+                                        foreach (var request in task.Params)
                                         {
                                             Device.BeginInvokeOnMainThread(() =>
                                             {
-                                                ((Label)page.PageControls[request.id]).Text = String.Format("{0} V", DT.Delib.DapiADGetVolt(task.module.handle, request.ch | 0x8000).ToString("0.000"));
+                                                ((Label)page.PageControls[request.id]).Text = String.Format("{0} V", DT.Delib.DapiADGetVolt(task.Module.handle, request.ch | 0x8000).ToString("0.000"));
                                             });
                                         }
                                         break;
@@ -319,13 +319,13 @@ namespace IOControl
                                     // ------------------------------------
 
                                     case XML.IOTypes.DA:
-                                        DT.Delib.DapiSpecialCommand(task.module.handle, DT.Delib.DAPI_SPECIAL_CMD_DA, DT.Delib.DAPI_SPECIAL_DA_READBACK_MULIPLE_DA, min, max);
-                                        foreach (var request in task.param)
+                                        DT.Delib.DapiSpecialCommand(task.Module.handle, DT.Delib.DAPI_SPECIAL_CMD_DA, DT.Delib.DAPI_SPECIAL_DA_READBACK_MULIPLE_DA, min, max);
+                                        foreach (var request in task.Params)
                                         {
                                             Device.BeginInvokeOnMainThread(() =>
                                             {
                                                 page.BlockUserAction = true;
-                                                ((Label)page.PageControls[request.id]).Text = String.Format("{0} V", DT.Delib.DapiDAGetVolt(task.module.handle, request.ch | 0x8000).ToString("0.000"));
+                                                ((Label)page.PageControls[request.id]).Text = String.Format("{0} V", DT.Delib.DapiDAGetVolt(task.Module.handle, request.ch | 0x8000).ToString("0.000"));
                                                 page.BlockUserAction = false;
                                             });
                                         }
@@ -336,13 +336,13 @@ namespace IOControl
                                     // ------------------------------------
 
                                     case XML.IOTypes.PWM:
-                                        DT.Delib.DapiSpecialCommand(task.module.handle, DT.Delib.DAPI_SPECIAL_CMD_PWM, DT.Delib.DAPI_SPECIAL_PWM_READBACK_MULIPLE_PWM, min, max);
-                                        foreach (var request in task.param)
+                                        DT.Delib.DapiSpecialCommand(task.Module.handle, DT.Delib.DAPI_SPECIAL_CMD_PWM, DT.Delib.DAPI_SPECIAL_PWM_READBACK_MULIPLE_PWM, min, max);
+                                        foreach (var request in task.Params)
                                         {
                                             Device.BeginInvokeOnMainThread(() =>
                                             {
                                                 page.BlockUserAction = true;
-                                                ((Slider)page.PageControls[request.id]).Value = (int)DT.Delib.DapiPWMOutReadback(task.module.handle, request.ch | 0x8000);
+                                                ((Slider)page.PageControls[request.id]).Value = (int)DT.Delib.DapiPWMOutReadback(task.Module.handle, request.ch | 0x8000);
                                                 page.BlockUserAction = false;
                                             });
                                         }
@@ -353,12 +353,12 @@ namespace IOControl
                                     // ------------------------------------
 
                                     case XML.IOTypes.TEMP:
-                                        DT.Delib.DapiSpecialCommand(task.module.handle, DT.Delib.DAPI_SPECIAL_CMD_TEMP, DT.Delib.DAPI_SPECIAL_TEMP_READ_MULIPLE_TEMP, min, max);
-                                        foreach (var request in task.param)
+                                        DT.Delib.DapiSpecialCommand(task.Module.handle, DT.Delib.DAPI_SPECIAL_CMD_TEMP, DT.Delib.DAPI_SPECIAL_TEMP_READ_MULIPLE_TEMP, min, max);
+                                        foreach (var request in task.Params)
                                         {
                                             Device.BeginInvokeOnMainThread(() =>
                                             { 
-                                                floatVal = DT.Delib.DapiTempGet(task.module.handle, request.ch | 0x4000);
+                                                floatVal = DT.Delib.DapiTempGet(task.Module.handle, request.ch | 0x4000);
                                                 ((Label)page.PageControls[request.id]).Text = ((floatVal != -9999) ? String.Format("{0} °C", floatVal.ToString("0.00")) : "disconnected");
                                             });
                                         }

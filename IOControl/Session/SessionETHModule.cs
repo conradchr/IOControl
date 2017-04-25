@@ -9,23 +9,14 @@ using Xamarin.Forms;
 
 namespace IOControl
 {
-    public class SessModule
+    public class ETHModule
     {
         public class ModuleTask
         {
-            public XML.IOTypes ioType;
-            public List<ModuleTaskParam> param;
-            public Module module;
-            public Dictionary<int, View> dict;
-
-            public ModuleTask(XML.IOTypes ioType, Module module, Dictionary<int, View> dict)
-            {
-                this.ioType = ioType;
-                this.module = module;
-                this.dict = dict;
-
-                param = new List<ModuleTaskParam>();
-            }
+            public XML.IOTypes IOType { get; set; }
+            public List<ModuleTaskParam> Params { get; set; } = new List<ModuleTaskParam>();
+            public Module Module { get; set; }
+            public Dictionary<int, View> dict { get; set; }
         }
 
         // --------------------

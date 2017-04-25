@@ -40,7 +40,7 @@ namespace IOControl
             public bool AlreadyAdded { get; set; }
 
             public uint Channel { get; set; }
-            public SessModule.Module Module { get; set; }
+            public ETHModule.Module Module { get; set; }
 
             // für Listview, damit dieser Wert sich in der Anzeige aktualisiert
             bool isSelected = false;
@@ -244,7 +244,7 @@ namespace IOControl
             {
                 Sess.Log("DA: Scan anfang");
                 // alle module scannen
-                foreach (var module in Sess.Xml.modules)
+                foreach (var module in Sess.Xml.Modules)
                 {
                     if (module.OpenModule() != 0)
                     {
@@ -254,7 +254,7 @@ namespace IOControl
                 }
 
                 // check ob eins der module den gesuchten I/O hat
-                Func<SessModule.Module, bool> checkIO = (m) =>
+                Func<ETHModule.Module, bool> checkIO = (m) =>
                 {
                     bool ret = false;
                     switch (Ctor.IOType)
@@ -269,7 +269,7 @@ namespace IOControl
                     }
                     return ret;
                 };
-                var modules = Sess.Xml.modules.Where(m => checkIO(m) == true);
+                var modules = Sess.Xml.Modules.Where(m => checkIO(m) == true);
 
                 Sess.Log("DA: Scan Module");
                 int cnt = 0;

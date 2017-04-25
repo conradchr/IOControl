@@ -47,6 +47,7 @@
     <Compile Include="library\delib\delib_intern.cs" />
     <Compile Include="library\delib\delib_io_tcp.cs" />
     <Compile Include="library\delib\IntCommands.cs" />
+    <Compile Include="Lib\TypeExtensions.cs" />
     <Compile Include="ListView.cs" />
     <Compile Include="DTProjectDeclaration.cs" />
     <Compile Include="library\communication\dt_communication_paramams.cs" />
@@ -67,14 +68,14 @@
     <Compile Include="Pages\DialogNetworkConfig.cs" />
     <Compile Include="Pages\IOContentPage.cs" />
     <Compile Include="Pages\IOTabbedPage.cs" />
-    <Compile Include="Pages\MainPage.cs" />
+    <Compile Include="Content\MainPage.cs" />
     <Compile Include="PlatformInterfaces\IWifiUtils.cs" />
     <Compile Include="PlatformInterfaces\ILocalizeUtils.cs" />
     <Compile Include="PlatformInterfaces\IDelibUtils.cs" />
     <Compile Include="PlatformInterfaces\IUDPUtils.cs" />
     <Compile Include="PlatformInterfaces\IFileUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="MenuNavigation.cs" />
+    <Compile Include="Content\MainNavi.cs" />
     <Compile Include="GUI\DTControl.cs" />
     <Compile Include="Resx\AppResources.de.Designer.cs">
       <AutoGen>True</AutoGen>

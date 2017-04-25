@@ -263,7 +263,7 @@ namespace IOControl
                 var imgAddTapped = new TapGestureRecognizer();
                 imgAddTapped.Tapped += async (s, e) =>
                 {
-                    if (((HeaderModel)BindingContext).Type == typeof(SessModule.Module))
+                    if (((HeaderModel)BindingContext).Type == typeof(ETHModule.Module))
                     {
                         await ((AppearancePage)context).AddModule();
                     }
@@ -319,7 +319,7 @@ namespace IOControl
                 Type = typeof(XML.XMLView)
             };
 
-            foreach (XML.XMLView loc in Sess.Xml.loc)
+            foreach (XML.XMLView loc in Sess.Xml.Views)
             {
                 groupLocation.Add(new ItemModel()
                 {
@@ -338,10 +338,10 @@ namespace IOControl
             {
                 LongName = Resx.AppResources.Modules.ToUpper(),
                 ShortName = Resx.AppResources.Modules.ToUpper().Substring(0, 1),
-                Type = typeof(SessModule.Module)
+                Type = typeof(ETHModule.Module)
             };
 
-            foreach (SessModule.Module module in Sess.Xml.modules)
+            foreach (ETHModule.Module module in Sess.Xml.Modules)
             {
                 groupModule.Add(new ItemModel()
                 {
@@ -400,7 +400,7 @@ namespace IOControl
                 List<string> macs = ((XML.XMLViewGroup)Ctor.Object).IOs.Select(x => x.MAC).Distinct().ToList();
                 foreach (var mac in macs)
                 {
-                    var module = Sess.Xml.modules.Find(x => x.mac == mac);
+                    var module = Sess.Xml.Modules.Find(x => x.mac == mac);
                     if (module.OpenModule() != 0)
                     {
                         module.IOInit();
@@ -416,7 +416,7 @@ namespace IOControl
                 // added die ios mit richtigen namen
                 foreach (XML.XMLViewGroupIO io in ((XML.XMLViewGroup)Ctor.Object).IOs)
                 {
-                    var module = Sess.Xml.modules.Find(x => x.mac == io.MAC);
+                    var module = Sess.Xml.Modules.Find(x => x.mac == io.MAC);
                     var ioname = module.GetIOName(io.IOType, io.Channel);
 
                     item.Add(new ItemModel()
@@ -563,15 +563,15 @@ namespace IOControl
                 {
                     case ViewType.MAIN:
 
-                        if (selectedItem.Type == typeof(SessModule.Module))
+                        if (selectedItem.Type == typeof(ETHModule.Module))
                         {
                             DialogNetworkConfig dnc = new DialogNetworkConfig(new DialogNetworkConfig.Constructor()
                             {
                                 ViewType = DialogNetworkConfig.ViewType.EDIT,
-                                Module = selectedItem.Object as SessModule.Module
+                                Module = selectedItem.Object as ETHModule.Module
                             });
                             await Navigation.PushAsync(dnc);
-                            SessModule.Module ret = await dnc.PageCloseTask;
+                            ETHModule.Module ret = await dnc.PageCloseTask;
                             if (ret != null)
                             {
                                 // alles ok
@@ -657,7 +657,7 @@ namespace IOControl
                 {
                     foreach (var selectedIO in ret)
                     {
-                        var module = Sess.Xml.modules.Find(x => x.mac == selectedIO.MAC);
+                        var module = Sess.Xml.Modules.Find(x => x.mac == selectedIO.MAC);
 
                         items[0].Add(new ItemModel()
                         {
@@ -698,7 +698,7 @@ namespace IOControl
                 // scan
                 DialogBroadcast db = new DialogBroadcast();
                 await Navigation.PushAsync(db);
-                List<SessModule.Module> ret = await db.PageCloseTask;
+                List<ETHModule.Module> ret = await db.PageCloseTask;
 
                 if (ret != null)
                 { 
@@ -712,7 +712,7 @@ namespace IOControl
                         });
                     }
                 
-                    Sess.Xml.modules.AddRange(ret);
+                    Sess.Xml.Modules.AddRange(ret);
                     Sess.Xml.Save();
                     MessagingCenter.Send<ContentPage>(this, Sess.MC_MSG_REFRESH);
                 }
@@ -725,11 +725,11 @@ namespace IOControl
                     ViewType = DialogNetworkConfig.ViewType.ADD
                 });
                 await Navigation.PushAsync(dnc);
-                SessModule.Module ret = await dnc.PageCloseTask;
+                ETHModule.Module ret = await dnc.PageCloseTask;
 
                 if (ret != null)
                 {
-                    if (Sess.Xml.modules.Find(x => x.mac == ret.mac) == null)
+                    if (Sess.Xml.Modules.Find(x => x.mac == ret.mac) == null)
                     {
                         // modul ist nicht drin
                         items[1].Add(new ItemModel()
@@ -739,7 +739,7 @@ namespace IOControl
                             Type = ret.GetType()
                         });
 
-                        Sess.Xml.modules.Add(ret);
+                        Sess.Xml.Modules.Add(ret);
                         Sess.Xml.Save();
                         MessagingCenter.Send<ContentPage>(this, Sess.MC_MSG_REFRESH);
 
@@ -789,7 +789,7 @@ namespace IOControl
                             Object = cl,
                             Name = pm.Text
                         });
-                        Sess.Xml.loc.Add(cl);
+                        Sess.Xml.Views.Add(cl);
                         break;
 
                     case ViewType.GROUP:
@@ -820,7 +820,7 @@ namespace IOControl
 
         public async Task<bool> EditItem()
         {
-            bool isModule = (selectedItem.Type == typeof(SessModule.Module));
+            bool isModule = (selectedItem.Type == typeof(ETHModule.Module));
             var itemList = (isModule ? items[1] : items[0]);
             int index;
 
@@ -849,7 +849,7 @@ namespace IOControl
                     {
                         case ViewType.MAIN:
                             Sess.Log("MAIN");
-                            Sess.Xml.loc[index].Name = pm.Text;
+                            Sess.Xml.Views[index].Name = pm.Text;
                             break;
 
                         case ViewType.GROUP:
@@ -890,7 +890,7 @@ namespace IOControl
             if (selectedItem != null)
             {
                 // swap in der internen liste
-                isModule = (selectedItem.Type == typeof(SessModule.Module));
+                isModule = (selectedItem.Type == typeof(ETHModule.Module));
                 var itemList = (isModule ? items[1] : items[0]);
                 index = itemList.IndexOf(selectedItem);
 
@@ -912,8 +912,8 @@ namespace IOControl
 
                     if (isModule)
                     {
-                        Sess.Xml.modules[index] = Sess.Xml.modules[indexNew];
-                        Sess.Xml.modules[indexNew] = selectedItem.Object as SessModule.Module;
+                        Sess.Xml.Modules[index] = Sess.Xml.Modules[indexNew];
+                        Sess.Xml.Modules[indexNew] = selectedItem.Object as ETHModule.Module;
                     }
                     else
                     {
@@ -921,8 +921,8 @@ namespace IOControl
                         {
                             case ViewType.MAIN:
                                 Sess.Log("MAIN");
-                                Sess.Xml.loc[index] = Sess.Xml.loc[indexNew];
-                                Sess.Xml.loc[indexNew] = selectedItem.Object as XML.XMLView;
+                                Sess.Xml.Views[index] = Sess.Xml.Views[indexNew];
+                                Sess.Xml.Views[indexNew] = selectedItem.Object as XML.XMLView;
                                 break;
 
                             case ViewType.GROUP:
@@ -971,15 +971,15 @@ namespace IOControl
 
                 if (answer)
                 { 
-                    isModule = (selectedItem.Type == typeof(SessModule.Module));
+                    isModule = (selectedItem.Type == typeof(ETHModule.Module));
                     var itemList = (isModule ? items[1] : items[0]);
                 
                     itemList.Remove(selectedItem);
 
                     if (isModule)
                     {
-                        var module = Sess.Xml.modules.Find(x => x.mac == ((SessModule.Module)selectedItem.Object).mac);
-                        Sess.Xml.modules.Remove(module);
+                        var module = Sess.Xml.Modules.Find(x => x.mac == ((ETHModule.Module)selectedItem.Object).mac);
+                        Sess.Xml.Modules.Remove(module);
                     }
                     else
                     {
@@ -987,10 +987,10 @@ namespace IOControl
                         {
                             case ViewType.MAIN:
                                 Sess.Log("MAIN");
-                                Sess.Log("Items vor löschen " + Sess.Xml.loc.Count.ToString());
-                                var loc = Sess.Xml.loc.Find(x => x.Name == ((XML.XMLView)selectedItem.Object).Name);
-                                Sess.Xml.loc.Remove(loc);
-                                Sess.Log("Items NACH löschen " + Sess.Xml.loc.Count.ToString());
+                                Sess.Log("Items vor löschen " + Sess.Xml.Views.Count.ToString());
+                                var loc = Sess.Xml.Views.Find(x => x.Name == ((XML.XMLView)selectedItem.Object).Name);
+                                Sess.Xml.Views.Remove(loc);
+                                Sess.Log("Items NACH löschen " + Sess.Xml.Views.Count.ToString());
                                 break;
 
                             case ViewType.GROUP:
@@ -1097,13 +1097,13 @@ namespace IOControl
 
             if (selectedItem != null)
             {
-                isModule = (selectedItem.Type == typeof(SessModule.Module));
+                isModule = (selectedItem.Type == typeof(ETHModule.Module));
                 var itemList = (isModule ? items[1] : items[0]);
                 index = itemList.IndexOf(selectedItem);
                 
                 GetButton(Buttons.UP).Enabled = (index != 0);
                 GetButton(Buttons.DOWN).Enabled = (index != (itemList.Count - 1));
-                GetButton(Buttons.EDIT).Enabled = ((selectedItem.Type != typeof(SessModule.Module)) && (selectedItem.Type != typeof(XML.XMLViewGroupIO)));
+                GetButton(Buttons.EDIT).Enabled = ((selectedItem.Type != typeof(ETHModule.Module)) && (selectedItem.Type != typeof(XML.XMLViewGroupIO)));
                 GetButton(Buttons.CONTINUE).Enabled = (selectedItem.Type != typeof(XML.XMLViewGroupIO));
             }
         }

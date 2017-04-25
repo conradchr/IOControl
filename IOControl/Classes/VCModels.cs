@@ -108,7 +108,7 @@ namespace IOControl
                 var imgAddTapped = new TapGestureRecognizer();
                 imgAddTapped.Tapped += async (s, e) =>
                 {
-                    if (((AppearancePage.HeaderModel)BindingContext).Type == typeof(SessModule.Module))
+                    if (((AppearancePage.HeaderModel)BindingContext).Type == typeof(ETHModule.Module))
                     {
                         await ((AppearancePage)context).AddModule();
                     }

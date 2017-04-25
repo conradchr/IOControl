@@ -29,7 +29,7 @@ namespace IOControl
 
         public class Constructor
         {
-            public SessModule.Module Module { get; set; }
+            public ETHModule.Module Module { get; set; }
             public ViewType ViewType { get; set; }
         }
 
@@ -60,9 +60,9 @@ namespace IOControl
         Image imgOK;
         Image imgCancel;
 
-        public Task<SessModule.Module> PageCloseTask { get { return tcs.Task; } }
-        TaskCompletionSource<SessModule.Module> tcs;
-        SessModule.Module taskResult = null;
+        public Task<ETHModule.Module> PageCloseTask { get { return tcs.Task; } }
+        TaskCompletionSource<ETHModule.Module> tcs;
+        ETHModule.Module taskResult = null;
 
         public DialogNetworkConfig(Constructor ctor)
         {
@@ -81,7 +81,7 @@ namespace IOControl
                 SetForm();
             }
 
-            tcs = new TaskCompletionSource<SessModule.Module>();
+            tcs = new TaskCompletionSource<ETHModule.Module>();
 
             this.Disappearing += (s, e) =>
             {
@@ -283,7 +283,7 @@ namespace IOControl
             Task<bool> t = new Task<bool>(() =>
             {
                 byte[] buffer = new byte[256];
-                SessModule.Module module = new SessModule.Module(entHostname.Text, Convert.ToInt32(entPort.Text), Convert.ToInt32(entTimeout.Text));
+                ETHModule.Module module = new ETHModule.Module(entHostname.Text, Convert.ToInt32(entPort.Text), Convert.ToInt32(entTimeout.Text));
                 uint handle = module.OpenModule();
 
                 if (handle != 0)

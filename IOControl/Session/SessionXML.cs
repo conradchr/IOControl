@@ -1,13 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Xamarin.Forms;    // DependencyService
 
+// --------------------
+// --------------------
+// --------------------
+
 namespace IOControl
 {
+    // ----------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------
+
     public class XML
     {
         public const int XML_FILE_VERSION = 100;
@@ -18,6 +25,32 @@ namespace IOControl
         public const string XML_FILENAME_MODULE = "modules.xml";
         public const string XML_FILENAME_CONFIG = "app_config.xml";
 
+        public enum GUIConfigs
+        {
+            SWITCH,
+            BUTTON,
+            VOLTAGE,
+            CURRENT,
+            NONE
+        }
+
+        public enum IOTypes
+        {
+            DI,
+            DO,
+            AD,
+            DA,
+            PWM,
+            DO_TIMER,
+            TEMP,
+            UNKNOWN,
+        }
+
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
 
         public class XMLConfig
         {
@@ -28,23 +61,21 @@ namespace IOControl
             public XMLConfig() { }
         }
 
-        // ----------------------------------------------------------------------------
-        // ----------------------------------------------------------------------------
-        // ----------------------------------------------------------------------------
-        // ----------------------------------------------------------------------------
-        // ----------------------------------------------------------------------------
+        // --------------------
+        // --------------------
+        // --------------------
 
         public class XMLModul
         {
             public int FileVersion { get; set; } = XML_FILE_VERSION;
-            public List<SessModule.Module> modules;
+            public List<ETHModule.Module> modules;
 
             public XMLModul() { }
-            public XMLModul(List<SessModule.Module> modules)
+            public XMLModul(List<ETHModule.Module> modules)
             {
                 this.modules = modules;
 
-                foreach (SessModule.Module module in modules)
+                foreach (ETHModule.Module module in modules)
                 {
                     try
                     {
@@ -55,90 +86,9 @@ namespace IOControl
             }
         }
 
-        // ----------------------------------------------------------------------------
-        // ----------------------------------------------------------------------------
-        // ----------------------------------------------------------------------------
-        // ----------------------------------------------------------------------------
-        // ----------------------------------------------------------------------------
-
-        public class SessionXML
-        {
-            public int fileVersionModule;
-
-            public List<XMLView> loc = new List<XMLView>();
-            public List<SessModule.Module> modules = new List<SessModule.Module>();
-            public XMLConfig config = new XMLConfig();
-
-            XMLModul cModules;
-
-            public void Save()
-            {
-                var fileService = DependencyService.Get<IFileUtils>();
-                string file;
-
-                fileService.CreateAppDir();
-
-                for (int i = 0; i != XML_FILE_MAX; i++)
-                {
-                    file = fileService.GetPathToFile(String.Format(XML_FILENAME_CONTENT, i));
-                    if (i < loc.Count)
-                    {
-                        fileService.SaveToXML(file, loc[i]);
-                    }
-                    else if (fileService.FileExist(file))
-                    {
-                        fileService.FileDelete(file);
-                    }
-                }
-
-                cModules = new XMLModul(modules);
-                file = fileService.GetPathToFile(XML_FILENAME_MODULE);
-                fileService.SaveToXML(file, cModules);
-
-                file = fileService.GetPathToFile(XML_FILENAME_CONFIG);
-                fileService.SaveToXML(file, config);
-            }
-
-            public void Load()
-            {
-                var fileService = DependencyService.Get<IFileUtils>();
-                string file;
-                XMLView tempL;
-                XMLConfig tempC;
-
-                loc.Clear();
-                for (int i = 0; i != XML_FILE_MAX; i++)
-                {
-                    file = fileService.GetPathToFile(String.Format(XML_FILENAME_CONTENT, i));
-                    if ((tempL = (XMLView)fileService.ReadFromXML(file, typeof(XMLView))) != null)
-                    {
-                        loc.Add(tempL);
-                    }
-                }
-
-                file = fileService.GetPathToFile(XML_FILENAME_MODULE);
-                if ((cModules = (XMLModul)fileService.ReadFromXML(file, typeof(XMLModul))) != null)
-                {
-                    this.modules = cModules.modules;
-                    this.fileVersionModule = cModules.FileVersion;
-
-                    foreach (SessModule.Module module in modules)
-                    {
-                        try
-                        {
-                            module.enc_pw = DT.ENC.Decrypt(DT.DEDITEC_ENCRYPTION_TEMPORARY_ADMIN_PW, module.pw_encryption);
-                        }
-                        catch (Exception) { }
-                    }
-                }
-
-                file = fileService.GetPathToFile(XML_FILENAME_CONFIG);
-                if ((tempC = (XMLConfig)fileService.ReadFromXML(file, typeof(XMLConfig))) != null)
-                {
-                    config = tempC;
-                }
-            }
-        }
+        // --------------------
+        // --------------------
+        // --------------------
 
         public class XMLView
         {
@@ -196,37 +146,97 @@ namespace IOControl
         // ----------------------------------------------------------------------------
         // ----------------------------------------------------------------------------
 
-        public enum GUIConfigs
+        public class SessionXML
         {
-            SWITCH,
-            BUTTON,
-            VOLTAGE,
-            CURRENT,
-            NONE
-        }
+            public int fileVersionModule;
 
-        public enum IOTypes
-        {
-            DI,
-            DO,
-            AD,
-            DA,
-            PWM,
-            DO_TIMER,
-            TEMP,
-            UNKNOWN,
-        }
+            public List<XMLView> Views { get; set; } = new List<XMLView>();
+            public List<ETHModule.Module> Modules { get; set; } = new List<ETHModule.Module>();
+            public XMLConfig Config { get; set; }
 
-        public class xIOTypes
-        {
-            public IOTypes ioType;
-            public string name;
+            XMLModul cModules;
 
-            public xIOTypes(string name, IOTypes ioType)
+            // --------------------
+            // --------------------
+            // --------------------
+
+            public void Save()
             {
-                this.name = name;
-                this.ioType = ioType;
+                var fileService = DependencyService.Get<IFileUtils>();
+                string file;
+
+                fileService.CreateAppDir();
+
+                for (int i = 0; i != XML_FILE_MAX; i++)
+                {
+                    file = fileService.GetPathToFile(String.Format(XML_FILENAME_CONTENT, i));
+                    if (i < Views.Count)
+                    {
+                        fileService.SaveToXML(file, Views[i]);
+                    }
+                    else if (fileService.FileExist(file))
+                    {
+                        fileService.FileDelete(file);
+                    }
+                }
+
+                cModules = new XMLModul(Modules);
+                file = fileService.GetPathToFile(XML_FILENAME_MODULE);
+                fileService.SaveToXML(file, cModules);
+
+                file = fileService.GetPathToFile(XML_FILENAME_CONFIG);
+                fileService.SaveToXML(file, Config);
+            }
+
+            // --------------------
+            // --------------------
+            // --------------------
+
+            public void Load()
+            {
+                var fileService = DependencyService.Get<IFileUtils>();
+                string file;
+                XMLView tempL;
+                XMLConfig tempC;
+
+                Views.Clear();
+                for (int i = 0; i != XML_FILE_MAX; i++)
+                {
+                    file = fileService.GetPathToFile(String.Format(XML_FILENAME_CONTENT, i));
+                    if ((tempL = (XMLView)fileService.ReadFromXML(file, typeof(XMLView))) != null)
+                    {
+                        Views.Add(tempL);
+                    }
+                }
+
+                file = fileService.GetPathToFile(XML_FILENAME_MODULE);
+                if ((cModules = (XMLModul)fileService.ReadFromXML(file, typeof(XMLModul))) != null)
+                {
+                    Modules = cModules.modules;
+                    this.fileVersionModule = cModules.FileVersion;
+
+                    foreach (ETHModule.Module module in Modules)
+                    {
+                        try
+                        {
+                            module.enc_pw = DT.ENC.Decrypt(DT.DEDITEC_ENCRYPTION_TEMPORARY_ADMIN_PW, module.pw_encryption);
+                        }
+                        catch (Exception) { }
+                    }
+                }
+
+                file = fileService.GetPathToFile(XML_FILENAME_CONFIG);
+                if ((tempC = (XMLConfig)fileService.ReadFromXML(file, typeof(XMLConfig))) != null)
+                {
+                    Config = tempC;
+                }
             }
         }
+
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
     }
 }
