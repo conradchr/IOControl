@@ -22,47 +22,24 @@ namespace IOControl
     public class MenuNavigation : ContentPage
     {
         public ListView ListView { get; set; }
-        ListViewGroups<MainNaviItem> Items { get; set; } = new ListViewGroups<MainNaviItem>();
-
 
 
         public MenuNavigation()
         {
-
-            // --------------------
-            // Views
-
-            var views = new ListViewGroupHeader<MainNaviItem>(Resx.AppResources.Location);
-            Sess.Xml.Views.ForEach(view => views.Add(new MainNaviItem(view.Name, view.GetType(), view)));
-            if (Sess.Xml.Views.Count > 0)
-            {
-                Items.Add(views);
-            }
-
-            // --------------------
-            // Module
-
-            var groups = new ListViewGroupHeader<MainNaviItem>(Resx.AppResources.Location);
-            {
-                LongName = Resx.AppResources.NAV_Modules.ToUpper(),
-                ShortName = Resx.AppResources.NAV_Modules.ToUpper().Substring(0, 1)
-            };
-
-            Sess.Xml.Modules.ForEach(module => groups.Add(new MainNaviItem() { Name = module.boardname, GroupType = module.GetType(), Object = module }));
-            if (Sess.Xml.Modules.Count > 0)
-            {
-                Items.Add(groups);
-            }
-
-            // --------------------
-            // Demo            
+            ListViewGroup<MainNaviItem> grp;
+            Sess.GUI.ListViewItems = new ListViewItems<MainNaviItem>();
             
-            var groupDemo = new GroupedMenuNaviModel()
-            {
-                LongName = "DEMO",
-                ShortName = "D"
-            };
+            // Views
+            grp = new ListViewGroup<MainNaviItem>(Resx.AppResources.Location);
+            Sess.Xml.Views.ForEach(view => grp.Add(new MainNaviItem(view.Name, view.GetType(), view)));
+            Sess.GUI.ListViewItems.AddGroup(grp);
+            
+            // Module
+            grp = new ListViewGroup<MainNaviItem>(Resx.AppResources.NAV_Modules);
+            Sess.Xml.Modules.ForEach(module => grp.Add(new MainNaviItem(module.boardname, module.GetType(), module)));
+            Sess.GUI.ListViewItems.AddGroup(grp);
 
+            // Demo 
             ETHModule.Module demo = new ETHModule.Module(
                 "DEDITEC RO-ETH Webcam",
                 "mx0.usb-la.de",
@@ -71,46 +48,23 @@ namespace IOControl
                 "00:C0:D5:01:10:8F"
             );
 
-            groupDemo.Add(new MainNaviItem()
-            {
-                Name = demo.boardname,
-                GroupType = demo.GetType(),
-                Object = demo,
-            });
-
-            if (Sess.Xml.Config.ShowDemoModule)
-            {
-                Items.Add(groupDemo);
-            }
-
-            // --------------------
-            // Settings
+            grp = new ListViewGroup<MainNaviItem>("DEMO");
+            grp.Add(new MainNaviItem(demo.boardname, demo.GetType(), demo));
+            Sess.GUI.ListViewItems.AddGroup(grp);
             
-            var groupSettings = new GroupedMenuNaviModel()
-            {
-                LongName = Resx.AppResources.NAV_Settings.ToUpper(),
-                ShortName = Resx.AppResources.NAV_Settings.ToUpper().Substring(0, 1)
-            };
-
-            groupSettings.Add(new MainNaviItem()
-            {
-                Name = Resx.AppResources.NAV_Configuration,
-                GroupType = typeof(AppearancePage)
-            });
-
-            if (Sess.Xml.Config.ShowSetting)
-            {
-                Items.Add(groupSettings);
-            }
+            // Settings
+            grp = new ListViewGroup<MainNaviItem>(Resx.AppResources.NAV_Settings);
+            grp.Add(new MainNaviItem(Resx.AppResources.NAV_Configuration, typeof(AppearancePage), null));
+            Sess.GUI.ListViewItems.AddGroup(grp);
 
             // --------------------
             // --------------------
             // ListView
 
-            listView = VCModels.ListViewInit();
-            listView.GroupHeaderTemplate = new DataTemplate(typeof(VCModels.NaviHeader));
-            listView.ItemTemplate = new DataTemplate(typeof(VCModels.NaviIcon));
-            listView.ItemsSource = Items;
+            ListView = VCModels.ListViewInit();
+            ListView.GroupHeaderTemplate = new DataTemplate(typeof(VCModels.NaviHeader));
+            ListView.ItemTemplate = new DataTemplate(typeof(VCModels.NaviIcon));
+            ListView.ItemsSource = Sess.GUI.ListViewItems;
 
             Icon = "hamburger.png";
             Title = "Configuration";
@@ -120,7 +74,7 @@ namespace IOControl
                 Padding = new Thickness(0, 5, 0, 0),
                 VerticalOptions = LayoutOptions.FillAndExpand,
                 Children = {
-                    listView
+                    ListView
                 }
             };
         }

@@ -36,7 +36,7 @@ namespace IOControl.UWP
             }
             catch (Exception e)
             {
-                DT.Log("DapiOpenModuleEx Error!\n" + e.ToString());
+                Sess.LogEX("DapiOpenModuleEx", e.ToString());
                 return 0;
             }
 
@@ -65,7 +65,7 @@ namespace IOControl.UWP
             }
             catch (Exception e)
             {
-                DT.Log("DapiCloseModule Error!\n" + e.ToString());
+                Sess.LogEX("DapiCloseModule", e.ToString());
             }
         }
 

@@ -16,12 +16,13 @@ namespace IOControl
     public static class TypeExtensions
     {
         // List<T>
-        public static void ForEach<T>(this List<T> list, Action<T> action)
+        // ObservableCollection<T>
+        public static void ForEach<T>(this IEnumerable<T> list, Action<T> action)
         {
             foreach (var item in list)
                 action(item);
         }
-
+        
         // ObservableCollection<T>
         public static void AddRange<T>(this ObservableCollection<T> oc, IEnumerable<T> collection)
         {
@@ -29,6 +30,8 @@ namespace IOControl
         }
 
 
+
+        /*
         public static void ClearMAC<T>(this List<T> list, String MAC) where T : ETHModule.Module
         {
             list.ForEach(module =>
@@ -40,6 +43,31 @@ namespace IOControl
 
             });
         }
+        
+         
+         public class MyComparer : IEqualityComparer<Test>
+        {
+        http://stackoverflow.com/questions/9410321/c-sharp-using-select-and-where-in-a-single-linq-statement
+            public bool Equals(Test x, Test y)
+            {
+                return x.Id == y.Id;
+            }
+
+            public int GetHashCode(Test obj)
+            {
+                return string.Format("{0}{1}", obj.Id, obj.Name).GetHashCode();
+            }
+        }
+         
+         
+         
+         
+         
+         */
+
+
+
+
     }
 
     // ----------------------------------------------------------------------------
@@ -48,45 +76,42 @@ namespace IOControl
     // ----------------------------------------------------------------------------
     // ----------------------------------------------------------------------------
 
-    public class ListViewGroups<T> : ObservableCollection<T>
+    public class ListViewGroup<T> : ObservableCollection<T>
     {
-        internal ObservableCollection<ListViewGroupHeader<T>> groups;
-        internal class ListViewGroupHeader<T> : ObservableCollection<T>
-        {
-            public string LongName { get; set; }
-            public string ShortName { get; set; }
+        public string LongName { get; set; }
+        public string ShortName { get; set; }
 
-            public ListViewGroupHeader(String name)
-            {
-                LongName = name.ToUpper();
-                ShortName = name.ToUpper().Substring(0, 1);
-            }
+        public ListViewGroup(String name)
+        {
+            LongName = name.ToUpper();
+            ShortName = name.ToUpper().Substring(0, 1);
         }
+    }
 
-        
+    public class ListViewItems<T> : ObservableCollection<T>
+    {
+        public ObservableCollection<ListViewGroup<T>> Groups { get; set; } = new ObservableCollection<ListViewGroup<T>>();
 
-        public void AddGroup(String name, ObservableCollection<T> items)
+        public void AddGroup(ListViewGroup<T> grp)
         {
-            if (items.Count > 0)
-            { 
-                var grp = new ListViewGroupHeader<T>(name);
-                grp.AddRange(items);
+            if (grp.Count > 0)
+            {
                 Groups.Add(grp);
             }
         }
-
         /*
-        public void AddGroup (this ObservableCollection<ListViewGroupHeader<T>> source, String name, ObservableCollection<T> items, Action<T> action)
+        public ListViewGroup<T> GetGroup(String name)
         {
-            var grp = new ListViewGroupHeader<T>(name);
-            foreach (var item in items)
-            {
-                
-            }
+            return Groups.ToList().Find(x => x.LongName == name.ToUpper());
+        }
+
+        public ListViewGroup<T> CreateGroup(String name)
+        {
+            var grp = new ListViewGroup<T>(name);
+            Groups.Add(grp);
+            return grp;
         }
         */
+
     }
-
-
-}
 }
