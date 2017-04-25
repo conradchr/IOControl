@@ -476,6 +476,15 @@ namespace IOControl.Resx {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
+        internal static string MSG_Error {
+            get {
+                return ResourceManager.GetString("MSG_Error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die No ähnelt.
         /// </summary>
         internal static string MSG_No {
@@ -530,11 +539,29 @@ namespace IOControl.Resx {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
+        internal static string NAV_CleanIOs {
+            get {
+                return ResourceManager.GetString("NAV_CleanIOs", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Configuration ähnelt.
         /// </summary>
         internal static string NAV_Configuration {
             get {
                 return ResourceManager.GetString("NAV_Configuration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
+        internal static string NAV_IOUnavailable {
+            get {
+                return ResourceManager.GetString("NAV_IOUnavailable", resourceCulture);
             }
         }
         
@@ -616,6 +643,24 @@ namespace IOControl.Resx {
         internal static string NC_EditToastOK {
             get {
                 return ResourceManager.GetString("NC_EditToastOK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
+        internal static string NC_HelpHeader {
+            get {
+                return ResourceManager.GetString("NC_HelpHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
+        internal static string NC_HelpText {
+            get {
+                return ResourceManager.GetString("NC_HelpText", resourceCulture);
             }
         }
         

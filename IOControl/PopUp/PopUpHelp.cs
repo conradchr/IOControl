@@ -68,13 +68,10 @@ namespace IOControl
             }
 
             // Footer
-            /*
-            StackLayout layout = DTControl.Switch(Resx.AppResources.HELP_ShowTooltip, true, NamedSize.Small) as StackLayout;
-            Switch sw = layout.Children.Select(x => x is Switch) as Switch;
-
-            slMain.Children.Add(layout);
-            */
-            slMain.Children.Add(DTControl.Switch(Resx.AppResources.HELP_ShowTooltip, true, NamedSize.Small));
+            if (Ctor.IsToolTip)
+            { 
+                slMain.Children.Add(DTControl.Switch(Resx.AppResources.HELP_ShowTooltip, true, NamedSize.Small));
+            }
 
             Button btn = new Button()
             {
@@ -82,7 +79,7 @@ namespace IOControl
             };
             btn.Clicked += (s, e) =>
             {
-                //DT.Log(sw.IsToggled.ToString());
+                //Sess.Log(sw.IsToggled.ToString());
                 PopupNavigation.PopAsync();
             };
             slMain.Children.Add(btn);

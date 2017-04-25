@@ -21,6 +21,7 @@
 //***********************************************************************************
 //***********************************************************************************
 
+using IOControl;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -1656,7 +1657,7 @@ DAPI_FUNCTION_PRE64 void DAPI_FUNCTION_PRE DapiDOClrBit32(ULONG handle, ULONG ch
                         case (int)DAPI_SPECIAL_PWM_READBACK_MULIPLE_PWM:
                             //ret = DapiReadMultipleBytes(handle, 0x1000 + par2*4, (par3-par2+1)*4, 1, global_ad_buffer, (par3-par2)*4);
                             ret = DapiReadMultipleBytes(handle, 0x800 + par2, (par3-par2+1), 1, global_pwm_buffer, (par3-par2));
-                            DT.Log(string.Format("DapiReadMultipleBytes(0x{0}, {1}, 1, buffer, {2}) ** ret = {3}", (0x800 + par2).ToString("X"), (par3 - par2 + 1), (par3 - par2), ret));
+                            Sess.Log(string.Format("DapiReadMultipleBytes(0x{0}, {1}, 1, buffer, {2}) ** ret = {3}", (0x800 + par2).ToString("X"), (par3 - par2 + 1), (par3 - par2), ret));
                             break;
                     }
 

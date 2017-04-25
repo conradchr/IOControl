@@ -77,7 +77,7 @@ namespace IOControl
             btn6.TextColor = Color.Black;
 
 
-            DT.Log(Device.OS.ToString());
+            Sess.Log(Device.OS.ToString());
 
             switch (Device.OS)
             {
@@ -200,19 +200,21 @@ namespace IOControl
 
         private void Btn5_Clicked(object sender, System.EventArgs e)
         {
-            var xx = DT.Session.xmlContent.loc.Find(x => x.name == "aa");
+            /*
+            var xx = Sess.Xml.loc.Find(x => x.name == "aa");
             if (xx == null)
             {
-                DT.Session.xmlContent.loc.Add(new ContentLocation("aa"));
+                Sess.Xml.loc.Add(new XML.XMLView() { Name = "aa" });
             }
             else
             {
-                DT.Session.xmlContent.loc.Remove(xx);
+                Sess.Xml.loc.Remove(xx);
             }
-            DT.Session.xmlContent.Save();
+            Sess.Xml.Save();
 
-            DT.Log("sende refresh request");
+            Sess.Log("sende refresh request");
             MessagingCenter.Send<ContentPage>(this, DT.Const.MSG_REFRESH);
+            */
         }
 
         private async void Btn6_Clicked(object sender, System.EventArgs e)
@@ -225,7 +227,7 @@ namespace IOControl
             });
             await Navigation.PushPopupAsync(da);
             float? val = await da.PageCloseTask;
-            DT.Log(string.Format("val = {0}V", val));
+            Sess.Log(string.Format("val = {0}V", val));
              */
 
             PopUpHelp help;

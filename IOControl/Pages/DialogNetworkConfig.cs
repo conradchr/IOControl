@@ -8,6 +8,7 @@ using System.ComponentModel;    // INotifyPropertyChanged
 
 using Xamarin.Forms;
 using Acr.UserDialogs;
+using Rg.Plugins.Popup.Extensions;
 
 namespace IOControl
 {
@@ -28,7 +29,7 @@ namespace IOControl
 
         public class Constructor
         {
-            public Module Module { get; set; }
+            public SessModule.Module Module { get; set; }
             public ViewType ViewType { get; set; }
         }
 
@@ -59,9 +60,9 @@ namespace IOControl
         Image imgOK;
         Image imgCancel;
 
-        public Task<Module> PageCloseTask { get { return tcs.Task; } }
-        TaskCompletionSource<Module> tcs;
-        Module taskResult = null;
+        public Task<SessModule.Module> PageCloseTask { get { return tcs.Task; } }
+        TaskCompletionSource<SessModule.Module> tcs;
+        SessModule.Module taskResult = null;
 
         public DialogNetworkConfig(Constructor ctor)
         {
@@ -80,7 +81,7 @@ namespace IOControl
                 SetForm();
             }
 
-            tcs = new TaskCompletionSource<Module>();
+            tcs = new TaskCompletionSource<SessModule.Module>();
 
             this.Disappearing += (s, e) =>
             {
@@ -111,7 +112,7 @@ namespace IOControl
 
         public void FormInit()
         {
-            ToolbarItems.Add(new ToolbarItem() { Text = "Help", Icon = "btn_help.png", Command = new Command(ShowHelp) });
+            ToolbarItems.Add(new ToolbarItem() { Text = "Help", Icon = "btn_help.png", Command = new Command(() => ShowHelp(false)) });
 
             slMain = new StackLayout() { VerticalOptions = LayoutOptions.FillAndExpand, HorizontalOptions = LayoutOptions.FillAndExpand, Padding = VCModels.PAD_HEADER };
             slContent = new StackLayout() { VerticalOptions = LayoutOptions.FillAndExpand };
@@ -225,7 +226,7 @@ namespace IOControl
             if (answer)
             {
                 // user hat confirmed
-                if (await DTControl.ShowLoadingWhileTask(t))
+                if (await GUIAnimation.ShowLoading(t))
                 {
                     // modul wurde geupdated
                     DTControl.ShowToast(Resx.AppResources.NC_LoadModulConfigOK);
@@ -282,7 +283,7 @@ namespace IOControl
             Task<bool> t = new Task<bool>(() =>
             {
                 byte[] buffer = new byte[256];
-                Module module = new Module(entHostname.Text, Convert.ToInt32(entPort.Text), Convert.ToInt32(entTimeout.Text));
+                SessModule.Module module = new SessModule.Module(entHostname.Text, Convert.ToInt32(entPort.Text), Convert.ToInt32(entTimeout.Text));
                 uint handle = module.OpenModule();
 
                 if (handle != 0)
@@ -298,6 +299,11 @@ namespace IOControl
                             module.boardname = devcfg.BoardName.boardname;
                             module.mac = devcfg.Network.mac_formatted;
                         }
+                        else if (Ctor.ViewType == ViewType.EDIT)
+                        {
+                            module.boardname = entName.Text;
+                            module.mac = Ctor.Module.mac;
+                        }
 
                         taskResult = module;
                         return true;
@@ -309,7 +315,7 @@ namespace IOControl
                 return false;
             });
 
-            return await DTControl.ShowLoadingWhileTask(t);
+            return await GUIAnimation.ShowLoading(t);
         }
 
         // ----------------------------------------------------------------------------
@@ -347,7 +353,7 @@ namespace IOControl
                 
                 if ((ret = DT.Bc.deditec_bc_set_string_parameter(Ctor.Module.mac, DT.Bc.Parameter.DED, entHostname.Text)) != DT.Error.DAPI_ERR_NONE)
                 {
-                    DT.Log("DEDITEC_BC_PACKET_PARAM_IP_ADDR");
+                    Sess.Log("DEDITEC_BC_PACKET_PARAM_IP_ADDR");
                 }
                 
 
@@ -368,9 +374,17 @@ namespace IOControl
         }
         */
 
-        public async void ShowHelp()
+        public async void ShowHelp(bool tooltip)
         {
-            await UserDialogs.Instance.AlertAsync("test", "title", "oktext");
+            PopUpHelp help = new PopUpHelp(new PopUpHelp.Constructor()
+            {
+                Title = Resx.AppResources.NC_HelpHeader,
+                IsToolTip = tooltip,
+                Content = ContentHelp.NetworkConfig()
+            });
+
+            await Navigation.PushPopupAsync(help);
+            await help.PageCloseTask;
         }
     }
 }

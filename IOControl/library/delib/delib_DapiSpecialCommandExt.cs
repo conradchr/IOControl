@@ -25,6 +25,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+
+using IOControl;
+
 //using System.Net;
 //using System.Net.Sockets;
 
@@ -294,7 +297,7 @@ namespace DELIB
                     // *buff3_length		Grösse des zurückgegebenen Wertes
 
                     //debug_print("DAPI_SPECIAL_CMDEXT_TCP_MODULE_GET_CONFIG_DATA");
-                    DT.Log("DAPI_SPECIAL_CMDEXT_TCP_MODULE_GET_CONFIG_DATA");
+                    Sess.Log("DAPI_SPECIAL_CMDEXT_TCP_MODULE_GET_CONFIG_DATA");
 
 
                     /*
@@ -312,20 +315,20 @@ namespace DELIB
                     {
                         try
                         {
-                            DT.Log("multiple mode");
+                            Sess.Log("multiple mode");
                             Array.Copy(buff1, buff, (int) buff1_size);
                             buff_cnt = (int) buff1_size;
                         }
                         catch (Exception)
                         {
-                            DT.Log("Array.Copy buff1->buff");
+                            Sess.Log("Array.Copy buff1->buff");
                             return DT.RETURN_ERROR;
                         }
                     }
                     else
                     {
                         // single mode
-                        DT.Log("single mode");
+                        Sess.Log("single mode");
                         // Sende Nummer der Konfiguration (bei durchnummerierten)
                         buff[buff_cnt++] = (byte)((par1) & 0xff);
                         buff[buff_cnt++] = (byte)((par1 >> 8) & 0xff);
@@ -346,7 +349,7 @@ namespace DELIB
                         }
                         catch (Exception)
                         {
-                            DT.Log("Array.Copy buff1->buff");
+                            Sess.Log("Array.Copy buff1->buff");
                             return DT.RETURN_ERROR;
                         }
                     }
@@ -367,13 +370,13 @@ namespace DELIB
                             }
                             catch (Exception)
                             {
-                                DT.Log("Array.Copy buff->buff3");
+                                Sess.Log("Array.Copy buff->buff3");
                                 return DT.RETURN_ERROR;
                             }
                         }
                         else
                         {
-                            DT.Log(" *********** NICHT IMPLEMENTIERT ************");
+                            Sess.Log(" *********** NICHT IMPLEMENTIERT ************");
 
                             /*
                             // single mode
@@ -408,7 +411,7 @@ namespace DELIB
                     // buff3 + buff3_size:	Antwort die zurückgegeben wird
                     // *buff3_length		Grösse des zurückgegebenen Wertes
 
-                    DT.Log("DAPI_SPECIAL_CMDEXT_TCP_MODULE_SET_CONFIG_DATA");
+                    Sess.Log("DAPI_SPECIAL_CMDEXT_TCP_MODULE_SET_CONFIG_DATA");
 
                     /*
                     if ((DapiModuleParams->sw_feature1 & DAPI_SW_FEATURE_BIT_SUPP_INDIVIDUAL_CH_NAMES) == 0)
@@ -426,20 +429,20 @@ namespace DELIB
                         // muliple mode
                         try
                         {
-                            DT.Log("multiple mode");
+                            Sess.Log("multiple mode");
                             Array.Copy(buff1, buff, (int)buff1_size);
                             buff_cnt = (int)buff1_size;
                         }
                         catch (Exception)
                         {
-                            DT.Log("Array.Copy buff1->buff");
+                            Sess.Log("Array.Copy buff1->buff");
                             return DT.RETURN_ERROR;
                         }
                     }
                     else
                     {
                         // single mode
-                        DT.Log("single mode");
+                        Sess.Log("single mode");
                         // Sende Nummer der Konfiguration (bei durchnummerierten)
                         buff[buff_cnt++] = (byte)((par1) & 0xff);
                         buff[buff_cnt++] = (byte)((par1 >> 8) & 0xff);
@@ -459,7 +462,7 @@ namespace DELIB
                         }
                         catch (Exception)
                         {
-                            DT.Log("Array.Copy buff1->buff");
+                            Sess.Log("Array.Copy buff1->buff");
                             return DT.RETURN_ERROR;
                         }
 
@@ -476,7 +479,7 @@ namespace DELIB
                         }
                         catch (Exception)
                         {
-                            DT.Log("Array.Copy buff2->buff");
+                            Sess.Log("Array.Copy buff2->buff");
                             return DT.RETURN_ERROR;
                         }
                     }
@@ -586,7 +589,7 @@ namespace DELIB
                     // return: byte buffer
                     // verschlüsselung: egal!
 
-                        DT.Log("DAPI_SPECIAL_CMDEXT_TCP_MODULE_GET_CURRENT_CONFIG");
+                        Sess.Log("DAPI_SPECIAL_CMDEXT_TCP_MODULE_GET_CURRENT_CONFIG");
 
                         buff_cnt = 0;
                         buff_length = 0;

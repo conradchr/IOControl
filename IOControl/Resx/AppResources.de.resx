@@ -183,7 +183,7 @@
   <data name="Main_Loading" xml:space="preserve">
     <value>Verbinde</value>
   </data>
-  <data name="MAS_OpenError" xml:space="preserve">
+  <data name="MSG_OpenError" xml:space="preserve">
     <value>Fehler beim Verbinden mit Modul {0} (IP={1})</value>
   </data>
   <data name="Modules" xml:space="preserve">
@@ -337,5 +337,23 @@ Möchten Sie fortfahren?</value>
   </data>
   <data name="NC_AddModuleToastOK" xml:space="preserve">
     <value>Modul wurde erfolgreich hinzugefügt!</value>
+  </data>
+  <data name="MSG_Error" xml:space="preserve">
+    <value>Fehler</value>
+  </data>
+  <data name="NAV_CleanIOs" xml:space="preserve">
+    <value>In dieser Ansicht befinden sich Ein-/Ausgänge, deren Modul (MAC={0}) nicht mehr konfiguriert ist.
+Möchten Sie diese Ein-/Ausgänge entfernen?</value>
+  </data>
+  <data name="NAV_IOUnavailable" xml:space="preserve">
+    <value>Das ausgewählte Module verfügt über keine unterstützten Ein-/Ausgänge</value>
+  </data>
+  <data name="NC_HelpHeader" xml:space="preserve">
+    <value>Modulkonfiguration</value>
+  </data>
+  <data name="NC_HelpText" xml:space="preserve">
+    <value>An dieser Stelle können Sie die Modul Konfiguration ändern.
+Wenn Sie das Modul von unterwegs aus steuern möchten, müssen Sie im Router einen Port freigeben.
+Dieser Port muss dann auf die IP-Adresse des DEDITEC Moduls weitergeleitet werden.</value>
   </data>
 </root>

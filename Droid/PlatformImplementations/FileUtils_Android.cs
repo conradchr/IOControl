@@ -2,10 +2,10 @@
 using Xamarin.Forms;
 using System.IO; // StreamWriter
 using System.Xml.Serialization; // XML
+
 using IOControl.Droid;
 
 [assembly: Dependency(typeof(FileUtils_Android))]
-
 namespace IOControl.Droid
 {
     public class FileUtils_Android : IFileUtils
@@ -49,7 +49,7 @@ namespace IOControl.Droid
 
         public void CreateAppDir()
         {
-            var path = Path.Combine(Android.OS.Environment.ExternalStorageDirectory.Path, DT.Const.CONFIG_FILES_DIRECTORY);
+            var path = Path.Combine(Android.OS.Environment.ExternalStorageDirectory.Path, IOControl.XML.XML_DIRECTORY);
 
             if (!Directory.Exists(path))
             {
@@ -61,7 +61,7 @@ namespace IOControl.Droid
         {
             //return Path.Combine(Android.OS.Environment.ExternalStorageDirectory.Path, filename);
             //return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), DT.Const.CONFIG_FILES_DIRECTORY, filename);
-            return Path.Combine(Android.OS.Environment.ExternalStorageDirectory.Path, DT.Const.CONFIG_FILES_DIRECTORY, filename);
+            return Path.Combine(Android.OS.Environment.ExternalStorageDirectory.Path, IOControl.XML.XML_DIRECTORY, filename);
         }
     }
 }

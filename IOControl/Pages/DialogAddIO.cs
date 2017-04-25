@@ -24,8 +24,8 @@ namespace IOControl
 
         public class Constructor
         {
-            public IOType IOType { get; set; }
-            public ContentGroup ContentGroup { get; set; }
+            public XML.IOTypes IOType { get; set; }
+            public XML.XMLViewGroup ViewGroup { get; set; }
         }
 
         // ------------------------------------
@@ -40,7 +40,7 @@ namespace IOControl
             public bool AlreadyAdded { get; set; }
 
             public uint Channel { get; set; }
-            public Module Module { get; set; }
+            public SessModule.Module Module { get; set; }
 
             // für Listview, damit dieser Wert sich in der Anzeige aktualisiert
             bool isSelected = false;
@@ -126,7 +126,7 @@ namespace IOControl
         // ----------------------------------------------------------------------------
 
         public Constructor Ctor { get; set; }
-        public Task<List<ContentIO>> PageCloseTask { get { return tcs.Task; } }
+        public Task<List<XML.XMLViewGroupIO>> PageCloseTask { get { return tcs.Task; } }
 
         // ------------------------------------
         // ------------------------------------
@@ -137,8 +137,8 @@ namespace IOControl
         ListView listView;
         Grid footer;
         ItemModel selectedItem;
-        TaskCompletionSource<List<ContentIO>> tcs;
-        List<ContentIO> taskResult = null;
+        TaskCompletionSource<List<XML.XMLViewGroupIO>> tcs;
+        List<XML.XMLViewGroupIO> taskResult = null;
 
         // ----------------------------------------------------------------------------
         // ----------------------------------------------------------------------------
@@ -154,12 +154,12 @@ namespace IOControl
             Ctor = ctor;
             Title = Resx.AppResources.CFG_AddIOHeader;
 
-            tcs = new TaskCompletionSource<List<ContentIO>>();
+            tcs = new TaskCompletionSource<List<XML.XMLViewGroupIO>>();
             slMain = new StackLayout() { Padding = new Thickness(0, 10, 0, 10) };
 
             this.Disappearing += (s, e) =>
             {
-                DT.Log("DialogAddIO SetResult");
+                Sess.Log("DialogAddIO SetResult");
                 tcs.SetResult(taskResult);
             };
 
@@ -242,9 +242,9 @@ namespace IOControl
         {
             Task<bool> scanning = new Task<bool>(() =>
             {
-                DT.Log("DA: Scan anfang");
+                Sess.Log("DA: Scan anfang");
                 // alle module scannen
-                foreach (var module in DT.Session.xmlContent.modules)
+                foreach (var module in Sess.Xml.modules)
                 {
                     if (module.OpenModule() != 0)
                     {
@@ -254,24 +254,24 @@ namespace IOControl
                 }
 
                 // check ob eins der module den gesuchten I/O hat
-                Func<Module, bool> checkIO = (m) =>
+                Func<SessModule.Module, bool> checkIO = (m) =>
                 {
                     bool ret = false;
                     switch (Ctor.IOType)
                     {
-                        case IOType.DI: ret = (m.IO.cnt_di > 0); break;
-                        case IOType.DO: ret = (m.IO.cnt_do > 0); break;
-                        case IOType.PWM: ret = (m.IO.cnt_do_pwm > 0); break;
-                        //case IOType.DO_TIMER:   ret = (m.IO.cnt_do_timer > 0);  break;
-                        case IOType.AD: ret = (m.IO.cnt_ai > 0); break;
-                        case IOType.DA: ret = (m.IO.cnt_ao > 0); break;
-                        case IOType.TEMP: ret = (m.IO.cnt_temp > 0); break;
+                        case XML.IOTypes.DI: ret = (m.IO.cnt_di > 0); break;
+                        case XML.IOTypes.DO: ret = (m.IO.cnt_do > 0); break;
+                        case XML.IOTypes.PWM: ret = (m.IO.cnt_do_pwm > 0); break;
+                        //case XML.IOTypes.DO_TIMER:   ret = (m.IO.cnt_do_timer > 0);  break;
+                        case XML.IOTypes.AD: ret = (m.IO.cnt_ai > 0); break;
+                        case XML.IOTypes.DA: ret = (m.IO.cnt_ao > 0); break;
+                        case XML.IOTypes.TEMP: ret = (m.IO.cnt_temp > 0); break;
                     }
                     return ret;
                 };
-                var modules = DT.Session.xmlContent.modules.Where(m => checkIO(m) == true);
+                var modules = Sess.Xml.modules.Where(m => checkIO(m) == true);
 
-                DT.Log("DA: Scan Module");
+                Sess.Log("DA: Scan Module");
                 int cnt = 0;
                 // module, inkl. I/Os in eine neue gruppe adden und das dann in die hauptliste
                 foreach (var module in modules)
@@ -289,24 +289,24 @@ namespace IOControl
 
                         foreach (var ioName in moduleIOs)
                         {
-                            ContentIO temp = new ContentIO(Ctor.IOType, module.mac, chan);
+                            XML.XMLViewGroupIO temp = new XML.XMLViewGroupIO(Ctor.IOType, module.mac, chan);
                             group.Add(new ItemModel()
                             {
                                 Channel = chan,
                                 Name = ioName,
                                 Module = module,
-                                AlreadyAdded = (Ctor.ContentGroup.io.Where(x => x.Equals(temp)).ToList().Count != 0)
+                                AlreadyAdded = (Ctor.ViewGroup.IOs.Where(x => x.Equals(temp)).ToList().Count != 0)
                             });
                             chan++;
                         }
                     }
 
                     items.Add(group);
-                    DT.Log("adde " + cnt.ToString());
+                    Sess.Log("adde " + cnt.ToString());
                     cnt++;
                 }
 
-                DT.Log("DA: Scan Task ende");
+                Sess.Log("DA: Scan Task ende");
                 return false;
             });
 
@@ -327,18 +327,18 @@ namespace IOControl
             sw.Start();
             scanning.Start();
 
-            DT.Log("await");
+            Sess.Log("await");
             await scanning;
-            DT.Log("danach");
+            Sess.Log("danach");
 
-            while (sw.ElapsedMilliseconds < DT.Const.TIME_ANIMATION_MIN_MS)
+            while (sw.ElapsedMilliseconds < GUI.TIME_ANIMATION_MIN_MS)
             {
                 await Task.Delay(10);
             }
-            DT.Log("switchGUI");
+            Sess.Log("switchGUI");
             // ui stuff danach
             switchGUI(false);
-            DT.Log("DA: Scan Ende");
+            Sess.Log("DA: Scan Ende");
 
             listView.ItemsSource = items;
 
@@ -353,13 +353,13 @@ namespace IOControl
 
         public void SaveIO()
         {
-            taskResult = new List<ContentIO>();
+            taskResult = new List<XML.XMLViewGroupIO>();
 
             foreach (var header in items)
             {
                 foreach (var selectedItem in header.Where(x => x.IsSelected))
                 {
-                    taskResult.Add(new ContentIO(Ctor.IOType, selectedItem.Module.mac, selectedItem.Channel));
+                    taskResult.Add(new XML.XMLViewGroupIO(Ctor.IOType, selectedItem.Module.mac, selectedItem.Channel));
                 }
             }
 

@@ -15,7 +15,7 @@ namespace IOControl.Droid
     {
         public uint DapiOpenModuleEx(String ipAdresseDeditec, uint portNoDeditec, uint timeout_ms, String enc_pw)
         {
-            DT.Log(string.Format("{0}:{1} {2}", ipAdresseDeditec, portNoDeditec, timeout_ms));
+            Sess.Log(string.Format("{0}:{1} {2}", ipAdresseDeditec, portNoDeditec, timeout_ms));
 
             DapiHandle dapiHandle = new DapiHandle();
             dapiHandle.ip_addr = ipAdresseDeditec;
@@ -34,7 +34,7 @@ namespace IOControl.Droid
             }
             catch (Exception e)
             {
-                DT.Log("DapiOpenModuleEx Error!\n" + e.ToString());
+                IOControl.Sess.Log("DapiOpenModuleEx Error!\n" + e.ToString());
                 return 0;
             }
 
@@ -58,7 +58,7 @@ namespace IOControl.Droid
             }
             catch (Exception e)
             {
-                DT.Log("DapiCloseModule Error!\n" + e.ToString());
+                Sess.Log("DapiCloseModule Error!\n" + e.ToString());
             }
         }
 

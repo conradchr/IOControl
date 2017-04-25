@@ -52,20 +52,20 @@ namespace IOControl
             {
                 IOContentPage page = (IOContentPage)this.CurrentPage;
                 
-                DT.Log("page-init");
+                Sess.Log("page-init");
                 page.Init();
                 IOContentPageSelect(page);
             };
 
 
-            if (Ctor.ObType == typeof(Module))
+            if (Ctor.ObType == typeof(SessModule.Module))
             {
                 foreach (var tab in Ctor.Tabs)
                 {
                     Children.Add(new IOContentPage(new IOContentPage.Constructor()
                     {
                         ViewType = IOContentPage.ViewType.MODULE,
-                        Module = (Module)Ctor.Object,
+                        Module = (SessModule.Module)Ctor.Object,
                         Title = tab,
                         IOType = GetIOType(tab)
                     }));
@@ -73,13 +73,13 @@ namespace IOControl
             }
             else
             {
-                foreach(var group in ((ContentLocation)Ctor.Object).groups)
+                foreach(var group in ((XML.XMLView)Ctor.Object).Groups)
                 { 
                     Children.Add(new IOContentPage(new IOContentPage.Constructor()
                     {
                         ViewType = IOContentPage.ViewType.CUSTOM,
                         Group = group,
-                        Title = group.name
+                        Title = group.Name
                     }));
                 }
 
@@ -95,14 +95,14 @@ namespace IOControl
                             Object = ((IOContentPage)this.CurrentPage).Ctor.Group
                         });
 
-                        DT.Log("ToolbarItems AA");
+                        Sess.Log("ToolbarItems AA");
                         await Navigation.PushAsync(ap);
-                        DT.Log("ToolbarItems BB");
+                        Sess.Log("ToolbarItems BB");
                         await ap.InitIO();
-                        DT.Log("ToolbarItems CC");
+                        Sess.Log("ToolbarItems CC");
                         await ap.PageCloseTaskIO;
 
-                        DT.Log("IOs geadded -> PageChanging");
+                        Sess.Log("IOs geadded -> PageChanging");
                         PageChanging();
                     })
                 });
@@ -146,7 +146,7 @@ namespace IOControl
                 /*
                 catch (Exception e)
                 {
-                    DT.Log(e.ToString());
+                    Sess.Log(e.ToString());
                 }*/
                 moduleThreadTimer = 0;
             }
@@ -157,11 +157,11 @@ namespace IOControl
             {
                 try
                 { 
-                DT.Log("Starte Thread!!");
+                Sess.Log("Starte Thread!!");
 
                 do
                 {
-                    //DT.Log("Thread Runde");
+                    //Sess.Log("Thread Runde");
 
                     // --------------------
                     // User Aktionen
@@ -179,7 +179,7 @@ namespace IOControl
                     {
                         new Task<int>(() =>
                         {
-                            DT.Log("inner task start");
+                            Sess.Log("inner task start");
 
                             refreshAnimation = true;
                             System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
@@ -190,14 +190,14 @@ namespace IOControl
                             while (refreshAnimation);
 
                             // künstlicher sleep damit die search animation durchkommt
-                            while (sw.ElapsedMilliseconds < DT.Const.TIME_ANIMATION_MIN_MS)
+                            while (sw.ElapsedMilliseconds < GUI.TIME_ANIMATION_MIN_MS)
                             {
                                 System.Threading.Tasks.Task.Delay(TIMER_INTERVAL_MS).Wait();
                             }
 
                             Device.BeginInvokeOnMainThread(() => IsBusy = false);
 
-                            DT.Log("inner task end");
+                            Sess.Log("inner task end");
 
                             return 0;
                         }).Start();
@@ -207,7 +207,7 @@ namespace IOControl
                         {
                             if (refreshTask.module.OpenModule() == 0)
                             {
-                                DT.Log(String.Format("Modul {0} konnte nicht geöffnet werden (handle=0)", refreshTask.module.tcp_hostname));
+                                Sess.Log(String.Format("Modul {0} konnte nicht geöffnet werden (handle=0)", refreshTask.module.tcp_hostname));
                                 return 1;
                             }
 
@@ -217,7 +217,7 @@ namespace IOControl
                                 uint min = task.param.Min(p => p.ch);
                                 uint max = task.param.Max(p => p.ch);
 
-                                DT.Log(String.Format("IP: {3} - task: {2} - min: {0} - max: {1}", min, max, task.ioType, refreshTask.module.tcp_hostname));
+                                Sess.Log(String.Format("IP: {3} - task: {2} - min: {0} - max: {1}", min, max, task.ioType, refreshTask.module.tcp_hostname));
 
                                 uint longVal0 = 0;
                                 uint longVal1 = 0;
@@ -232,44 +232,44 @@ namespace IOControl
                                     // ------------------------------------
                                     // ------------------------------------
 
-                                    case IOType.DI:
-                                    case IOType.DO:
+                                    case XML.IOTypes.DI:
+                                    case XML.IOTypes.DO:
 
                                         if ((min <= 31) || (max <= 31))
                                         {
                                             switch (task.ioType)
                                             {
-                                                case IOType.DI: longVal0 = DT.Delib.DapiDIGet32(task.module.handle, 0); break;
-                                                case IOType.DO: longVal0 = DT.Delib.DapiDOReadback32(task.module.handle, 0); break;
+                                                case XML.IOTypes.DI: longVal0 = DT.Delib.DapiDIGet32(task.module.handle, 0); break;
+                                                case XML.IOTypes.DO: longVal0 = DT.Delib.DapiDOReadback32(task.module.handle, 0); break;
                                             }
                                         }
                                         else if ((min <= 63) || (max <= 63))
                                         {
                                             switch (task.ioType)
                                             {
-                                                case IOType.DI: longVal1 = DT.Delib.DapiDIGet32(task.module.handle, 32); break;
-                                                case IOType.DO: longVal1 = DT.Delib.DapiDOReadback32(task.module.handle, 32); break;
+                                                case XML.IOTypes.DI: longVal1 = DT.Delib.DapiDIGet32(task.module.handle, 32); break;
+                                                case XML.IOTypes.DO: longVal1 = DT.Delib.DapiDOReadback32(task.module.handle, 32); break;
                                             }
                                         }
                                         else if ((min <= 95) || (max <= 95))
                                         {
                                             switch (task.ioType)
                                             {
-                                                case IOType.DI: longVal2 = DT.Delib.DapiDIGet32(task.module.handle, 64); break;
-                                                case IOType.DO: longVal2 = DT.Delib.DapiDOReadback32(task.module.handle, 64); break;
+                                                case XML.IOTypes.DI: longVal2 = DT.Delib.DapiDIGet32(task.module.handle, 64); break;
+                                                case XML.IOTypes.DO: longVal2 = DT.Delib.DapiDOReadback32(task.module.handle, 64); break;
                                             }
                                         }
                                         else
                                         {
                                             switch (task.ioType)
                                             {
-                                                case IOType.DI: longVal3 = DT.Delib.DapiDIGet32(task.module.handle, 96); break;
-                                                case IOType.DO: longVal3 = DT.Delib.DapiDOReadback32(task.module.handle, 96); break;
+                                                case XML.IOTypes.DI: longVal3 = DT.Delib.DapiDIGet32(task.module.handle, 96); break;
+                                                case XML.IOTypes.DO: longVal3 = DT.Delib.DapiDOReadback32(task.module.handle, 96); break;
                                             }
                                         }
                                         foreach (var request in task.param)
                                         {
-                                            if (request.ioCfg == IOCfg.SWITCH)
+                                            if (request.ioCfg == XML.GUIConfigs.SWITCH)
                                             { 
                                                 Device.BeginInvokeOnMainThread(() =>
                                                 { 
@@ -303,7 +303,7 @@ namespace IOControl
                                     // ------------------------------------
                                     // ------------------------------------
 
-                                    case IOType.AD:
+                                    case XML.IOTypes.AD:
                                         DT.Delib.DapiSpecialCommand(task.module.handle, DT.Delib.DAPI_SPECIAL_CMD_AD, DT.Delib.DAPI_SPECIAL_AD_READ_MULTIPLE_AD, min, max);
                                         foreach (var request in task.param)
                                         {
@@ -318,7 +318,7 @@ namespace IOControl
                                     // ------------------------------------
                                     // ------------------------------------
 
-                                    case IOType.DA:
+                                    case XML.IOTypes.DA:
                                         DT.Delib.DapiSpecialCommand(task.module.handle, DT.Delib.DAPI_SPECIAL_CMD_DA, DT.Delib.DAPI_SPECIAL_DA_READBACK_MULIPLE_DA, min, max);
                                         foreach (var request in task.param)
                                         {
@@ -335,7 +335,7 @@ namespace IOControl
                                     // ------------------------------------
                                     // ------------------------------------
 
-                                    case IOType.PWM:
+                                    case XML.IOTypes.PWM:
                                         DT.Delib.DapiSpecialCommand(task.module.handle, DT.Delib.DAPI_SPECIAL_CMD_PWM, DT.Delib.DAPI_SPECIAL_PWM_READBACK_MULIPLE_PWM, min, max);
                                         foreach (var request in task.param)
                                         {
@@ -352,7 +352,7 @@ namespace IOControl
                                     // ------------------------------------
                                     // ------------------------------------
 
-                                    case IOType.TEMP:
+                                    case XML.IOTypes.TEMP:
                                         DT.Delib.DapiSpecialCommand(task.module.handle, DT.Delib.DAPI_SPECIAL_CMD_TEMP, DT.Delib.DAPI_SPECIAL_TEMP_READ_MULIPLE_TEMP, min, max);
                                         foreach (var request in task.param)
                                         {
@@ -382,21 +382,24 @@ namespace IOControl
 
                 } while (moduleThreadActive);
 
-                DT.Log("Thread weg..");
+                Sess.Log("Thread weg..");
                 }
                 catch (Exception e)
                 {
-                    DT.Log(e.ToString());
+                    Sess.Log(e.ToString());
                 }
 
                 return 0;
             });
 
 
-            if (page.RefreshTasks.Count != 0)
+            if (page != null)
             { 
-                moduleThread.Start();
-                moduleThreadActive = true;
+                if (page.RefreshTasks.Count != 0)
+                { 
+                    moduleThread.Start();
+                    moduleThreadActive = true;
+                }
             }
         }
 
@@ -406,20 +409,20 @@ namespace IOControl
         // ----------------------------------------------------------------------------
         // ----------------------------------------------------------------------------
 
-        IOType GetIOType(String title)
+        XML.IOTypes GetIOType(String title)
         {
             switch (title)
             {
-                case "DI": return IOType.DI;
-                case "DO": return IOType.DO;
-                case "DO_Timer": return IOType.DO_TIMER;
-                case "PWM": return IOType.PWM;
-                case "AD": return IOType.AD;
-                case "DA": return IOType.DA;
-                case "Temp": return IOType.TEMP;
+                case "DI": return XML.IOTypes.DI;
+                case "DO": return XML.IOTypes.DO;
+                case "DO_Timer": return XML.IOTypes.DO_TIMER;
+                case "PWM": return XML.IOTypes.PWM;
+                case "AD": return XML.IOTypes.AD;
+                case "DA": return XML.IOTypes.DA;
+                case "Temp": return XML.IOTypes.TEMP;
             }
 
-            return IOType.UNKNOWN;
+            return XML.IOTypes.UNKNOWN;
         }
     }
 }

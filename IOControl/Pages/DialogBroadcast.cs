@@ -35,9 +35,9 @@ namespace IOControl
         ListView listView;
         public static ObservableCollection<BCTemplateItem> items;
 
-        public Task<List<Module>> PageCloseTask { get { return tcs.Task; } }
-        TaskCompletionSource<List<Module>> tcs;
-        List<Module> taskResult = null;
+        public Task<List<SessModule.Module>> PageCloseTask { get { return tcs.Task; } }
+        TaskCompletionSource<List<SessModule.Module>> tcs;
+        List<SessModule.Module> taskResult = null;
 
         public class BCTemplateItem : INotifyPropertyChanged
         {
@@ -127,7 +127,7 @@ namespace IOControl
             FormInit();
 
             Title = Resx.AppResources.BC_Header;
-            tcs = new TaskCompletionSource<List<Module>>();
+            tcs = new TaskCompletionSource<List<SessModule.Module>>();
 
             this.Disappearing += (s, e) =>
             {
@@ -160,7 +160,7 @@ namespace IOControl
                             IP = String.Format("{0}:{1}", module.Network.ip, module.Network.port),
                             Mac = module.Network.mac_formatted,
                             Product = IntCommands.DapiInternGetModuleName(module.BLFWInfo.delib_module_id),
-                            AlreadyAdded = (DT.Session.xmlContent.modules.Find(x => x.mac == module.Network.mac_formatted) != null)
+                            AlreadyAdded = (Sess.Xml.modules.Find(x => x.mac == module.Network.mac_formatted) != null)
                         });
                     }
                     listView.ItemsSource = items;
@@ -175,7 +175,7 @@ namespace IOControl
             });
 
 #pragma warning disable CS4014 // Da dieser Aufruf nicht abgewartet wird, wird die Ausführung der aktuellen Methode fortgesetzt, bevor der Aufruf abgeschlossen ist
-            DTControl.ShowLoadingWhileTask(t);
+            GUIAnimation.ShowLoading(t);
 #pragma warning restore CS4014 // Da dieser Aufruf nicht abgewartet wird, wird die Ausführung der aktuellen Methode fortgesetzt, bevor der Aufruf abgeschlossen ist
         }
 
@@ -285,14 +285,14 @@ namespace IOControl
 
         void AddModules()
         {
-            taskResult = new List<Module>();
+            taskResult = new List<SessModule.Module>();
 
             foreach (var selectedItem in items.Where(x => x.IsSelected))
             {
                 var dev = DT.eth_devs.Find(x => x.Network.mac_formatted == selectedItem.Mac);
                 if (dev != null)
                 {
-                    taskResult.Add(new Module(
+                    taskResult.Add(new SessModule.Module(
                         dev.BoardName.boardname,
                         dev.Network.ip,
                         (int)dev.Network.port,

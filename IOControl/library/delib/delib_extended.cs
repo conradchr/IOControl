@@ -28,6 +28,8 @@ using System.Text;
 //using System.Net;
 //using System.Net.Sockets;
 
+using IOControl;
+
 
 namespace DELIB
 {
@@ -126,7 +128,7 @@ namespace DELIB
             }
 
 
-            DT.Log("RWMultipleParams ret= " + ret.ToString());
+            Sess.Log("RWMultipleParams ret= " + ret.ToString());
             return ret;
         }
 

@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;	// GCHandle
 
 using Xamarin.Forms;    // DependencyService
 
+using IOControl;
 //const int MAX_BUFFER_LENGTH = 2048;
 
 public class DT_TCPUtils
@@ -85,7 +86,7 @@ public class DT_TCPUtils
 				break;
 			// ------------------------------------
 			default:
-                DT.Log("SendRecData: Unknown encryption_type");
+                Sess.Log("SendRecData: Unknown encryption_type");
                 return DT.Error.DAPI_ERR_GEN_UNKNOWN_ENCRYPTION_TYPE;
 			// ------------------------------------
 		}
@@ -151,7 +152,7 @@ public class DT_TCPUtils
 
             if (DT.ENC.Encrypt(DT.Conv.ConvertStringToByteArray(encryption_pw), tx_buffer_cp, (int) TCP_RO_TX_ENCRYPTION_START, (int) encryption_length) != DT.RETURN_OK)
 			{
-                DT.Log("SendRecData: Error while encrypting tx_buffer");
+                Sess.Log("SendRecData: Error while encrypting tx_buffer");
 				return DT.Error.DAPI_ERR_GEN_ENCRYPTION_ERROR;
 			}
 		}
@@ -166,7 +167,7 @@ public class DT_TCPUtils
         }
 		catch (Exception)
 		{
-            DT.Log("SendRecData: Error while SEND");
+            Sess.Log("SendRecData: Error while SEND");
 			return DT.Error.DAPI_ERR_COM_CONN_COULD_NOT_BE_ESTABLISHED;			
 		}
 		
@@ -198,7 +199,7 @@ public class DT_TCPUtils
         }
 		catch (Exception)
 		{
-            DT.Log("SendRecData: Error while RCV");
+            Sess.Log("SendRecData: Error while RCV");
 			return DT.Error.DAPI_ERR_COM_DEVICE_DID_NOT_ANSWER;
 		}
 		
@@ -215,14 +216,14 @@ public class DT_TCPUtils
 
             if (DT.ENC.Decrypt(DT.Conv.ConvertStringToByteArray(encryption_pw), recv_buffer, (int) TCP_RO_RX_ENCRYPTION_START, (int) encryption_length) != DT.RETURN_OK)
 			{
-                DT.Log("SendRecData: Error while decrypting rx_buffer");
+                Sess.Log("SendRecData: Error while decrypting rx_buffer");
 				return DT.Error.DAPI_ERR_GEN_ENCRYPTION_ERROR;
 			}
 
             if (DT.Conv.ArrayCompare(recv_buffer, 0, recv_buffer, TCP_RO_RX_ENCRYPTION_START, TCP_RO_RX_ENCRYPTION_START-1) > 0)
 			//if (DT.Conv.ArrayCompare(recv_buffer, 0, recv_buffer, TCP_RO_RX_ENCRYPTION_START, TCP_RO_RX_ENCRYPTION_START) > 0)
 			{
-                DT.Log("SendRecData: Incorrect password \""+dapiHandle.encryption_password+"\" (len="+dapiHandle.encryption_password.Length+")");
+                Sess.Log("SendRecData: Incorrect password \""+dapiHandle.encryption_password+"\" (len="+dapiHandle.encryption_password.Length+")");
 				return DT.Error.DAPI_ERR_DEV_ENCRYPTED_HEADER_NOT_OK;
 			}  
 		}	
@@ -239,14 +240,14 @@ public class DT_TCPUtils
 
 		if (recv_error != 0)	// header not ok = error
 		{
-            DT.Log("SendRecData: Header of rx_msg not ok!");
+            Sess.Log("SendRecData: Header of rx_msg not ok!");
 			return DT.Error.DAPI_ERR_DEV_PACKET_HEADER_NOT_OK;
 		}
 
 		// device error code
 		if (recv_buffer[3] != 0x0)
 		{
-            DT.Log("SendRecData: recv_buffer[3] != 0x0");
+            Sess.Log("SendRecData: recv_buffer[3] != 0x0");
 			return (err | DT.Error.DAPI_ERR_DEV_CLASS);
 		}
 
@@ -263,7 +264,7 @@ public class DT_TCPUtils
 			}
 			catch (Exception)
 			{
-                DT.Log(String.Format("Array.Copy(recv_buffer[{0}], {1}, rx_buffer[{2}], 0, {3}-{1}={4})",
+                Sess.Log(String.Format("Array.Copy(recv_buffer[{0}], {1}, rx_buffer[{2}], 0, {3}-{1}={4})",
                     recv_buffer.Length, rx_data_pos, rx_buffer.Length, amount_bytes_received, amount_bytes_received-rx_data_pos)
                 );
 
@@ -274,7 +275,7 @@ public class DT_TCPUtils
                 //DT.DBG.Print("rx_buff_len = " + rx_buffer.Length.ToString());
 
 
-                DT.Log("SendRecData: rx_buffer too small");
+                Sess.Log("SendRecData: rx_buffer too small");
 				return DT.Error.DAPI_ERR_GEN_BUFFER_TOO_SMALL_ERROR;
 			}
 		}
@@ -652,12 +653,12 @@ public class DT_TCPUtils
         //if ((dapiHandle = (DapiHandle)((GCHandle)((IntPtr)handle)).Target) == null)
         if (dapiHandle == null)
         {
-            DT.Log("invalid handle");
+            Sess.Log("invalid handle");
             return DT.Error.DAPI_ERR_COM_HANDLE_INVALID;
         }
         if (dapiHandle.TCP_IO == null)
         {
-            DT.Log("invalid socket");
+            Sess.Log("invalid socket");
             return DT.Error.DAPI_ERR_GEN_SOCKET_ERROR;
         }
 
@@ -709,14 +710,14 @@ public class DT_TCPUtils
             // start_id checken
             if (m_start_id != DT.DEDITEC_TCP_START_ID_FOR_MULTIPLE_BYTE_DATA)
             {
-                DT.Log("m_start_id != DEDITEC_TCP_START_ID_FOR_MULTIPLE_BYTE_DATA");
+                Sess.Log("m_start_id != DEDITEC_TCP_START_ID_FOR_MULTIPLE_BYTE_DATA");
                 return DT.RETURN_ERROR;         // Error
             }
 
             // data_id checken
             if (m_data_id != i)
             {
-                DT.Log("m_data_id != i");
+                Sess.Log("m_data_id != i");
                 return DT.RETURN_ERROR;         // Error
             }
         }
@@ -735,7 +736,7 @@ public class DT_TCPUtils
         // zum abschluss geschrieben zeichen in "richtigen buffer" mit der errechneten (und benötigten größe vergleichen)
         if (tx_cnt != (repeat * address_depth))
         {
-            DT.Log("tx_cnt != (repeat * address_depth)");
+            Sess.Log("tx_cnt != (repeat * address_depth)");
             return DT.RETURN_ERROR;         // Error
         }
 

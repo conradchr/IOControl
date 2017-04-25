@@ -327,4 +327,19 @@
   <data name="NC_AddModuleToastOK" xml:space="preserve">
     <value />
   </data>
+  <data name="MSG_Error" xml:space="preserve">
+    <value />
+  </data>
+  <data name="NAV_CleanIOs" xml:space="preserve">
+    <value />
+  </data>
+  <data name="NAV_IOUnavailable" xml:space="preserve">
+    <value />
+  </data>
+  <data name="NC_HelpHeader" xml:space="preserve">
+    <value />
+  </data>
+  <data name="NC_HelpText" xml:space="preserve">
+    <value />
+  </data>
 </root>

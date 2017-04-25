@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Net;
 
+using IOControl;
+
 #if (!__MOBILE__)
 //using System.Windows.Forms;
 #endif
@@ -80,7 +82,7 @@ public class DT_ConvertUtils
             if (array_a.GetValue((int)(index_a + i)).ToString() != array_b.GetValue((int)(index_b + i)).ToString())
             //if (((byte)array_a.GetValue(index_a + i)) != ((byte)array_b.GetValue(index_b + i)))
 			{
-                DT.Log(array_a.GetValue((int)(index_a + i)).ToString() + " != " + array_b.GetValue((int)(index_b + i)).ToString());
+                Sess.Log(array_a.GetValue((int)(index_a + i)).ToString() + " != " + array_b.GetValue((int)(index_b + i)).ToString());
 				cnt_not_equal++;
 			}
 		}

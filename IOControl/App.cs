@@ -36,19 +36,19 @@ namespace IOControl
 		protected override void OnStart ()
 		{
             // Handle when your app starts
-            DT.Log("OnStart");
+            Sess.Log("OnStart");
 		}
 
 		protected override void OnSleep ()
 		{
             // Handle when your app sleeps
-            DT.Log("OnSleep");
+            Sess.Log("OnSleep");
         }
 
 		protected override void OnResume ()
 		{
             // Handle when your app resumes
-            DT.Log("OnResume");
+            Sess.Log("OnResume");
         }
 	}
 }

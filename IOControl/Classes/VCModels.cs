@@ -108,24 +108,24 @@ namespace IOControl
                 var imgAddTapped = new TapGestureRecognizer();
                 imgAddTapped.Tapped += async (s, e) =>
                 {
-                    if (((AppearancePage.HeaderModel)BindingContext).Type == typeof(Module))
+                    if (((AppearancePage.HeaderModel)BindingContext).Type == typeof(SessModule.Module))
                     {
                         await ((AppearancePage)context).AddModule();
                     }
-                    else if (((AppearancePage.HeaderModel)BindingContext).Type == typeof(ContentLocation))
+                    else if (((AppearancePage.HeaderModel)BindingContext).Type == typeof(XML.XMLView))
                     {
                         await ((AppearancePage)context).AddLocation();
                     }
-                    else if (((AppearancePage.HeaderModel)BindingContext).Type == typeof(ContentGroup))
+                    else if (((AppearancePage.HeaderModel)BindingContext).Type == typeof(XML.XMLViewGroup))
                     {
                         await ((AppearancePage)context).AddLocation();
                     }
-                    else if (((AppearancePage.HeaderModel)BindingContext).Type == typeof(ContentIO))
+                    else if (((AppearancePage.HeaderModel)BindingContext).Type == typeof(XML.XMLViewGroupIO))
                     {
                         ((AppearancePage)context).taskComplete = false;
-                        DT.Log("await AddIO");
+                        Sess.Log("await AddIO");
                         await ((AppearancePage)context).AddIO();
-                        DT.Log("AddIO fertig");
+                        Sess.Log("AddIO fertig");
                         ((AppearancePage)context).taskComplete = true;
                     }
                 };

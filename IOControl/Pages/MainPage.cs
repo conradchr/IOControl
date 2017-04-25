@@ -19,13 +19,13 @@ namespace IOControl
 
 		public MainPage ()
 		{
-            MessagingCenter.Subscribe<ContentPage>(this, DT.Const.MSG_REFRESH, (s) =>
+            MessagingCenter.Subscribe<ContentPage>(this, Sess.MC_MSG_REFRESH, (s) =>
             {
-                DT.Log("refresh cmd bekommen");
+                Sess.Log("refresh cmd bekommen");
                 RefreshNavigation();
             });
 
-            DT.Log(App.Density.ToString());
+            Sess.Log(App.Density.ToString());
 			
             Detail = new NavigationPage(new ControlDemo())
             {
@@ -46,7 +46,7 @@ namespace IOControl
         {
             if (Device.OS != TargetPlatform.Windows)
             {
-                DT.Session.xmlContent.Load();
+                Sess.Xml.Load();
             }
 
             menuNavigation = new MenuNavigation();
@@ -64,29 +64,52 @@ namespace IOControl
         async void OnItemSelected(object sender, ItemTappedEventArgs e)
         {
             menuNavigation.ListView.SelectedItem = null;
-            IsPresented = false;
 
             var item = e.Item as MenuNaviModel;
             if (item != null)
             {
                 List<String> tabs = new List<String>();
-                Module module = null;
+                SessModule.Module module = null;
                 NavigationPage navPage = null;
                 String msg = null;
 
                 Task<bool> openModule = new Task<bool>(() =>
                 {
-                    if (item.GroupType == typeof(ContentLocation))
+                    if (item.GroupType == typeof(XML.XMLView))
                     {
-                        var location = (ContentLocation)item.Object;
-                        List<Module> locModules = new List<Module>();
+                        var location = (XML.XMLView)item.Object;
+                        List<SessModule.Module> locModules = new List<SessModule.Module>();
 
-                        foreach (var group in location.groups)
+                        foreach (var group in location.Groups)
                         {
-                            foreach (var io in group.io)
+                            foreach (var io in group.IOs)
                             {
-                                var mod = DT.Session.xmlContent.modules.Find(x => x.mac == io.moduleMAC);
-                                if (!locModules.Contains(mod))
+                                var mod = Sess.Xml.modules.Find(x => x.mac == io.MAC);
+
+                                if (mod == null)
+                                {
+                                    //das ist ein I/O zu dem es KEIN modul mehr gibt..
+                                    UserDialogs.Instance.Confirm(new ConfirmConfig()
+                                    {
+                                        Message = String.Format(Resx.AppResources.NAV_CleanIOs, io.MAC),
+                                        Title = Resx.AppResources.MSG_Error,
+                                        OnAction = (ok) =>
+                                        {
+                                            if (ok)
+                                            {
+                                                foreach(var l in Sess.Xml.loc)
+                                                {
+                                                    foreach(var g in l.Groups)
+                                                    {
+                                                        g.IOs.RemoveAll(x => x.MAC == io.MAC);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    });
+                                }
+
+                                if (!locModules.Contains(mod) && (mod != null))
                                 {
                                     locModules.Add(mod);
                                 }
@@ -108,14 +131,14 @@ namespace IOControl
 
                         navPage = new NavigationPage(new IOTabbedPage(new IOTabbedPage.Constructor()
                         {
-                            Title = location.name,
+                            Title = location.Name,
                             ObType = location.GetType(),
                             Object = location
                         }));
                     }
-                    else if (item.GroupType == typeof(Module))
+                    else if (item.GroupType == typeof(SessModule.Module))
                     {
-                        module = (Module)item.Object;
+                        module = (SessModule.Module)item.Object;
 
                         if (module.OpenModule() == 0)
                         {
@@ -134,6 +157,13 @@ namespace IOControl
                         if (module.IO.cnt_ai > 0) tabs.Add("AD");
                         if (module.IO.cnt_ao > 0) tabs.Add("DA");
                         if (module.IO.cnt_temp > 0) tabs.Add("Temp");
+
+                        if (tabs.Count == 0)
+                        {
+                            // keine unterstützten I/Os
+                            msg = Resx.AppResources.NAV_IOUnavailable;
+                            return false;
+                        }
 
                         navPage = new NavigationPage(new IOTabbedPage(new IOTabbedPage.Constructor()
                         {
@@ -154,38 +184,17 @@ namespace IOControl
                     return true;
                 }); // Task openModule
 
-                Stopwatch sw = new Stopwatch();
-                sw.Start();
-                openModule.Start();
 
-                if (item.GroupType == typeof(AppearancePage))
+                if (await GUIAnimation.ShowLoading(openModule))
                 {
-                    UserDialogs.Instance.ShowLoading(Resx.AppResources.MSG_PleaseWait);
-                }
-                else
-                {
-                    UserDialogs.Instance.ShowLoading(Resx.AppResources.Main_Loading);
-                }
-                bool ok = await openModule;
-
-                // künstlicher sleep damit die search animation durchkommt
-                //while (sw.ElapsedMilliseconds < DT.Const.TIME_ANIMATION_MIN_MS)
-                while (sw.ElapsedMilliseconds < 1000)
-                {
-                    await Task.Delay(DT.Const.TIME_ANIMATION_MIN_MS); //.Wait();
-                }
-
-                UserDialogs.Instance.HideLoading();
-
-                if (ok)
-                { 
+                    IsPresented = false;
                     navPage.BarBackgroundColor = DT.COLOR;
                     navPage.BarTextColor = Color.FromHex("#FFFFFF");
                     Detail = navPage;
                 }
                 else
                 {
-                    UserDialogs.Instance.Toast(msg);
+                    await UserDialogs.Instance.AlertAsync(msg, Resx.AppResources.MSG_Error);
                 }
 
             }   // if (item != null)

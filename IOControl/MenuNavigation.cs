@@ -38,17 +38,17 @@ namespace IOControl
                 ShortName = Resx.AppResources.Location.ToUpper().Substring(0, 1)
             };
 
-            foreach (ContentLocation location in DT.Session.xmlContent.loc)
+            foreach (XML.XMLView location in Sess.Xml.loc)
             {
                 groupLocation.Add(new MenuNaviModel()
                 {
-                    Name = location.name,
+                    Name = location.Name,
                     GroupType = location.GetType(),
                     Object = location
                 });
             }
 
-            if (DT.Session.xmlContent.loc.Count > 0)
+            if (Sess.Xml.loc.Count > 0)
             { 
                 items.Add(groupLocation);
             }
@@ -62,7 +62,7 @@ namespace IOControl
                 ShortName = Resx.AppResources.NAV_Modules.ToUpper().Substring(0, 1)
             };
 
-            foreach(Module module in DT.Session.xmlContent.modules)
+            foreach(SessModule.Module module in Sess.Xml.modules)
             {
                 groupModule.Add(new MenuNaviModel()
                 {
@@ -72,7 +72,7 @@ namespace IOControl
                 });
             }
 
-            if (DT.Session.xmlContent.modules.Count > 0)
+            if (Sess.Xml.modules.Count > 0)
             { 
                 items.Add(groupModule);
             }
@@ -86,7 +86,7 @@ namespace IOControl
                 ShortName = "D"
             };
 
-            Module demo = new Module(
+            SessModule.Module demo = new SessModule.Module(
                 "DEDITEC RO-ETH Webcam",
                 "mx0.usb-la.de",
                 8890,
@@ -101,7 +101,7 @@ namespace IOControl
                 Object = demo,
             });
 
-            if (DT.Session.xmlContent.config.ShowDemoModule)
+            if (Sess.Xml.config.ShowDemoModule)
             { 
                 items.Add(groupDemo);
             }
@@ -121,7 +121,7 @@ namespace IOControl
                 GroupType = typeof(AppearancePage)
             });
 
-            if (DT.Session.xmlContent.config.ShowSetting)
+            if (Sess.Xml.config.ShowSetting)
             { 
                 items.Add(groupSettings);
             }

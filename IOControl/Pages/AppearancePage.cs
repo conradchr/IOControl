@@ -86,11 +86,11 @@ namespace IOControl
 
             // Spezial für IOs
             public event PropertyChangedEventHandler Changing;
-            public IOType IOType { get; set; }
+            public XML.IOTypes IOType { get; set; }
             public String ModuleInfo { get; set; }
 
-            IOCfg iocfg = IOCfg.NONE;
-            public IOCfg IOCfg
+            XML.GUIConfigs iocfg = XML.GUIConfigs.NONE;
+            public XML.GUIConfigs IOCfg
             {
                 get { return iocfg; }
                 set
@@ -136,7 +136,7 @@ namespace IOControl
                 sw.SetBinding(Switch.IsToggledProperty, new Binding("IsSelected"));
                 sw.Toggled += new EventHandler<ToggledEventArgs>((s, e) =>
                 {
-                    layout.BackgroundColor = sw.IsToggled ? DT.COLOR_SELECTED : temp;
+                    layout.BackgroundColor = sw.IsToggled ? GUI.COLOR_SELECTED : temp;
                 });
                 layout.Children.Add(sw);
 
@@ -176,49 +176,49 @@ namespace IOControl
 
                 if ((itemModel = ((ItemModel)BindingContext)) != null)
                 {
-                    if (itemModel.Type == typeof(ContentIO))
+                    if (itemModel.Type == typeof(XML.XMLViewGroupIO))
                     {
-                        var io = (ContentIO)itemModel.Object;
-                        switch (io.ioType)
+                        var io = (XML.XMLViewGroupIO)itemModel.Object;
+                        switch (io.IOType)
                         {
-                            case IOType.DO:
+                            case XML.IOTypes.DO:
                                 picker.Items.Add(Resx.AppResources.IO_CFG_DO_OnOffSwitch);
                                 picker.Items.Add(Resx.AppResources.IO_CFG_DO_PushButton);
-                                switch (io.ioCfg)
+                                switch (io.GUICfg)
                                 {
-                                    case IOCfg.SWITCH: picker.SelectedIndex = 0; break;
-                                    case IOCfg.BUTTON: picker.SelectedIndex = 1; break;
+                                    case XML.GUIConfigs.SWITCH: picker.SelectedIndex = 0; break;
+                                    case XML.GUIConfigs.BUTTON: picker.SelectedIndex = 1; break;
                                 }
 
                                 picker.SelectedIndexChanged += (s, e) =>
                                 {
                                     switch (picker.SelectedIndex)
                                     {
-                                        case 0: io.ioCfg = IOCfg.SWITCH; break;
-                                        case 1: io.ioCfg = IOCfg.BUTTON; break;
+                                        case 0: io.GUICfg = XML.GUIConfigs.SWITCH; break;
+                                        case 1: io.GUICfg = XML.GUIConfigs.BUTTON; break;
                                     }
-                                    DT.Session.xmlContent.Save();
+                                    Sess.Xml.Save();
                                 };
                                 break;
 
-                            case IOType.AD:
-                            case IOType.DA:
+                            case XML.IOTypes.AD:
+                            case XML.IOTypes.DA:
                                 picker.Items.Add(Resx.AppResources.IO_CFG_ADDA_Voltage);
                                 picker.Items.Add(Resx.AppResources.IO_CFG_ADDA_Current);
-                                switch (io.ioCfg)
+                                switch (io.GUICfg)
                                 {
-                                    case IOCfg.VOLTAGE: picker.SelectedIndex = 0; break;
-                                    case IOCfg.CURRENT: picker.SelectedIndex = 1; break;
+                                    case XML.GUIConfigs.VOLTAGE: picker.SelectedIndex = 0; break;
+                                    case XML.GUIConfigs.CURRENT: picker.SelectedIndex = 1; break;
                                 }
 
                                 picker.SelectedIndexChanged += (s, e) =>
                                 {
                                     switch (picker.SelectedIndex)
                                     {
-                                        case 0: io.ioCfg = IOCfg.VOLTAGE; break;
-                                        case 1: io.ioCfg = IOCfg.CURRENT; break;
+                                        case 0: io.GUICfg = XML.GUIConfigs.VOLTAGE; break;
+                                        case 1: io.GUICfg = XML.GUIConfigs.CURRENT; break;
                                     }
-                                    DT.Session.xmlContent.Save();
+                                    Sess.Xml.Save();
                                 };
                                 break;
 
@@ -263,24 +263,24 @@ namespace IOControl
                 var imgAddTapped = new TapGestureRecognizer();
                 imgAddTapped.Tapped += async (s, e) =>
                 {
-                    if (((HeaderModel)BindingContext).Type == typeof(Module))
+                    if (((HeaderModel)BindingContext).Type == typeof(SessModule.Module))
                     {
                         await ((AppearancePage)context).AddModule();
                     }
-                    else if (((HeaderModel)BindingContext).Type == typeof(ContentLocation))
+                    else if (((HeaderModel)BindingContext).Type == typeof(XML.XMLView))
                     {
                         await ((AppearancePage)context).AddLocation();
                     }
-                    else if (((HeaderModel)BindingContext).Type == typeof(ContentGroup))
+                    else if (((HeaderModel)BindingContext).Type == typeof(XML.XMLViewGroup))
                     {
                         await ((AppearancePage)context).AddLocation();
                     }
-                    else if (((HeaderModel)BindingContext).Type == typeof(ContentIO))
+                    else if (((HeaderModel)BindingContext).Type == typeof(XML.XMLViewGroupIO))
                     {
                         ((AppearancePage)context).taskComplete = false;
-                        DT.Log("await AddIO");
+                        Sess.Log("await AddIO");
                         await ((AppearancePage)context).AddIO();
-                        DT.Log("AddIO fertig");
+                        Sess.Log("AddIO fertig");
                         ((AppearancePage)context).taskComplete = true;
                     }
                 };
@@ -316,14 +316,14 @@ namespace IOControl
             {
                 LongName = Resx.AppResources.Location.ToUpper(),
                 ShortName = Resx.AppResources.Location.ToUpper().Substring(0, 1),
-                Type = typeof(ContentLocation)
+                Type = typeof(XML.XMLView)
             };
 
-            foreach (ContentLocation loc in DT.Session.xmlContent.loc)
+            foreach (XML.XMLView loc in Sess.Xml.loc)
             {
                 groupLocation.Add(new ItemModel()
                 {
-                    Name = loc.name,
+                    Name = loc.Name,
                     Type = loc.GetType(),
                     Object = loc,
                 });
@@ -338,10 +338,10 @@ namespace IOControl
             {
                 LongName = Resx.AppResources.Modules.ToUpper(),
                 ShortName = Resx.AppResources.Modules.ToUpper().Substring(0, 1),
-                Type = typeof(Module)
+                Type = typeof(SessModule.Module)
             };
 
-            foreach (Module module in DT.Session.xmlContent.modules)
+            foreach (SessModule.Module module in Sess.Xml.modules)
             {
                 groupModule.Add(new ItemModel()
                 {
@@ -356,20 +356,20 @@ namespace IOControl
 
         void InitGroup()
         {
-            Title = ((ContentLocation)Ctor.Object).name;
+            Title = ((XML.XMLView)Ctor.Object).Name;
 
             var item = new HeaderModel()
             {
                 LongName = Resx.AppResources.Groups.ToUpper(),
                 ShortName = Resx.AppResources.Groups.ToUpper().Substring(0, 1),
-                Type = typeof(ContentGroup)
+                Type = typeof(XML.XMLViewGroup)
             };
 
-            foreach (ContentGroup group in ((ContentLocation)Ctor.Object).groups)
+            foreach (XML.XMLViewGroup group in ((XML.XMLView)Ctor.Object).Groups)
             {
                 item.Add(new ItemModel()
                 {
-                    Name = group.name,
+                    Name = group.Name,
                     Type = group.GetType(),
                     Object = group,
                 });
@@ -381,7 +381,7 @@ namespace IOControl
 
         public async Task<bool> InitIO()
         {
-            Title = ((ContentGroup)Ctor.Object).name;
+            Title = ((XML.XMLViewGroup)Ctor.Object).Name;
 
             // --------------------
             // Locations
@@ -393,14 +393,14 @@ namespace IOControl
                 {
                     LongName = Resx.AppResources.IOs.ToUpper(),
                     ShortName = Resx.AppResources.IOs.ToUpper().Substring(0, 1),
-                    Type = typeof(ContentIO)
+                    Type = typeof(XML.XMLViewGroupIO)
                 };
 
                 // führt bei allen verwendeten modulen das IOinit aus
-                List<string> macs = ((ContentGroup)Ctor.Object).io.Select(x => x.moduleMAC).Distinct().ToList();
+                List<string> macs = ((XML.XMLViewGroup)Ctor.Object).IOs.Select(x => x.MAC).Distinct().ToList();
                 foreach (var mac in macs)
                 {
-                    var module = DT.Session.xmlContent.modules.Find(x => x.mac == mac);
+                    var module = Sess.Xml.modules.Find(x => x.mac == mac);
                     if (module.OpenModule() != 0)
                     {
                         module.IOInit();
@@ -414,18 +414,18 @@ namespace IOControl
                 }
                 
                 // added die ios mit richtigen namen
-                foreach (ContentIO io in ((ContentGroup)Ctor.Object).io)
+                foreach (XML.XMLViewGroupIO io in ((XML.XMLViewGroup)Ctor.Object).IOs)
                 {
-                    var module = DT.Session.xmlContent.modules.Find(x => x.mac == io.moduleMAC);
-                    var ioname = module.GetIOName(io.ioType, io.channel);
+                    var module = Sess.Xml.modules.Find(x => x.mac == io.MAC);
+                    var ioname = module.GetIOName(io.IOType, io.Channel);
 
                     item.Add(new ItemModel()
                     {
-                        Name = ((ioname != null) ? ioname : String.Format(Resx.AppResources.CFG_ChNotAvailable, io.channel)),
+                        Name = ((ioname != null) ? ioname : String.Format(Resx.AppResources.CFG_ChNotAvailable, io.Channel)),
                         Type = io.GetType(),
                         Object = io,
-                        IOType = io.ioType,
-                        IOCfg = io.ioCfg,
+                        IOType = io.IOType,
+                        IOCfg = io.GUICfg,
                         ModuleInfo = String.Format("{0} ({1})", module.boardname, module.tcp_hostname)
                     });
                 }
@@ -435,7 +435,7 @@ namespace IOControl
                 return true;
             });
 
-            await DTControl.ShowLoadingWhileTask(t);
+            await GUIAnimation.ShowLoading(t);
 
             listView.ItemsSource = items;
             listView.ItemTemplate = new DataTemplate(typeof(ItemViewCell));
@@ -459,7 +459,7 @@ namespace IOControl
                     if (taskComplete)
                     { 
                         tcs.SetResult(true);
-                        DT.Log(string.Format("AppearancePage {0} weg", Ctor.ViewType));
+                        Sess.Log(string.Format("AppearancePage {0} weg", Ctor.ViewType));
                     }
                 };
             }
@@ -563,21 +563,21 @@ namespace IOControl
                 {
                     case ViewType.MAIN:
 
-                        if (selectedItem.Type == typeof(Module))
+                        if (selectedItem.Type == typeof(SessModule.Module))
                         {
                             DialogNetworkConfig dnc = new DialogNetworkConfig(new DialogNetworkConfig.Constructor()
                             {
                                 ViewType = DialogNetworkConfig.ViewType.EDIT,
-                                Module = selectedItem.Object as Module
+                                Module = selectedItem.Object as SessModule.Module
                             });
                             await Navigation.PushAsync(dnc);
-                            Module ret = await dnc.PageCloseTask;
+                            SessModule.Module ret = await dnc.PageCloseTask;
                             if (ret != null)
                             {
                                 // alles ok
                                 selectedItem.Name = ret.boardname;
-                                DT.Session.xmlContent.Save();
-                                MessagingCenter.Send<ContentPage>(this, DT.Const.MSG_REFRESH);
+                                Sess.Xml.Save();
+                                MessagingCenter.Send<ContentPage>(this, Sess.MC_MSG_REFRESH);
                             }
                         }
                         else
@@ -621,13 +621,13 @@ namespace IOControl
 
         public async Task<bool> AddIO()
         {
-            Dictionary<string, IOType> ioTypes = new Dictionary<string, IOType>();
-            ioTypes.Add(Resx.AppResources.Module_DI, IOType.DI);
-            ioTypes.Add(Resx.AppResources.Module_DO, IOType.DO);
-            ioTypes.Add(Resx.AppResources.Module_PWM, IOType.PWM);
-            ioTypes.Add(Resx.AppResources.Module_AI, IOType.AD);
-            ioTypes.Add(Resx.AppResources.Module_AO, IOType.DA);
-            ioTypes.Add(Resx.AppResources.Module_TEMP, IOType.TEMP);
+            Dictionary<string, XML.IOTypes> ioTypes = new Dictionary<string, XML.IOTypes>();
+            ioTypes.Add(Resx.AppResources.Module_DI, XML.IOTypes.DI);
+            ioTypes.Add(Resx.AppResources.Module_DO, XML.IOTypes.DO);
+            ioTypes.Add(Resx.AppResources.Module_PWM, XML.IOTypes.PWM);
+            ioTypes.Add(Resx.AppResources.Module_AI, XML.IOTypes.AD);
+            ioTypes.Add(Resx.AppResources.Module_AO, XML.IOTypes.DA);
+            ioTypes.Add(Resx.AppResources.Module_TEMP, XML.IOTypes.TEMP);
 
             string[] options = new string[ioTypes.Keys.Count];
             ioTypes.Keys.CopyTo(options, 0);
@@ -645,33 +645,33 @@ namespace IOControl
                 DialogAddIO da = new DialogAddIO(new DialogAddIO.Constructor()
                 {
                     IOType = ioType,
-                    ContentGroup = Ctor.Object as ContentGroup
+                    ViewGroup = Ctor.Object as XML.XMLViewGroup
                 });
-                DT.Log("AP: AA");
+                Sess.Log("AP: AA");
                 await Navigation.PushAsync(da);
                 await da.Scan();
 
                 // warte auf antwort
-                List<ContentIO> ret = await da.PageCloseTask;
+                List<XML.XMLViewGroupIO> ret = await da.PageCloseTask;
                 if (ret != null)
                 {
                     foreach (var selectedIO in ret)
                     {
-                        var module = DT.Session.xmlContent.modules.Find(x => x.mac == selectedIO.moduleMAC);
+                        var module = Sess.Xml.modules.Find(x => x.mac == selectedIO.MAC);
 
                         items[0].Add(new ItemModel()
                         {
-                            Name = module.GetIOName(ioType, selectedIO.channel),
+                            Name = module.GetIOName(ioType, selectedIO.Channel),
                             Object = selectedIO,
                             Type = selectedIO.GetType(),
-                            IOType = selectedIO.ioType,
-                            IOCfg = selectedIO.ioCfg,
+                            IOType = selectedIO.IOType,
+                            IOCfg = selectedIO.GUICfg,
                             ModuleInfo = String.Format("{0} ({1})", module.boardname, module.tcp_hostname)
                         });
                     }
 
-                    ((ContentGroup)Ctor.Object).io.AddRange(ret);
-                    DT.Session.xmlContent.Save();
+                    ((XML.XMLViewGroup)Ctor.Object).IOs.AddRange(ret);
+                    Sess.Xml.Save();
                 }
             }
 
@@ -698,7 +698,7 @@ namespace IOControl
                 // scan
                 DialogBroadcast db = new DialogBroadcast();
                 await Navigation.PushAsync(db);
-                List<Module> ret = await db.PageCloseTask;
+                List<SessModule.Module> ret = await db.PageCloseTask;
 
                 if (ret != null)
                 { 
@@ -712,9 +712,9 @@ namespace IOControl
                         });
                     }
                 
-                    DT.Session.xmlContent.modules.AddRange(ret);
-                    DT.Session.xmlContent.Save();
-                    MessagingCenter.Send<ContentPage>(this, DT.Const.MSG_REFRESH);
+                    Sess.Xml.modules.AddRange(ret);
+                    Sess.Xml.Save();
+                    MessagingCenter.Send<ContentPage>(this, Sess.MC_MSG_REFRESH);
                 }
             }
             else
@@ -725,11 +725,11 @@ namespace IOControl
                     ViewType = DialogNetworkConfig.ViewType.ADD
                 });
                 await Navigation.PushAsync(dnc);
-                Module ret = await dnc.PageCloseTask;
+                SessModule.Module ret = await dnc.PageCloseTask;
 
                 if (ret != null)
                 {
-                    if (DT.Session.xmlContent.modules.Find(x => x.mac == ret.mac) == null)
+                    if (Sess.Xml.modules.Find(x => x.mac == ret.mac) == null)
                     {
                         // modul ist nicht drin
                         items[1].Add(new ItemModel()
@@ -739,9 +739,9 @@ namespace IOControl
                             Type = ret.GetType()
                         });
 
-                        DT.Session.xmlContent.modules.Add(ret);
-                        DT.Session.xmlContent.Save();
-                        MessagingCenter.Send<ContentPage>(this, DT.Const.MSG_REFRESH);
+                        Sess.Xml.modules.Add(ret);
+                        Sess.Xml.Save();
+                        MessagingCenter.Send<ContentPage>(this, Sess.MC_MSG_REFRESH);
 
                         DTControl.ShowToast(Resx.AppResources.NC_AddModuleToastOK);
                         return true;
@@ -781,32 +781,32 @@ namespace IOControl
                 switch (Ctor.ViewType)
                 {
                     case ViewType.MAIN:
-                        DT.Log("MAIN");
-                        ContentLocation cl = new ContentLocation(pm.Text);
+                        Sess.Log("MAIN");
+                        XML.XMLView cl = new XML.XMLView() { Name = pm.Text };
                         items[0].Add(new ItemModel()
                         {
-                            Type = typeof(ContentLocation),
+                            Type = typeof(XML.XMLView),
                             Object = cl,
                             Name = pm.Text
                         });
-                        DT.Session.xmlContent.loc.Add(cl);
+                        Sess.Xml.loc.Add(cl);
                         break;
 
                     case ViewType.GROUP:
-                        DT.Log("GROUP");
-                        ContentGroup cg = new ContentGroup(pm.Text);
+                        Sess.Log("GROUP");
+                        XML.XMLViewGroup cg = new XML.XMLViewGroup() { Name = pm.Text };
                         items[0].Add(new ItemModel()
                         {
-                            Type = typeof(ContentGroup),
+                            Type = typeof(XML.XMLViewGroup),
                             Object = cg,
                             Name = pm.Text
                         });
-                        ((ContentLocation)Ctor.Object).groups.Add(cg);
+                        ((XML.XMLView)Ctor.Object).Groups.Add(cg);
                         break;
                 }
 
-                DT.Session.xmlContent.Save();
-                MessagingCenter.Send<ContentPage>(this, DT.Const.MSG_REFRESH);
+                Sess.Xml.Save();
+                MessagingCenter.Send<ContentPage>(this, Sess.MC_MSG_REFRESH);
             }
 
             return true;
@@ -820,7 +820,7 @@ namespace IOControl
 
         public async Task<bool> EditItem()
         {
-            bool isModule = (selectedItem.Type == typeof(Module));
+            bool isModule = (selectedItem.Type == typeof(SessModule.Module));
             var itemList = (isModule ? items[1] : items[0]);
             int index;
 
@@ -848,18 +848,18 @@ namespace IOControl
                     switch (Ctor.ViewType)
                     {
                         case ViewType.MAIN:
-                            DT.Log("MAIN");
-                            DT.Session.xmlContent.loc[index].name = pm.Text;
+                            Sess.Log("MAIN");
+                            Sess.Xml.loc[index].Name = pm.Text;
                             break;
 
                         case ViewType.GROUP:
-                            DT.Log("GROUP");
-                            ((ContentLocation)Ctor.Object).groups[index].name = pm.Text;
+                            Sess.Log("GROUP");
+                            ((XML.XMLView)Ctor.Object).Groups[index].Name = pm.Text;
                             break;
                     }
                     
-                    DT.Session.xmlContent.Save();
-                    MessagingCenter.Send<ContentPage>(this, DT.Const.MSG_REFRESH);
+                    Sess.Xml.Save();
+                    MessagingCenter.Send<ContentPage>(this, Sess.MC_MSG_REFRESH);
                 }
             }
 
@@ -890,7 +890,7 @@ namespace IOControl
             if (selectedItem != null)
             {
                 // swap in der internen liste
-                isModule = (selectedItem.Type == typeof(Module));
+                isModule = (selectedItem.Type == typeof(SessModule.Module));
                 var itemList = (isModule ? items[1] : items[0]);
                 index = itemList.IndexOf(selectedItem);
 
@@ -912,38 +912,38 @@ namespace IOControl
 
                     if (isModule)
                     {
-                        DT.Session.xmlContent.modules[index] = DT.Session.xmlContent.modules[indexNew];
-                        DT.Session.xmlContent.modules[indexNew] = selectedItem.Object as Module;
+                        Sess.Xml.modules[index] = Sess.Xml.modules[indexNew];
+                        Sess.Xml.modules[indexNew] = selectedItem.Object as SessModule.Module;
                     }
                     else
                     {
                         switch (Ctor.ViewType)
                         {
                             case ViewType.MAIN:
-                                DT.Log("MAIN");
-                                DT.Session.xmlContent.loc[index] = DT.Session.xmlContent.loc[indexNew];
-                                DT.Session.xmlContent.loc[indexNew] = selectedItem.Object as ContentLocation;
+                                Sess.Log("MAIN");
+                                Sess.Xml.loc[index] = Sess.Xml.loc[indexNew];
+                                Sess.Xml.loc[indexNew] = selectedItem.Object as XML.XMLView;
                                 break;
 
                             case ViewType.GROUP:
-                                DT.Log("GROUP");
-                                ((ContentLocation)Ctor.Object).groups[index] = ((ContentLocation)Ctor.Object).groups[indexNew];
-                                ((ContentLocation)Ctor.Object).groups[indexNew] = selectedItem.Object as ContentGroup;
+                                Sess.Log("GROUP");
+                                ((XML.XMLView)Ctor.Object).Groups[index] = ((XML.XMLView)Ctor.Object).Groups[indexNew];
+                                ((XML.XMLView)Ctor.Object).Groups[indexNew] = selectedItem.Object as XML.XMLViewGroup;
                                 break;
 
                             case ViewType.IO:
-                                DT.Log("IO");
-                                ((ContentGroup)Ctor.Object).io[index] = ((ContentGroup)Ctor.Object).io[indexNew];
-                                ((ContentGroup)Ctor.Object).io[indexNew] = selectedItem.Object as ContentIO;
+                                Sess.Log("IO");
+                                ((XML.XMLViewGroup)Ctor.Object).IOs[index] = ((XML.XMLViewGroup)Ctor.Object).IOs[indexNew];
+                                ((XML.XMLViewGroup)Ctor.Object).IOs[indexNew] = selectedItem.Object as XML.XMLViewGroupIO;
                                 break;
                         }
                     }
 
-                    DT.Session.xmlContent.Save();
+                    Sess.Xml.Save();
                     if (Ctor.ViewType != ViewType.IO)
                     { 
                         // bei I/Os nicht refreshen, da sonst die namen weg sind
-                        MessagingCenter.Send<ContentPage>(this, DT.Const.MSG_REFRESH);
+                        MessagingCenter.Send<ContentPage>(this, Sess.MC_MSG_REFRESH);
                     }
                     SetFooterIcons();
                 }
@@ -971,51 +971,51 @@ namespace IOControl
 
                 if (answer)
                 { 
-                    isModule = (selectedItem.Type == typeof(Module));
+                    isModule = (selectedItem.Type == typeof(SessModule.Module));
                     var itemList = (isModule ? items[1] : items[0]);
                 
                     itemList.Remove(selectedItem);
 
                     if (isModule)
                     {
-                        var module = DT.Session.xmlContent.modules.Find(x => x.mac == ((Module)selectedItem.Object).mac);
-                        DT.Session.xmlContent.modules.Remove(module);
+                        var module = Sess.Xml.modules.Find(x => x.mac == ((SessModule.Module)selectedItem.Object).mac);
+                        Sess.Xml.modules.Remove(module);
                     }
                     else
                     {
                         switch (Ctor.ViewType)
                         {
                             case ViewType.MAIN:
-                                DT.Log("MAIN");
-                                DT.Log("Items vor löschen " + DT.Session.xmlContent.loc.Count.ToString());
-                                var loc = DT.Session.xmlContent.loc.Find(x => x.name == ((ContentLocation)selectedItem.Object).name);
-                                DT.Session.xmlContent.loc.Remove(loc);
-                                DT.Log("Items NACH löschen " + DT.Session.xmlContent.loc.Count.ToString());
+                                Sess.Log("MAIN");
+                                Sess.Log("Items vor löschen " + Sess.Xml.loc.Count.ToString());
+                                var loc = Sess.Xml.loc.Find(x => x.Name == ((XML.XMLView)selectedItem.Object).Name);
+                                Sess.Xml.loc.Remove(loc);
+                                Sess.Log("Items NACH löschen " + Sess.Xml.loc.Count.ToString());
                                 break;
 
                             case ViewType.GROUP:
-                                DT.Log("GROUP");
-                                DT.Log("Items vor löschen " + ((ContentLocation)Ctor.Object).groups.Count.ToString());
-                                var group = ((ContentLocation)Ctor.Object).groups.Find(x => x.name == ((ContentGroup)selectedItem.Object).name);
-                                ((ContentLocation)Ctor.Object).groups.Remove(group);
-                                DT.Log("Items NACH löschen " + ((ContentLocation)Ctor.Object).groups.Count.ToString());
+                                Sess.Log("GROUP");
+                                Sess.Log("Items vor löschen " + ((XML.XMLView)Ctor.Object).Groups.Count.ToString());
+                                var group = ((XML.XMLView)Ctor.Object).Groups.Find(x => x.Name == ((XML.XMLViewGroup)selectedItem.Object).Name);
+                                ((XML.XMLView)Ctor.Object).Groups.Remove(group);
+                                Sess.Log("Items NACH löschen " + ((XML.XMLView)Ctor.Object).Groups.Count.ToString());
                                 break;
 
                             case ViewType.IO:
-                                DT.Log("IO");
-                                DT.Log("Items vor löschen " + ((ContentGroup)Ctor.Object).io.Count.ToString());
-                                DT.Log("Lösche " + ((ContentIO)selectedItem.Object).channel.ToString());
-                                ((ContentGroup)Ctor.Object).io.Remove(selectedItem.Object as ContentIO);
-                                DT.Log("Items NACH löschen " + ((ContentGroup)Ctor.Object).io.Count.ToString());
+                                Sess.Log("IO");
+                                Sess.Log("Items vor löschen " + ((XML.XMLViewGroup)Ctor.Object).IOs.Count.ToString());
+                                Sess.Log("Lösche " + ((XML.XMLViewGroupIO)selectedItem.Object).Channel.ToString());
+                                ((XML.XMLViewGroup)Ctor.Object).IOs.Remove(selectedItem.Object as XML.XMLViewGroupIO);
+                                Sess.Log("Items NACH löschen " + ((XML.XMLViewGroup)Ctor.Object).IOs.Count.ToString());
                                 break;
                         }
                     }
 
-                    DT.Session.xmlContent.Save();
+                    Sess.Xml.Save();
                     if (Ctor.ViewType != ViewType.IO)
                     {
                         // bei I/Os nicht refreshen, da sonst die namen weg sind
-                        MessagingCenter.Send<ContentPage>(this, DT.Const.MSG_REFRESH);
+                        MessagingCenter.Send<ContentPage>(this, Sess.MC_MSG_REFRESH);
                     }
                     selectedItem = null;
                 }
@@ -1097,14 +1097,14 @@ namespace IOControl
 
             if (selectedItem != null)
             {
-                isModule = (selectedItem.Type == typeof(Module));
+                isModule = (selectedItem.Type == typeof(SessModule.Module));
                 var itemList = (isModule ? items[1] : items[0]);
                 index = itemList.IndexOf(selectedItem);
                 
                 GetButton(Buttons.UP).Enabled = (index != 0);
                 GetButton(Buttons.DOWN).Enabled = (index != (itemList.Count - 1));
-                GetButton(Buttons.EDIT).Enabled = ((selectedItem.Type != typeof(Module)) && (selectedItem.Type != typeof(ContentIO)));
-                GetButton(Buttons.CONTINUE).Enabled = (selectedItem.Type != typeof(ContentIO));
+                GetButton(Buttons.EDIT).Enabled = ((selectedItem.Type != typeof(SessModule.Module)) && (selectedItem.Type != typeof(XML.XMLViewGroupIO)));
+                GetButton(Buttons.CONTINUE).Enabled = (selectedItem.Type != typeof(XML.XMLViewGroupIO));
             }
         }
     }

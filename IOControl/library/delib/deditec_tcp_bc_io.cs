@@ -9,8 +9,10 @@ using System.Text;
 using System.Collections.Generic;
 using System.Threading;
 
+using IOControl;
+
 #if (USE_UDP_SERVICE)
-    using Xamarin.Forms;    // DependencyService
+using Xamarin.Forms;    // DependencyService
 #else
     using Java.Net;
 #endif
@@ -152,7 +154,7 @@ public class DT_Mobile_BCFunctions
 			    buff_tx [pos++] = 0;
 		    }
 		} catch (Exception/* e*/) {
-			//DT.Log(e.ToString());
+			//Sess.Log(e.ToString());
 		}
 
 
@@ -161,7 +163,7 @@ public class DT_Mobile_BCFunctions
         // send
 
         // 255.255.255.255
-        DT.Log("Sending BC to " + DEDITEC_BC_ADDR);
+        Sess.Log("Sending BC to " + DEDITEC_BC_ADDR);
 #if (USE_UDP_SERVICE)
         udpService.Send(DEDITEC_BC_ADDR, DEDITEC_BC_PORT, buff_tx, (int)pos);
 #else
@@ -171,9 +173,9 @@ public class DT_Mobile_BCFunctions
 
         // xxx.xxx.xxx.255
 
-        //String nw_bc_addr = String.Format("{0}.{1}.{2}.255", (DT.Session.deviceIP & 0xff), (DT.Session.deviceIP >> 8 & 0xff), (DT.Session.deviceIP >> 16 & 0xff));
+        //String nw_bc_addr = String.Format("{0}.{1}.{2}.255", (Sess.deviceIP & 0xff), (Sess.deviceIP >> 8 & 0xff), (Sess.deviceIP >> 16 & 0xff));
         String nw_bc_addr = "192.168.1.255";
-        DT.Log("Sending BC to " + nw_bc_addr);
+        Sess.Log("Sending BC to " + nw_bc_addr);
 #if (USE_UDP_SERVICE)
         udpService.Send(nw_bc_addr, DEDITEC_BC_PORT, buff_tx, (int)pos);
 #else
@@ -201,7 +203,7 @@ public class DT_Mobile_BCFunctions
 			{
 				data_present = true;
 				socket.Receive(packet);
-                DT.Log("#" + durchlauf.ToString() + " UDP: " + packet.Length);
+                Sess.Log("#" + durchlauf.ToString() + " UDP: " + packet.Length);
 				//Log.Info ("DBG", "#" + durchlauf.ToString() + " UDP: " + packet.Length);
 
             }
@@ -210,7 +212,7 @@ public class DT_Mobile_BCFunctions
 				// wenn wir hier landen, ist nichts mehr da ...
 				//data_present = true;
 				data_present = false;
-                DT.Log("#" + durchlauf.ToString() + " UDP: nichts mehr da!");
+                Sess.Log("#" + durchlauf.ToString() + " UDP: nichts mehr da!");
             }
 
 			if (data_present == true)

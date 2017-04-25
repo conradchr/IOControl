@@ -31,11 +31,11 @@ namespace IOControl
             public ViewType ViewType { get; set; }
 
             // ModulView
-            public IOType IOType { get; set; }
-            public Module Module { get; set; }
+            public XML.IOTypes IOType { get; set; }
+            public SessModule.Module Module { get; set; }
 
             // CustomView
-            public ContentGroup Group { get; set; }
+            public XML.XMLViewGroup Group { get; set; }
             
         }
         public Constructor Ctor { get; set; }
@@ -56,7 +56,7 @@ namespace IOControl
             Ctor = ctor;
             Title = Ctor.Title;
 
-            DT.Log(String.Format("VType={0}, IOType={1}, Title={2}", Ctor.ViewType, Ctor.IOType, Title));
+            Sess.Log(String.Format("VType={0}, XML.IOTypes={1}, Title={2}", Ctor.ViewType, Ctor.IOType, Title));
 
             Init();
         }
@@ -71,16 +71,16 @@ namespace IOControl
         {
             uint i;
 
-            DT.Session.btns.Clear();
+            Sess.Buttons.Clear();
 
             ScrollView sv = new ScrollView();
             sv.Scrolled += (s, e) =>
             {
-                foreach (var ctrl in DT.Session.btns)
+                foreach (var ctrl in Sess.Buttons)
                 {
                     if (ctrl.IsPressed)
                     {
-                        DT.Log("Release Button");
+                        Sess.Log("Release Button");
                         ctrl.Release();
                     }
                 }
@@ -106,37 +106,37 @@ namespace IOControl
                     switch (Ctor.IOType)
                     {
                         // ------------------------------------
-                        case IOType.DI:
+                        case XML.IOTypes.DI:
                             for (i = 0; i != Ctor.Module.IO.cnt_di; i++)
                                 AddIOView(sl, PageControls, Ctor.IOType, Ctor.Module, i);
                             break;
                         // ------------------------------------
-                        case IOType.DO:
+                        case XML.IOTypes.DO:
                             for (i = 0; i != Ctor.Module.IO.cnt_do; i++)
                                 AddIOView(sl, PageControls, Ctor.IOType, Ctor.Module, i);
                             break;
                         // ------------------------------------
-                        case IOType.AD:
+                        case XML.IOTypes.AD:
                             for (i = 0; i != Ctor.Module.IO.cnt_ai; i++)
                                 AddIOView(sl, PageControls, Ctor.IOType, Ctor.Module, i);
                             break;
                         // ------------------------------------
-                        case IOType.DA:
+                        case XML.IOTypes.DA:
                             for (i = 0; i != Ctor.Module.IO.cnt_ao; i++)
                                 AddIOView(sl, PageControls, Ctor.IOType, Ctor.Module, i);
                             break;
                         // ------------------------------------
-                        case IOType.PWM:
+                        case XML.IOTypes.PWM:
                             for (i = 0; i != Ctor.Module.IO.cnt_do_pwm; i++)
                                 AddIOView(sl, PageControls, Ctor.IOType, Ctor.Module, i);
                             break;
                         // ------------------------------------
-                        case IOType.DO_TIMER:
+                        case XML.IOTypes.DO_TIMER:
                             for (i = 0; i != Ctor.Module.IO.cnt_do_timer; i++)
                                 AddIOView(sl, PageControls, Ctor.IOType, Ctor.Module, i);
                             break;
                         // ------------------------------------
-                        case IOType.TEMP:
+                        case XML.IOTypes.TEMP:
                             for (i = 0; i != Ctor.Module.IO.cnt_temp; i++)
                                 AddIOView(sl, PageControls, Ctor.IOType, Ctor.Module, i);
                             break;
@@ -150,12 +150,12 @@ namespace IOControl
 
                 case ViewType.CUSTOM:
                     
-                    if (Ctor.Group.io.Count != 0)
+                    if (Ctor.Group.IOs.Count != 0)
                     { 
-                        foreach (var io in Ctor.Group.io)
+                        foreach (var io in Ctor.Group.IOs)
                         {
-                            var module = DT.Session.xmlContent.modules.Find(x => x.mac == io.moduleMAC);
-                            AddIOView(sl, PageControls, io.ioType, module, io.channel, io.ioCfg);
+                            var module = Sess.Xml.modules.Find(x => x.mac == io.MAC);
+                            AddIOView(sl, PageControls, io.IOType, module, io.Channel, io.GUICfg);
                         }
                     }
                     else
@@ -188,30 +188,30 @@ namespace IOControl
         // ----------------------------------------------------------------------------
         // ----------------------------------------------------------------------------
 
-        public void AddIOView(StackLayout sl, Dictionary<int, View> dict, IOType ioType, Module module, uint ch)
+        public void AddIOView(StackLayout sl, Dictionary<int, View> dict, XML.IOTypes ioType, SessModule.Module module, uint ch)
         {
-            AddIOView(sl, dict, ioType, module, ch, IOCfg.NONE);
+            AddIOView(sl, dict, ioType, module, ch, XML.GUIConfigs.NONE);
         }
 
-        public void AddIOView(StackLayout sl, Dictionary<int, View> dict, IOType ioType, Module module, uint ch, IOCfg ioCfg)
+        public void AddIOView(StackLayout sl, Dictionary<int, View> dict, XML.IOTypes ioType, SessModule.Module module, uint ch, XML.GUIConfigs ioCfg)
         {
             Action userAction;
 
-            DT.Log(string.Format("IOType={0}, ch={1} ioCfg={2}", ioType, ch, ioCfg));
+            Sess.Log(string.Format("XML.IOTypes={0}, ch={1} ioCfg={2}", ioType, ch, ioCfg));
 
             if (module.GetIOName(ioType, ch) != null)
             {
                 switch (ioType)
                 {
                     // ------------------------------------
-                    case IOType.DI:
+                    case XML.IOTypes.DI:
                         module.GetIOName(ioType, ch);
                         sl.Children.Add(DTIOControl.DISwitch(dict, module.IOName.di[(int)ch], valID));
                         break;
                     // ------------------------------------
-                    case IOType.DO:
+                    case XML.IOTypes.DO:
 
-                        if (ioCfg == IOCfg.BUTTON)
+                        if (ioCfg == XML.GUIConfigs.BUTTON)
                         {
                             sl.Children.Add(DTIOControl.DOButton(dict, module.IOName.dout[(int)ch], valID));
                             ((DTControl.DOButton)dict[valID]).Pressed += (s, e) =>
@@ -243,11 +243,11 @@ namespace IOControl
                         break;
 
                     // ------------------------------------
-                    case IOType.AD:
+                    case XML.IOTypes.AD:
                         sl.Children.Add(DTIOControl.ADView(dict, module.IOName.ai[(int)ch], valID));
                         break;
                     // ------------------------------------
-                    case IOType.DA:
+                    case XML.IOTypes.DA:
                         sl.Children.Add(DTIOControl.DAView(dict, module.IOName.ao[(int)ch], valID));
                         userAction = CreateTodoEvent(ioType, module, dict, ch, valID);
 
@@ -281,7 +281,7 @@ namespace IOControl
                     break;
                     */
                     // ------------------------------------
-                    case IOType.PWM:
+                    case XML.IOTypes.PWM:
                         sl.Children.Add(DTIOControl.PWMView(dict, module.IOName.pwm[(int)ch], valID));
                         userAction = CreateTodoEvent(ioType, module, dict, ch, valID);
                         ((Slider)dict[valID]).ValueChanged += (s, e) =>
@@ -294,13 +294,13 @@ namespace IOControl
                         break;
 
                     // ------------------------------------
-                    case IOType.TEMP:
+                    case XML.IOTypes.TEMP:
                         sl.Children.Add(DTIOControl.ADView(dict, module.IOName.temp[(int)ch], valID));
                         break;
                         // ------------------------------------
                 }   // switch (ioType)
 
-                AddModuleTask(module, ioType, new ModuleTaskParam(ch, valID, ioCfg), dict);
+                AddModuleTask(module, ioType, new SessModule.ModuleTaskParam(ch, valID, ioCfg), dict);
                 valID++;
             }   // if (channelValid)
             else
@@ -320,35 +320,35 @@ namespace IOControl
         // ----------------------------------------------------------------------------
         // ----------------------------------------------------------------------------
 
-        public Action CreateTodoEvent(IOType ioType, Module module, Dictionary<int, View> dict, uint ch, int id)
+        public Action CreateTodoEvent(XML.IOTypes ioType, SessModule.Module module, Dictionary<int, View> dict, uint ch, int id)
         {
             return CreateTodoEvent(ioType, module, dict, ch, id, DT.NULL);
         }
 
-        public Action CreateTodoEvent(IOType ioType, Module module, Dictionary<int, View> dict, uint ch, int id, int id2)
+        public Action CreateTodoEvent(XML.IOTypes ioType, SessModule.Module module, Dictionary<int, View> dict, uint ch, int id, int id2)
         {
             return new Action(() => {
 
                 if (module.OpenModule() == 0)
                 {
-                    DT.Log(String.Format("CreateTodoEvent: IP {0} : handle = 0", module.tcp_hostname));
+                    Sess.Log(String.Format("CreateTodoEvent: IP {0} : handle = 0", module.tcp_hostname));
                     return;
                 }
 
                 switch (ioType)
                 {
                     // ------------------------------------
-                    case IOType.DO:
+                    case XML.IOTypes.DO:
                         DT.Delib.DapiDOSet1(module.handle, ch,  (((Switch)PageControls[id]).IsToggled ? (uint)1 : (uint)0));
                         break;
                     // ------------------------------------
-                    case IOType.DA:
+                    case XML.IOTypes.DA:
                         DTControl.SpecialLabel label = PageControls[id] as DTControl.SpecialLabel;
                         Device.BeginInvokeOnMainThread(() => label.Text = String.Format("{0} V", ((float)label.Value).ToString("0.000")));
                         DT.Delib.DapiDASetVolt(module.handle, ch, Convert.ToSingle(label.Value));
                         break;
                     // ------------------------------------
-                    case IOType.PWM:
+                    case XML.IOTypes.PWM:
                         DT.Delib.DapiPWMOutSet(module.handle, ch, (float)((Slider)PageControls[id]).Value);
                         break;
                 }
@@ -365,19 +365,19 @@ namespace IOControl
 
         public class ModuleTask
         {
-            public Module module;
-            public List<IOControl.ModuleTask> tasks = new List<IOControl.ModuleTask>();
+            public SessModule.Module module;
+            public List<SessModule.ModuleTask> tasks = new List<SessModule.ModuleTask>();
 
-            public ModuleTask(Module module)
+            public ModuleTask(SessModule.Module module)
             {
                 this.module = module;
             }
         }
 
-        public void AddModuleTask(Module module, IOType ioType, ModuleTaskParam param, Dictionary<int, View> dict)
+        public void AddModuleTask(SessModule.Module module, XML.IOTypes ioType, SessModule.ModuleTaskParam param, Dictionary<int, View> dict)
         {
             ModuleTask mTask;
-            IOControl.ModuleTask task;
+            SessModule.ModuleTask task;
 
             // Modul in die TaskListe aufnehmen
             if ((mTask = RefreshTasks.Find(x => x.module == module)) == null)
@@ -389,7 +389,7 @@ namespace IOControl
             // ModulTask 
             if ((task = mTask.tasks.Find(x => x.ioType == ioType)) == null)
             {
-                task = new IOControl.ModuleTask(ioType, module, dict);
+                task = new SessModule.ModuleTask(ioType, module, dict);
                 mTask.tasks.Add(task);
             }
 

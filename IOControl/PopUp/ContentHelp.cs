@@ -19,6 +19,11 @@ namespace IOControl
             return DTControl.GetLabel(Resx.AppResources.HELP_HelpLocation);
         }
 
+        public static View NetworkConfig()
+        {
+            return DTControl.GetLabel(Resx.AppResources.NC_HelpText);
+        }
+
         public static View ContentHelpLocationButtons()
         {
             StackLayout sl = new StackLayout();
