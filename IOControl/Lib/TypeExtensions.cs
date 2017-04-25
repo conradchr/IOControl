@@ -50,7 +50,8 @@ namespace IOControl
 
     public class ListViewGroups<T> : ObservableCollection<T>
     {
-        public class ListViewGroupHeader<T> : ObservableCollection<T>
+        internal ObservableCollection<ListViewGroupHeader<T>> groups;
+        internal class ListViewGroupHeader<T> : ObservableCollection<T>
         {
             public string LongName { get; set; }
             public string ShortName { get; set; }
@@ -62,7 +63,7 @@ namespace IOControl
             }
         }
 
-        ObservableCollection<ListViewGroupHeader<T>> Groups { get; set; } = new ObservableCollection<ListViewGroupHeader<T>>();
+        
 
         public void AddGroup(String name, ObservableCollection<T> items)
         {
